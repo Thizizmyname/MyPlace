@@ -10,8 +10,13 @@
         android:id="@+id/listMessages"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
         android:layout_above="@+id/border"
-        android:background="@android:color/darker_gray"></ListView>
+        android:background="@android:color/darker_gray"
+        android:divider="@null"
+        android:dividerHeight="0dp"></ListView>
+
     <View
         android:id="@+id/border"
         android:layout_above="@+id/layoutInputMessage"
