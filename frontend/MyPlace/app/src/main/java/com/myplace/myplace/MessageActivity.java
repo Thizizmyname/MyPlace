@@ -10,6 +10,8 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class MessageActivity extends AppCompatActivity {
 
@@ -27,13 +29,16 @@ public class MessageActivity extends AppCompatActivity {
         listMessages.setAdapter(messageAdapter);
 
         final ImageButton btnSend = (ImageButton) findViewById(R.id.btnSendMsg);
+        final String name[] = new String[2];
+        name[0] = "Anders";
+        name[1] = "Joel";
 
         btnSend.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 final EditText message = (EditText) findViewById(R.id.editMsg);
-                final String name = "Anders";
-
-                Message newMessage = new Message(name, message.getText().toString());
+                //Random rand;
+                //int nr = rand.nextInt(2);
+                Message newMessage = new Message(name[0], message.getText().toString());
                 messageAdapter.add(newMessage);
 
                 message.setText(null); // Reset input field
