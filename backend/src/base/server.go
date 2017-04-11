@@ -5,7 +5,7 @@ import (
     "fmt"
 	//"time"
 	"bufio"
-	"os"
+	"log"
 )
 
 
@@ -17,7 +17,9 @@ func main() {
 	//Skapar två variabler listener och err
 	//Om allt går bra kommer err vara nil, vilket gör det enkelt att testa
 	//så att det gick bra
-	listener, err := net.Listen("tcp",":1337")
+	tcpLAddr,_ := net.ResolveTCPAddr("tcp","127.0.0.1:1337") // För att få en tcp-address
+	listener, err := net.ListenTCP("tcp",tcpLAddr)
+	
 	if err != nil { //Här testas om err inte är nil (alltså, har det blivit fel)
 		fmt.Printf("Error starting server: %v\n", err)
 	}
@@ -32,7 +34,6 @@ func main() {
 			fmt.Printf("Connection established: %v\n", connection)
 			go handleConnection(connection)
 			go readMsg(connection)
-			go sendMsg(connection)
 					
 		}
 	}
@@ -48,17 +49,17 @@ func handleConnection(conn net.Conn) {
 func readMsg(conn net.Conn){
 	
 	for{
-	msg,_ := bufio.NewReader(conn).ReadString('\n')
-	fmt.Print(" Message recivied: ", msg)
+		msg,err := bufio.NewReader(conn).ReadString('\n')
+		if err == nil{
+			fmt.Print(" Message recivied: ", msg)
+			sendMsg(conn,msg)
+		}else{
+			log.Fatal(err)
+		}
 	}
 }
 
-func sendMsg(conn net.Conn){
+func sendMsg(conn net.Conn, msg string){
 
-	for{
-		reader := bufio.NewReader(os.Stdin)
-		fmt.Print("text to send: ")
-		msg, _ :=reader.ReadString('\n')
 		fmt.Fprintf(conn,msg)
-	}
 }
