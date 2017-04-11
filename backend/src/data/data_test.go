@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 	"math/rand"
-	//"encoding/json"
 	"reflect"
 	"testing"
 )
@@ -18,35 +17,9 @@ func TestStoreLoad(t *testing.T) {
 	initRooms(roomDB)
 	var err error
 
-	// printRooms(roomsDB)
-	// printUsers(usersDB)
-
-	// roomsDBJ, e1 := json.Marshal(roomsDB)
-	// if e1 != nil {
-	// 	panic(e1)
-	// }
-
-	// usersDBJ, e2 := json.Marshal(usersDB)
-	// if e2 != nil {
-	// 	panic(e2)
-	// }
-
-	//fmt.Println(string(roomsDBJ))
-
 	if err = StoreDBs(userDB, roomDB); err != nil {
 		panic(err)
 	}
-
-	// var roomsDB2 []Room
-	// var usersDB2 []User
-
-	// if e := json.Unmarshal(roomsDBJ, &roomsDB2); e != nil {
-	// 	panic(e)
-	// }
-
-	// if e := json.Unmarshal(usersDBJ, &usersDB2); e != nil {
-	// 	panic(e)
-	// }
 
 	var userDB2 UserDB
 	var roomDB2 RoomDB
@@ -118,19 +91,3 @@ func printUsers(us []User) {
 		fmt.Printf("Rooms: %v\n", u.Rooms)
 	}
 }
-
-// func TestReverse(t *testing.T) {
-// 	cases := []struct {
-// 		in, want string
-// 	} {
-// 		{"Hello, world", "dlrow ,olleH"},
-// 		{"Hello, 世界", "界世 ,olleH"},
-// 		{"", ""},
-// 	}
-// 	for _, c := range cases {
-// 		got := Reverse(c.in)
-// 		if got != c.want {
-// 			t.Errorf("Reverse(%q) == %q, want %q", c.in, got, c.want)
-// 		}
-// 	}
-// }
