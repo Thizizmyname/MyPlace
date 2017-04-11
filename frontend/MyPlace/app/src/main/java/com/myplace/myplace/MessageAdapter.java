@@ -11,10 +11,6 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.TreeSet;
 
-/**
- * Created by jesper on 2017-04-06.
- */
-
 public class MessageAdapter extends ArrayAdapter<Message> {
     private static final int TYPE_INCOMING = 0;
     private static final int TYPE_OUTGOING = 1;
@@ -55,7 +51,9 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         }
 
         TextView text = (TextView) convertView.findViewById(R.id.textMessage);
+        TextView date = (TextView) convertView.findViewById(R.id.textDate);
 
+        date.setText(message.date);
         text.setText(message.text);
 
         return convertView;

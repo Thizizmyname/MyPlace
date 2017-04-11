@@ -11,6 +11,16 @@
         android:textSize="12sp"/>
 
     <TextView
+        android:id="@+id/textDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/textName"
+        android:layout_toEndOf="@+id/textName"
+        android:paddingRight="10dp"
+        android:paddingLeft="10dp"
+        android:textSize="12sp"/>
+
+    <TextView
         android:id="@+id/textMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -22,5 +32,5 @@
         android:paddingBottom="10dp"
         android:paddingTop="10dp"
         android:textSize="18sp"
-        android:background="@drawable/message_background"/>
+        android:background="@drawable/message_left_background"/>
 </RelativeLayout>

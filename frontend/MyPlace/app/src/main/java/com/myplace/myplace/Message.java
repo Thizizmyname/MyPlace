@@ -1,20 +1,20 @@
 package com.myplace.myplace;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
-
-/**
- * Created by jesper on 2017-04-06.
- */
 
 class Message {
     public String name = "Anders";
-    public String text = "";
-    private String date;
+    String text = "";
+    String date;
+    private DateFormat df = new SimpleDateFormat("yy-MM-dd HH:mm");
 
     Message(String name, String message) {
         this.name = name;
         this.text = message;
-        this.date = new Date().toString();
+        Date mDate = new Date();
+        this.date = df.format(mDate);
     }
 
     public String getName() {

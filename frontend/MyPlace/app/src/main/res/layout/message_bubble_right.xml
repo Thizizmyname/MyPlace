@@ -4,9 +4,20 @@
     android:layout_height="wrap_content">
 
     <TextView
+        android:id="@+id/textDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:paddingRight="10dp"
+        android:paddingLeft="10dp"
+        android:textSize="12sp"/>
+
+    <TextView
         android:id="@+id/textMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/textDate"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:paddingLeft="10dp"
@@ -14,5 +25,5 @@
         android:paddingBottom="10dp"
         android:paddingTop="10dp"
         android:textSize="18sp"
-        android:background="@drawable/message_background"/>
+        android:background="@drawable/message_right_background"/>
 </RelativeLayout>
