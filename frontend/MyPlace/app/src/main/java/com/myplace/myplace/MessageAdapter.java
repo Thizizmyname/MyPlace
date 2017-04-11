@@ -9,33 +9,53 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.TreeSet;
 
 /**
  * Created by jesper on 2017-04-06.
  */
 
 public class MessageAdapter extends ArrayAdapter<Message> {
+    private static final int TYPE_INCOMING = 0;
+    private static final int TYPE_OUTGOING = 1;
+    private static final int TYPE_MAX_COUNT = TYPE_OUTGOING + 1;
+
     public MessageAdapter(Context context, ArrayList<Message> messages) {
         super(context, 0, messages);
     }
 
-    public View getView(int position, View convertView, ViewGroup parent){
+    @Override
+    public int getItemViewType(int position) {
+        Message message = getItem(position);
+        if(message.getName().equals("Anders")) {
+            return TYPE_OUTGOING;
+        } else {
+            return TYPE_INCOMING;
+        }
+    }
+
+    @Override
+    public int getViewTypeCount() {
+        return TYPE_MAX_COUNT;
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
         Message message = getItem(position);
 
-        TextView name = (TextView) convertView.findViewById(R.id.textName);
-        TextView text = (TextView) convertView.findViewById(R.id.textMessage);
-
-        if(convertView == null) {
-            int layout;
-            if (message.name == "Anders") {
-                layout = R.layout.message_bubble_right;
+        int itemType = getItemViewType(position);
+        if (convertView == null) {
+            if (itemType == TYPE_INCOMING) {
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.message_bubble_left, parent, false);
+                TextView name = (TextView) convertView.findViewById(R.id.textName);
+                name.setText(message.getName());
             } else {
-                layout = R.layout.message_bubble_left;
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.message_bubble_right, parent, false);
             }
-            convertView = LayoutInflater.from(getContext()).inflate(layout, parent, false);
         }
 
-        name.setText(message.name);
+        TextView text = (TextView) convertView.findViewById(R.id.textMessage);
+
         text.setText(message.text);
 
         return convertView;

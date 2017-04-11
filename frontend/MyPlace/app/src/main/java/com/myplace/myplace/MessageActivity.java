@@ -15,6 +15,19 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class MessageActivity extends AppCompatActivity {
 
+    //TEST FOR INCOMING AND OUTGOING
+    int a = 0;
+    String name = "Joel";
+
+    //TEST FOR INCOMING AND OUTGOING
+    private int mod(int x, int y)
+    {
+        int result = x % y;
+        if (result < 0)
+            result += y;
+        return result;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,17 +42,23 @@ public class MessageActivity extends AppCompatActivity {
         listMessages.setAdapter(messageAdapter);
 
         final ImageButton btnSend = (ImageButton) findViewById(R.id.btnSendMsg);
-        final String name[] = new String[2];
-        name[0] = "Anders";
-        name[1] = "Joel";
 
         btnSend.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 final EditText message = (EditText) findViewById(R.id.editMsg);
-                //Random rand;
-                //int nr = rand.nextInt(2);
-                Message newMessage = new Message(name[0], message.getText().toString());
+
+                //TEST FOR INCOMING AND OUTGOING
+                if(mod(a, 2) == 0) {
+                    name = "Anders";
+                } else {
+                    name = "Joel";
+                }
+
+                Message newMessage = new Message(name, message.getText().toString());
                 messageAdapter.add(newMessage);
+
+                //TEST FOR INCOMING AND OUTGOING
+                ++a; //TEST
 
                 message.setText(null); // Reset input field
             }

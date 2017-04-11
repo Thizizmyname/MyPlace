@@ -7,13 +7,17 @@ import java.util.Date;
  */
 
 class Message {
-    String name;
-    String text;
-    String date;
+    public String name = "Anders";
+    public String text = "";
+    private String date;
 
     Message(String name, String message) {
         this.name = name;
         this.text = message;
         this.date = new Date().toString();
+    }
+
+    public String getName() {
+        return name;
     }
 }
