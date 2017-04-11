@@ -8,6 +8,7 @@ import (
 	"log"
 )
 
+var connections []net.Conn
 
 /*
 
@@ -31,6 +32,7 @@ func main() {
 		if errs != nil { //Här testas igen om det blev något fel
 			fmt.Printf("Connection Accept error: %v\n",errs)
 		} else { //om inga fel inträffade, kan vi gå vidare
+      connections = append(connections, connection)
 			fmt.Printf("Connection established: %v\n", connection)
 			go handleConnection(connection)
 			go readMsg(connection)
@@ -43,7 +45,10 @@ func main() {
     Denna funktionen körs som en goroutine parallellt med main.
 */
 func handleConnection(conn net.Conn) {
-	fmt.Printf("Handle connection whattup: %v\n", conn)
+	fmt.Printf("Handle connection whattup: %v\nOpen connections:\n", conn)
+  for _, conn := range connections{
+    fmt.Println(conn)
+  }
 }
 
 func readMsg(conn net.Conn){
@@ -51,10 +56,13 @@ func readMsg(conn net.Conn){
 	for{
 		msg,err := bufio.NewReader(conn).ReadString('\n')
 		if err == nil{
-			fmt.Print(" Message recivied: ", msg)
-			sendMsg(conn,msg)
+			fmt.Print("Message recieved: ", msg)
+      for _, cons := range connections{
+			  sendMsg(cons,msg)
+      }
 		}else{
-			log.Fatal(err)
+      //TODO: ta bort användare ur connections om dom inte längre är anslutna
+			log.Fatal("User left the server", err)
 		}
 	}
 }
