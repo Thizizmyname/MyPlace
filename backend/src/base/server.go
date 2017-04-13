@@ -5,7 +5,8 @@ import (
     "fmt"
 	//"time"
 	"bufio"
-	"log"
+//	"log"
+	"reflect"
 )
 
 var connections []net.Conn
@@ -32,11 +33,11 @@ func main() {
 		if errs != nil { //Här testas igen om det blev något fel
 			fmt.Printf("Connection Accept error: %v\n",errs)
 		} else { //om inga fel inträffade, kan vi gå vidare
-      connections = append(connections, connection)
+			connections = append(connections, connection)
 			fmt.Printf("Connection established: %v\n", connection)
 			go handleConnection(connection)
 			go readMsg(connection)
-					
+			
 		}
 	}
 }
@@ -46,9 +47,9 @@ func main() {
 */
 func handleConnection(conn net.Conn) {
 	fmt.Printf("Handle connection whattup: %v\nOpen connections:\n", conn)
-  for _, conn := range connections{
-    fmt.Println(conn)
-  }
+	for _, conn := range connections{
+		fmt.Println(conn)
+	}
 }
 
 func readMsg(conn net.Conn){
@@ -56,18 +57,41 @@ func readMsg(conn net.Conn){
 	for{
 		msg,err := bufio.NewReader(conn).ReadString('\n')
 		if err == nil{
+
+			
 			fmt.Print("Message recieved: ", msg)
-      for _, cons := range connections{
-			  sendMsg(cons,msg)
-      }
+			for _, cons := range connections{
+				sendMsg(cons,msg)
+			}
 		}else{
-      //TODO: ta bort användare ur connections om dom inte längre är anslutna
-			log.Fatal("User left the server", err)
+
+			// Tar just nu för givet att så fort det blir ett error så är det pga att en klient har stängt av
+			// Tar bort klienten ur connections.
+			removeConnection(conn)
+			break
 		}
 	}
 }
 
 func sendMsg(conn net.Conn, msg string){
 
-		fmt.Fprintf(conn,msg)
+	fmt.Fprintf(conn,msg)
 }
+
+
+// Tar bort den specifika TCPAddressen i den globala slicen connections.
+func removeConnection(conn net.Conn){
+	for i, tcpAddr := range connections{
+		if reflect.DeepEqual(tcpAddr,conn){
+			fmt.Println("User ", tcpAddr, " has left the server")
+			
+			// Har ej skrivit denna men det är ett sätt för att ta bort önskat element
+			connections = connections[:i+copy(connections[i:], connections[i+1:])] 
+		}
+
+	}
+	
+	
+}
+
+
