@@ -60,7 +60,7 @@ func initRooms(rooms RoomDB) {
 		for j := 0; j < len(msgs); j++ {
 			msgs[j].Time = time.Now()
 			msgs[j].Uname = "some user"
-			msgs[j].Text = fmt.Sprintf("message%v", j)
+			msgs[j].Body = fmt.Sprintf("message%v", j)
 		}
 		rooms[i].Messages = msgs
 	}
@@ -77,7 +77,7 @@ func printRooms(rs []Room) {
 		for _, m := range r.Messages {
 			fmt.Printf("Time: %v\n", m.Time)
 			fmt.Printf("User: %s\n", m.Uname)
-			fmt.Printf("Text: %s\n", m.Text)
+			fmt.Printf("Text: %s\n", m.Body)
 		}
 	}
 }

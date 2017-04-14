@@ -1,31 +1,41 @@
 package data
 
 import (
-	"time"
 	"encoding/json"
 	"io/ioutil"
+  "net"
+  "fmt"
+  "myplaceutils"
 )
+type UserDB []myplaceutils.User
+type RoomDB []myplaceutils.Room
 
-type UserDB []User
-type RoomDB []Room
+/*
+//DETTA ÄR FLYTTAT TILL src/myplaceutils/myplaceutils.go för att modularisera
 
 type User struct {
 	Uname string
 	Pass string
-	Rooms []string
+	Rooms []Room
+  ActiveConn net.Conn
 }
 
 type Room struct {
 	Name string
 	NoPeople int
+  Users []User
 	Messages []Message
 }
 
 type Message struct {
 	Time time.Time
 	Uname string
-	Text string
+	Body string
+  ID string
+  
 }
+*/
+
 
 func StoreDBs(us UserDB, rs RoomDB) error {
 	var usj []byte
@@ -78,3 +88,4 @@ func LoadDBs() (UserDB, RoomDB, error) {
 
 	return us, rs, nil
 }
+

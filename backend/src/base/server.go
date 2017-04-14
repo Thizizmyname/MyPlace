@@ -7,6 +7,8 @@ import (
 	"bufio"
 //	"log"
 	"reflect"
+  //"data" //importera denna när vi ska implementera databasen
+  "myplaceutils"
 )
 
 var connections []net.Conn
@@ -25,6 +27,7 @@ func main() {
 	if err != nil { //Här testas om err inte är nil (alltså, har det blivit fel)
 		fmt.Printf("Error starting server: %v\n", err)
 	}
+  globalRoom := myplaceutils.CreateRoom("big room")
 	for { //Denna loopen körs för evigt
 		//Här skapas två nya variabler, connection och errs, samma som innan
 		// men connection är varje anslutning som inkommer till server
@@ -34,7 +37,11 @@ func main() {
 			fmt.Printf("Connection Accept error: %v\n",errs)
 		} else { //om inga fel inträffade, kan vi gå vidare
 			connections = append(connections, connection)
-			fmt.Printf("Connection established: %v\n", connection)
+			newUser := myplaceutils.CreateUser("TODO RANDOM NAME", "leet1337", connection)
+      fmt.Printf("Connection established: %v\n", connection)
+      newUser.JoinRoom(globalRoom)
+      globalRoom.AddUser(newUser)
+      globalRoom.ShowUsers()
 			go handleConnection(connection)
 			go readMsg(connection)
 			
@@ -59,7 +66,7 @@ func readMsg(conn net.Conn){
 		if err == nil{
 
 			
-			fmt.Print("Message recieved: ", msg)
+			fmt.Printf("Message recieved from %v: %v",conn, msg)
 			for _, cons := range connections{
 				sendMsg(cons,msg)
 			}
@@ -93,5 +100,10 @@ func removeConnection(conn net.Conn){
 	
 	
 }
+
+
+
+
+
 
 
