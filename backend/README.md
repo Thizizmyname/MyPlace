@@ -12,7 +12,7 @@ När anslutningen är upprättad används följande gränssnitt (interface)
 Servern kommer koppla samman en anslutning med användaren när den loggar in, vilket gör att användaren inte behöver skicka med sin användare i alla anrop
 
 ### Format
-Servern vill ha en string med formatet "**anropsfunktion, arg1, arg2, .., argn**"
+Servern vill ha en string med formatet > "**anropsfunktion, arg1, arg2, .., argn**"
 
 
 ### joinroom 
