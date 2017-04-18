@@ -23,7 +23,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
     @Override
     public int getItemViewType(int position) {
         Message message = getItem(position);
-        if(message.getName().equals("Anders")) {
+        if(message.getName().equals("Anders")) { // TO TEST INCOMING AND OUTGOING
             return TYPE_OUTGOING;
         } else {
             return TYPE_INCOMING;
