@@ -83,10 +83,13 @@ func sendMsg(conn net.Conn, msg string){
 func removeConnection(conn net.Conn){
 	for i, tcpAddr := range connections{
 		if reflect.DeepEqual(tcpAddr,conn){
-			fmt.Println("User ", tcpAddr, " has left the server")
-			
 			// Har ej skrivit denna men det är ett sätt för att ta bort önskat element
-			connections = connections[:i+copy(connections[i:], connections[i+1:])] 
+			connections = connections[:i+copy(connections[i:], connections[i+1:])]
+			
+			for _,addr := range connections{
+				// Detta borde inte funka, hur formaterar jag en sträng som tar med conn?
+				fmt.Fprintf(addr,"User", conn , "Has left the server" )
+			}
 		}
 
 	}
