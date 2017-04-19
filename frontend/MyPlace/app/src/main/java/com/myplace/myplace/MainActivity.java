@@ -32,8 +32,15 @@ public class MainActivity extends AppCompatActivity {
         //noinspection ConstantConditions
         getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
 
-        roomList.add(new Room("Ett rum"));
-        roomList.add(new Room("två rum"));
+        //TODO Tests for viewing temporary items
+        Room r1 = new Room("Rum Ett");
+        //r1.addMessage(new Message("Alexis", "hejsan ettan"));
+        //r1.addMessage(new Message("Jesper", "hoppsan"));
+        roomList.add(r1);
+
+        Room r2 = new Room("Rum Två");
+        //r1.addMessage(new Message("Patrik", "hejsan tvåan"));
+        roomList.add(r2);
 
         listView = (ListView) findViewById(R.id.roomList);
 
@@ -58,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(MainActivity.this, MessageActivity.class);
-                intent.putExtra("RoomName", roomList.get(position).getName());
+                intent.putExtra("Room", roomList.get(position));
                 //intent.putExtra("SongName", listView.getItemAtPosition(position).toString());
                 startActivity(intent);
             }
