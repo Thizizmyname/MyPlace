@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:paddingBottom="5dp"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin">
+
     <TextView
         android:id="@+id/textName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingRight="10dp"
-        android:paddingLeft="10dp"
-        android:textSize="12sp"/>
+        android:paddingRight="5dp"
+        android:paddingLeft="5dp"
+        android:textColor="@color/colorPrimary"
+        android:textSize="14sp"/>
 
     <TextView
         android:id="@+id/textDate"
@@ -16,8 +21,7 @@
         android:layout_height="wrap_content"
         android:layout_toRightOf="@+id/textName"
         android:layout_toEndOf="@+id/textName"
-        android:paddingRight="10dp"
-        android:paddingLeft="10dp"
+        android:layout_alignBaseline="@+id/textName"
         android:textSize="12sp"/>
 
     <TextView
@@ -32,5 +36,6 @@
         android:paddingBottom="10dp"
         android:paddingTop="10dp"
         android:textSize="18sp"
+        android:textColor="@color/white"
         android:background="@drawable/message_left_background"/>
 </RelativeLayout>

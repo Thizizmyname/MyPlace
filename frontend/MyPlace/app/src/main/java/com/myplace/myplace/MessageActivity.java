@@ -6,11 +6,12 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
 public class MessageActivity extends AppCompatActivity {
-
+    private Toast messageEmptyToast = null;
 
     //TEST FOR INCOMING AND OUTGOING
     int a = 0;
@@ -36,8 +37,8 @@ public class MessageActivity extends AppCompatActivity {
 
 
         // Creates an array containing the messages and an adapter
-        final ArrayList<Message> messageArray = new ArrayList<>();
-        final MessageAdapter messageAdapter = new MessageAdapter(this, messageArray);
+        // final ArrayList<Message> messageArray = new ArrayList<>();
+        final MessageAdapter messageAdapter = new MessageAdapter(this, room.messageList);
 
         // Finds the listview and specifies the adapter to use
         ListView listMessages = (ListView) findViewById(R.id.listMessages);
@@ -48,6 +49,15 @@ public class MessageActivity extends AppCompatActivity {
         btnSend.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 final EditText message = (EditText) findViewById(R.id.editMsg);
+                String messageString = message.getText().toString();
+
+                // Check if message is empty
+                if (messageString.matches("")) {
+                    if (messageEmptyToast != null) messageEmptyToast.cancel();
+                    messageEmptyToast = Toast.makeText(MessageActivity.this, R.string.message_empty, Toast.LENGTH_SHORT);
+                    messageEmptyToast.show();
+                    return;
+                }
 
                 //TEST FOR INCOMING AND OUTGOING
                 if(mod(a, 2) == 0) {
