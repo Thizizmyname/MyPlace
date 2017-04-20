@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 public class Room implements Parcelable {
     private String roomName;
-    public ArrayList<Message> messageList;
+    public ArrayList<Message> messageList = new ArrayList<>();
 
     public Room(String name) {
         roomName = name;
