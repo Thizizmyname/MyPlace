@@ -17,7 +17,7 @@
             android:src="@drawable/bild"
             android:layout_width="261dp"
             android:layout_height="80dp"
-            android:layout_marginBottom="24dp"
+            android:layout_marginBottom="48dp"
             android:layout_gravity="center_horizontal"
             android:layout_weight="0.17"/>
 

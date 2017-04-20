@@ -8,7 +8,7 @@ class Message {
     public String name = "Anders";
     String text = "";
     String date;
-    private DateFormat df = new SimpleDateFormat("yy-MM-dd HH:mm");
+    private DateFormat df = new SimpleDateFormat("HH:mm");
 
     Message(String name, String message) {
         this.name = name;

@@ -103,7 +103,7 @@ public class SignupActivity extends AppCompatActivity {
         }
 
         if(username.isEmpty() || username.length() <= 3) {
-            _userSign.setText("Username needs to be longer than 3 characters");
+            _userSign.setText("Username must be longer than 3 characters");
             valid = false;
         }
         else {

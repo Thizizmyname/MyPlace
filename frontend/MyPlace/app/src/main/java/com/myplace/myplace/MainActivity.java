@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         //noinspection ConstantConditions
@@ -34,12 +35,12 @@ public class MainActivity extends AppCompatActivity {
 
         //TODO Tests for viewing temporary items
         Room r1 = new Room("Rum Ett");
-        //r1.addMessage(new Message("Alexis", "hejsan ettan"));
-        //r1.addMessage(new Message("Jesper", "hoppsan"));
+        r1.addMessage(new Message("Alexis", "hejsan ettan"));
+        r1.addMessage(new Message("Jesper", "hoppsan"));
         roomList.add(r1);
 
         Room r2 = new Room("Rum Två");
-        //r1.addMessage(new Message("Patrik", "hejsan tvåan"));
+        r2.addMessage(new Message("Patrik", "hejsan tvåan"));
         roomList.add(r2);
 
         listView = (ListView) findViewById(R.id.roomList);
