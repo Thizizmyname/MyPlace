@@ -25,6 +25,7 @@
         </activity>
         <activity
             android:name=".MessageActivity"
+            android:exported="true"
             android:parentActivityName=".MainActivity"/>
     </application>
 
