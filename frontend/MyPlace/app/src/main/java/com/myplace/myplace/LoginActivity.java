@@ -22,6 +22,7 @@ public class LoginActivity extends AppCompatActivity {
     @Bind(R.id.input_username) EditText _username;
     @Bind(R.id.input_password) EditText _password;
     @Bind(R.id.btn_login) Button _login;
+    @Bind(R.id.btn_bypass) Button _bypass;
     @Bind(R.id.link_signup) TextView _signup;
 
     @Override
@@ -29,6 +30,14 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
+
+        _bypass.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                onLoginSuccess();
+            }
+        });
 
         _login.setOnClickListener(new View.OnClickListener() {
 
