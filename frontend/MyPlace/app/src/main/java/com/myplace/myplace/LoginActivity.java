@@ -29,6 +29,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
+        getSupportActionBar().hide();
 
         _login.setOnClickListener(new View.OnClickListener() {
 
@@ -81,8 +82,6 @@ public class LoginActivity extends AppCompatActivity {
         if (requestCode == REQUEST_SIGNUP) {
             if (resultCode == RESULT_OK) {
 
-                // TODO: Implement successful signup logic here
-                // By default we just finish the Activity and log them in automatically
                 this.finish();
             }
         }
@@ -96,6 +95,8 @@ public class LoginActivity extends AppCompatActivity {
 
     public void onLoginSuccess() {
         _login.setEnabled(true);
+        Intent startMain = new Intent(getApplicationContext(), MainActivity.class);
+        startActivity(startMain);
         finish();
     }
 
@@ -112,14 +113,14 @@ public class LoginActivity extends AppCompatActivity {
         String password = _password.getText().toString();
 
         if (username.isEmpty() || username.length() <= 3) {
-            _username.setError("Username needs to be atleast 4 characteters");
+            _username.setError("Username must be atleast 4 characteters");
             valid = false;
         } else {
             _username.setError(null);
         }
 
         if (password.isEmpty() || password.length() <= 5) {
-            _password.setError("Password needs to be atleast 6 characters");
+            _password.setError("Password must be atleast 6 characters");
             valid = false;
         } else {
             _password.setError(null);
