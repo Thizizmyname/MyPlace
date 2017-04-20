@@ -6,14 +6,11 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class MessageActivity extends AppCompatActivity {
+
 
     //TEST FOR INCOMING AND OUTGOING
     int a = 0;
@@ -32,6 +29,11 @@ public class MessageActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_message);
+        Room room = getIntent().getParcelableExtra("Room");
+        //noinspection ConstantConditions
+        getSupportActionBar().setTitle(room.getName());
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
 
         // Creates an array containing the messages and an adapter
         final ArrayList<Message> messageArray = new ArrayList<>();
@@ -56,6 +58,7 @@ public class MessageActivity extends AppCompatActivity {
 
                 Message newMessage = new Message(name, message.getText().toString());
                 messageAdapter.add(newMessage);
+                //room.messageList.add(newMessage);
 
                 //TEST FOR INCOMING AND OUTGOING
                 ++a; //TEST
