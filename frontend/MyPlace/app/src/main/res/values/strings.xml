@@ -22,5 +22,4 @@
     <string name="title_activity_message">YourPlace</string>
     <string name="message_hint">Write a message.</string>
     <string name="send_button">Send</string>
->>>>>>> frontend
 </resources>
