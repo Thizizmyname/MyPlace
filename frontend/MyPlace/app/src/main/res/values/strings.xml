@@ -11,11 +11,16 @@
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
+    <string name="title_activity_signup">SignupActivity</string>
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
 
     <string name="title_activity_main">MyPlace</string>
+
+    <!-- Strings related to Message Activity -->
     <string name="title_activity_message">YourPlace</string>
-    <string name="title_activity_signup">SignupActivity</string>
+    <string name="message_hint">Write a message.</string>
+    <string name="send_button">Send</string>
+>>>>>>> frontend
 </resources>
