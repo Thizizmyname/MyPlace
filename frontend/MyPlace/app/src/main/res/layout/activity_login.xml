@@ -1,24 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:fitsSystemWindows="true">
 
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="56dp"
+        android:orientation="vertical"
         android:paddingLeft="24dp"
         android:paddingRight="24dp"
+        android:paddingTop="24dp"
         android:weightSum="1">
 
-        <ImageView android:src="@drawable/bild"
+        <ImageView
+            android:src="@drawable/bild"
             android:layout_width="256dp"
             android:layout_height="80dp"
-            android:layout_marginBottom="100dp"
+            android:layout_marginBottom="64dp"
             android:layout_gravity="center_horizontal"
-            android:layout_weight="0.17" />
+            android:layout_weight="0.19"
+            tools:ignore="ContentDescription" />
 
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
@@ -28,10 +32,10 @@
 
             <android.support.design.widget.TextInputEditText
                 android:id="@+id/input_username"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:hint="@string/prompt_username"
                 android:inputType="textWebEditText"
-                android:hint="Username" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
         </android.support.design.widget.TextInputLayout>
 
         <android.support.design.widget.TextInputLayout
@@ -39,31 +43,41 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp">
+
             <android.support.design.widget.TextInputEditText
                 android:id="@+id/input_password"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:hint="@string/prompt_password"
                 android:inputType="textPassword"
-                android:hint="Password">
-            </android.support.design.widget.TextInputEditText>
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
         </android.support.design.widget.TextInputLayout>
 
         <android.support.v7.widget.AppCompatButton
             android:id="@+id/btn_login"
+            android:text="@string/action_sign_in_short"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:layout_marginBottom="24dp"
-            android:padding="12dp"
-            android:text="Login"/>
+            android:padding="12dp" />
 
-        <TextView android:id="@+id/link_signup"
-            android:layout_width="fill_parent"
+        <TextView
+            android:id="@+id/link_signup"
+            android:text="@string/action_register"
+            android:textSize="16sp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="24dp"
-            android:text="Create Account"
-            android:gravity="center"
-            android:textSize="16dp"/>
+            android:gravity="center" />
+
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/btn_bypass"
+            android:text="Bypass authentication"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="24dp"
+            android:padding="12dp" />
 
     </LinearLayout>
 </ScrollView>
