@@ -33,7 +33,7 @@
 
             <android.support.design.widget.TextInputEditText
                 android:id="@+id/sign_email"
-                android:hint="Email"
+                android:hint="@string/prompt_email"
                 android:inputType="textEmailAddress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -47,7 +47,7 @@
 
             <android.support.design.widget.TextInputEditText
                 android:id="@+id/sign_username"
-                android:hint="Username"
+                android:hint="@string/prompt_username"
                 android:inputType="textWebEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -61,7 +61,7 @@
 
             <android.support.design.widget.TextInputEditText
                 android:id="@+id/sign_password"
-                android:hint="Password"
+                android:hint="@string/prompt_password"
                 android:inputType="textPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -69,7 +69,7 @@
 
         <android.support.v7.widget.AppCompatButton
             android:id="@+id/sign_btn"
-            android:text="Create Account"
+            android:text="@string/action_register"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
@@ -77,7 +77,7 @@
 
         <TextView
             android:id="@+id/link_login"
-            android:text="Already a member?"
+            android:text="@string/action_sign_in_question"
             android:textSize="16sp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
