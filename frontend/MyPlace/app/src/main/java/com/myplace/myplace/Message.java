@@ -6,9 +6,15 @@ import java.util.Date;
 
 class Message {
     public String name = "Anders";
-    String text = "";
-    String date;
+    public String text = "";
+    public String date;
     private DateFormat df = new SimpleDateFormat("HH:mm");
+
+    Message(String name, String message, String date) {
+        this.name = name;
+        this.text = message;
+        this.date = df.format(date);
+    }
 
     Message(String name, String message) {
         this.name = name;

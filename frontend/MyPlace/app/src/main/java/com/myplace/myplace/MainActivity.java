@@ -1,6 +1,7 @@
 package com.myplace.myplace;
 
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -22,6 +23,8 @@ public class MainActivity extends AppCompatActivity {
     Toolbar toolbar;
     ListView listView;
     ArrayList<Room> roomList = new ArrayList<>();
+    public static SQLiteDatabase roomDB = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,13 +36,25 @@ public class MainActivity extends AppCompatActivity {
         //noinspection ConstantConditions
         getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
 
+        //Open database
+        roomDB = openOrCreateDatabase("Rooms", MODE_PRIVATE, null);
+
+
+
         //TODO Tests for viewing temporary items
-        Room r1 = new Room("Rum Ett");
+        Room r1 = new Room("Rum1");
+        String createTable = "CREATE TABLE IF NOT EXISTS "+r1.getName()+"(name TEXT, message TEXT, date DATETIME);";
+        roomDB.execSQL(createTable);
+
         r1.addMessage(new Message("Alexis", "hejsan ettan"));
         r1.addMessage(new Message("Jesper", "hoppsan"));
         roomList.add(r1);
 
-        Room r2 = new Room("Rum Två");
+        Room r2 = new Room("Rum2");
+
+        String createTable2 = "CREATE TABLE IF NOT EXISTS "+r2.getName()+"(name TEXT, message TEXT, date DATETIME);";
+        roomDB.execSQL(createTable2);
+
         r2.addMessage(new Message("Patrik", "hejsan tvåan"));
         roomList.add(r2);
 
