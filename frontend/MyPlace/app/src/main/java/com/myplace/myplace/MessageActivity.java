@@ -31,24 +31,27 @@ public class MessageActivity extends AppCompatActivity {
         return result;
     }
 
+    // Retrieves messages from local database
     public ArrayList<Message> getMessages(String roomName){
         String query = "SELECT * FROM "+roomName;
         Cursor c = roomDB.rawQuery(query,null);
         ArrayList<Message> list=new ArrayList<>();
-        c.moveToFirst();
+        if (c.getCount() > 0) {
+            c.moveToFirst();
 
-        while(c.moveToNext()){
-            String name = c.getString(c.getColumnIndex("name"));
+            do {
+                String name = c.getString(c.getColumnIndex("name"));
 
-            String message = c.getString(c.getColumnIndex("message"));
+                String message = c.getString(c.getColumnIndex("message"));
 
-            String date = c.getString(c.getColumnIndex("date"));
+                String date = c.getString(c.getColumnIndex("date"));
 
-            Message newMessage = new Message(name, message, date);
-            list.add(newMessage);
+                Message newMessage = new Message(name, message, date);
+                list.add(newMessage);
+            } while (c.moveToNext());
+
+            c.close();
         }
-
-        c.close();
         return list;
     }
 
