@@ -1,5 +1,6 @@
 package com.myplace.myplace;
 
+import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -40,7 +41,13 @@ public class Room implements Parcelable {
     public String getLastMessage() {
         //return "Detta är ett meddelande";
         try {
-            return messageList.get(messageList.size()-1).text;
+            String query = "SELECT message FROM "+roomName;
+            Cursor c = MainActivity.roomDB.rawQuery(query, null);
+            c.moveToLast();
+            String message = c.getString(c.getColumnIndex("message"));
+            c.close();
+            return message;
+            //return messageList.get(messageList.size()-1).text;
         } catch (Exception ignore) {
             return "This board has no messages";
         }
