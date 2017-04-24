@@ -13,7 +13,7 @@ class Message {
     Message(String name, String message, String date) {
         this.name = name;
         this.text = message;
-        this.date = df.format(date);
+        this.date = date;
     }
 
     Message(String name, String message) {

@@ -44,7 +44,7 @@ public class MessageActivity extends AppCompatActivity {
 
             String date = c.getString(c.getColumnIndex("date"));
 
-            Message newMessage = new Message(name,message,date);
+            Message newMessage = new Message(name, message, date);
             list.add(newMessage);
         }
 
@@ -102,7 +102,7 @@ public class MessageActivity extends AppCompatActivity {
                 insertValues.put("name", newMessage.getName());
                 insertValues.put("message", newMessage.text);
                 insertValues.put("date", newMessage.date);
-                roomDB.insert("Rooms", null, insertValues);
+                roomDB.insert(roomName, null, insertValues);
 
                 //roomDB.execSQL("INSERT INTO "+roomName+" VALUES('" + newMessage.getName() + "','" + newMessage.text + "','" + newMessage.date + "');");
 
