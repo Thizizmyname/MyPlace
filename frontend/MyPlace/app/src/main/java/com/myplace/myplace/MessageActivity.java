@@ -13,11 +13,9 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
-import static com.myplace.myplace.MainActivity.roomDB;
-
 public class MessageActivity extends AppCompatActivity {
     private Toast messageEmptyToast = null;
-    public static RoomDbHelper roomDB = null;
+    RoomDbHelper roomDB = null;
 
     //TEST FOR INCOMING AND OUTGOING
     int a = 0;
@@ -32,31 +30,6 @@ public class MessageActivity extends AppCompatActivity {
         return result;
     }
 
-    // Retrieves messages from local database
-/*    public ArrayList<Message> getMessages(String roomName){
-
-        String query = "SELECT * FROM "+roomName;
-        Cursor c = roomDB.rawQuery(query,null);
-        ArrayList<Message> list=new ArrayList<>();
-        if (c.getCount() > 0) {
-            c.moveToFirst();
-
-            do {
-                String name = c.getString(c.getColumnIndex("name"));
-
-                String message = c.getString(c.getColumnIndex("message"));
-
-                String date = c.getString(c.getColumnIndex("date"));
-
-                Message newMessage = new Message(name, message, date);
-                list.add(newMessage);
-            } while (c.moveToNext());
-
-            c.close();
-        }
-        return list;
-    }*/
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,9 +41,6 @@ public class MessageActivity extends AppCompatActivity {
         //noinspection ConstantConditions
         getSupportActionBar().setTitle(roomName);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        // Creates an array containing the messages and an adapter
-        // final ArrayList<Message> messageArray = new ArrayList<>();
 
         roomDB = new RoomDbHelper(this);
 
@@ -106,15 +76,8 @@ public class MessageActivity extends AppCompatActivity {
                 Message newMessage = new Message(name, message.getText().toString());
                 messageAdapter.add(newMessage);
 
-                /*ContentValues insertValues = new ContentValues();
-                insertValues.put("name", newMessage.getName());
-                insertValues.put("message", newMessage.text);
-                insertValues.put("date", newMessage.date);*/
                 roomDB.addMessage(roomName, newMessage);
-
-                //roomDB.execSQL("INSERT INTO "+roomName+" VALUES('" + newMessage.getName() + "','" + newMessage.text + "','" + newMessage.date + "');");
-
-                //room.messageList.add(newMessage);
+                MainActivity.adapter.notifyDataSetChanged();
 
                 //TEST FOR INCOMING AND OUTGOING
                 ++a; //TEST

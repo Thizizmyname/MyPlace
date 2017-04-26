@@ -5,8 +5,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 class Message {
-    public String name = "Anders";
-    public String text = "";
+    public String name;
+    public String text;
     public String date;
     private DateFormat df = new SimpleDateFormat("HH:mm");
 

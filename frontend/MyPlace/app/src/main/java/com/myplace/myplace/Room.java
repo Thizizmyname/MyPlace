@@ -45,9 +45,8 @@ public class Room implements Parcelable {
 
             //return messageList.get(messageList.size()-1).text;
         } catch (Exception ignore) {
-            return "This board has no messages";
+            return "This room has no messages";
         }
-
     }
 
     public void addMessage(Message msg) {

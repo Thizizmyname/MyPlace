@@ -26,4 +26,5 @@
     <string name="message_hint">Write a message.</string>
     <string name="send_button">Send</string>
     <string name="message_empty">Please enter a message.</string>
+    <string name="room_empty">This room has no messages.</string>
 </resources>
