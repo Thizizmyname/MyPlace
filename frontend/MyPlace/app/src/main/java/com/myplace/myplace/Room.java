@@ -41,12 +41,8 @@ public class Room implements Parcelable {
     public String getLastMessage() {
         //return "Detta är ett meddelande";
         try {
-            String query = "SELECT message FROM "+roomName;
-            Cursor c = MainActivity.roomDB.rawQuery(query, null);
-            c.moveToLast();
-            String message = c.getString(c.getColumnIndex("message"));
-            c.close();
-            return message;
+            return MainActivity.roomDB.getLastMessage(this.roomName);
+
             //return messageList.get(messageList.size()-1).text;
         } catch (Exception ignore) {
             return "This board has no messages";

@@ -17,6 +17,7 @@ import static com.myplace.myplace.MainActivity.roomDB;
 
 public class MessageActivity extends AppCompatActivity {
     private Toast messageEmptyToast = null;
+    public static RoomDbHelper roomDB = null;
 
     //TEST FOR INCOMING AND OUTGOING
     int a = 0;
@@ -32,7 +33,8 @@ public class MessageActivity extends AppCompatActivity {
     }
 
     // Retrieves messages from local database
-    public ArrayList<Message> getMessages(String roomName){
+/*    public ArrayList<Message> getMessages(String roomName){
+
         String query = "SELECT * FROM "+roomName;
         Cursor c = roomDB.rawQuery(query,null);
         ArrayList<Message> list=new ArrayList<>();
@@ -53,7 +55,7 @@ public class MessageActivity extends AppCompatActivity {
             c.close();
         }
         return list;
-    }
+    }*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +64,7 @@ public class MessageActivity extends AppCompatActivity {
         Room room = getIntent().getParcelableExtra("Room");
 
         final String roomName = room.getName();
+
         //noinspection ConstantConditions
         getSupportActionBar().setTitle(roomName);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -69,7 +72,9 @@ public class MessageActivity extends AppCompatActivity {
         // Creates an array containing the messages and an adapter
         // final ArrayList<Message> messageArray = new ArrayList<>();
 
-        ArrayList<Message> messageList = getMessages(roomName);
+        roomDB = new RoomDbHelper(this);
+
+        ArrayList<Message> messageList = roomDB.getMessages(roomName);
         final MessageAdapter messageAdapter = new MessageAdapter(this, messageList);
 
         // Finds the listview and specifies the adapter to use
@@ -101,11 +106,11 @@ public class MessageActivity extends AppCompatActivity {
                 Message newMessage = new Message(name, message.getText().toString());
                 messageAdapter.add(newMessage);
 
-                ContentValues insertValues = new ContentValues();
+                /*ContentValues insertValues = new ContentValues();
                 insertValues.put("name", newMessage.getName());
                 insertValues.put("message", newMessage.text);
-                insertValues.put("date", newMessage.date);
-                roomDB.insert(roomName, null, insertValues);
+                insertValues.put("date", newMessage.date);*/
+                roomDB.addMessage(roomName, newMessage);
 
                 //roomDB.execSQL("INSERT INTO "+roomName+" VALUES('" + newMessage.getName() + "','" + newMessage.text + "','" + newMessage.date + "');");
 
