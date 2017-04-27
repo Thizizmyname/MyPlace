@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(MainActivity.this, MessageActivity.class);
-                intent.putExtra("Room", roomList.get(position));
+                intent.putExtra("RoomName", roomList.get(position).getName());
                 startActivity(intent);
             }
         });

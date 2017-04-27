@@ -10,7 +10,7 @@ import java.util.ArrayList;
  * Created by alexis on 2017-04-18.
  */
 
-public class Room implements Parcelable {
+public class Room {
     private String roomName;
     public ArrayList<Message> messageList = new ArrayList<>();
 
@@ -18,21 +18,6 @@ public class Room implements Parcelable {
         roomName = name;
     }
 
-    protected Room(Parcel in) {
-        roomName = in.readString();
-    }
-
-    public static final Creator<Room> CREATOR = new Creator<Room>() {
-        @Override
-        public Room createFromParcel(Parcel in) {
-            return new Room(in);
-        }
-
-        @Override
-        public Room[] newArray(int size) {
-            return new Room[size];
-        }
-    };
 
     public String getName() {
         return roomName;
@@ -44,15 +29,5 @@ public class Room implements Parcelable {
 
     public void addMessage(Message msg) {
         messageList.add(msg);
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(roomName);
     }
 }
