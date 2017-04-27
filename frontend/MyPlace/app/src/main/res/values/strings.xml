@@ -27,4 +27,5 @@
     <string name="send_button">Send</string>
     <string name="message_empty">Please enter a message.</string>
     <string name="room_empty">This room has no messages.</string>
+    <string name="title_add_room">Add Room</string>
 </resources>
