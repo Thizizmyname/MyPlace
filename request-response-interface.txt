@@ -15,7 +15,7 @@ args: uname
 respose: for each of user's room's: roomID, room name, latest msg(msgID, fromUser, text), latest read msgID
 note: list ordered by latest activity
 
-03.get_room_users
+03.get_room_info
 args: roomID
 response: joined users
 
@@ -29,7 +29,7 @@ response: all msgs newer than msgID
 
 06.join_room
 args: roomID, uname
-response: -
+response: Return room joined
 side-effect: updates users_db, rooms_db
 
 07.leave_room (vs. join_room)
