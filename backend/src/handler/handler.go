@@ -43,7 +43,11 @@ func getNewerMessages(roomID string, msgID string) []string{
 }
 
 func joinRoom(roomId string, username string) {
-  //
+// Exempel på hur det kan se ut.	
+//	workingUser = getUser(username)
+//	workingRoom = getRoom(roomId)
+//	workingUser.JoinRoom(workingRoom)
+	
 }
 
 func leaveRoom(username string, roomId string) {
