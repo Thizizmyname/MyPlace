@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<TwoLineListItem xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:minHeight="?attr/listPreferredItemHeight"
@@ -20,8 +20,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/r_title"
-        android:layout_alignStart="@id/r_title"
-        android:textAppearance="?attr/textAppearanceListItemSmall"
-        android:layout_alignLeft="@id/r_title" />
+        android:paddingStart="10dp"
+        android:paddingLeft="10dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
-</TwoLineListItem>
+</RelativeLayout>
