@@ -5,10 +5,16 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 class Message {
-    public String name = "Anders";
-    String text = "";
-    String date;
+    public String name;
+    public String text;
+    public String date;
     private DateFormat df = new SimpleDateFormat("HH:mm");
+
+    Message(String name, String message, String date) {
+        this.name = name;
+        this.text = message;
+        this.date = date;
+    }
 
     Message(String name, String message) {
         this.name = name;

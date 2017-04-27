@@ -1,5 +1,8 @@
 package com.myplace.myplace;
 
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -12,6 +15,7 @@ import java.util.ArrayList;
 
 public class MessageActivity extends AppCompatActivity {
     private Toast messageEmptyToast = null;
+    RoomDbHelper roomDB = null;
 
     //TEST FOR INCOMING AND OUTGOING
     int a = 0;
@@ -31,14 +35,17 @@ public class MessageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_message);
         Room room = getIntent().getParcelableExtra("Room");
+
+        final String roomName = room.getName();
+
         //noinspection ConstantConditions
-        getSupportActionBar().setTitle(room.getName());
+        getSupportActionBar().setTitle(roomName);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        roomDB = new RoomDbHelper(this);
 
-        // Creates an array containing the messages and an adapter
-        // final ArrayList<Message> messageArray = new ArrayList<>();
-        final MessageAdapter messageAdapter = new MessageAdapter(this, room.messageList);
+        ArrayList<Message> messageList = roomDB.getMessages(roomName);
+        final MessageAdapter messageAdapter = new MessageAdapter(this, messageList);
 
         // Finds the listview and specifies the adapter to use
         ListView listMessages = (ListView) findViewById(R.id.listMessages);
@@ -68,7 +75,9 @@ public class MessageActivity extends AppCompatActivity {
 
                 Message newMessage = new Message(name, message.getText().toString());
                 messageAdapter.add(newMessage);
-                //room.messageList.add(newMessage);
+
+                roomDB.addMessage(roomName, newMessage);
+                MainActivity.adapter.notifyDataSetChanged();
 
                 //TEST FOR INCOMING AND OUTGOING
                 ++a; //TEST

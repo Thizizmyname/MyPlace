@@ -1,6 +1,7 @@
 package com.myplace.myplace;
 
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -21,7 +22,11 @@ public class MainActivity extends AppCompatActivity {
 
     Toolbar toolbar;
     ListView listView;
-    ArrayList<Room> roomList = new ArrayList<>();
+    ArrayList<Room> roomList = null;
+    public static ArrayAdapter<Room> adapter = null;
+
+    //Defines the database
+    public static RoomDbHelper roomDB = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,20 +38,27 @@ public class MainActivity extends AppCompatActivity {
         //noinspection ConstantConditions
         getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
 
-        //TODO Tests for viewing temporary items
-        Room r1 = new Room("Rum Ett");
-        r1.addMessage(new Message("Alexis", "hejsan ettan"));
-        r1.addMessage(new Message("Jesper", "hoppsan"));
-        roomList.add(r1);
+        //Open database
+        roomDB = new RoomDbHelper(this);
 
-        Room r2 = new Room("Rum Två");
-        r2.addMessage(new Message("Patrik", "hejsan tvåan"));
-        roomList.add(r2);
+        //TODO Tests for viewing temporary items
+
+        Room r1 = new Room("Rum 1");
+        roomDB.createRoomTable(r1.getName());
+
+        //roomList.add(r1);
+
+        Room r2 = new Room("Rum 2");
+        roomDB.createRoomTable(r2.getName());
+
+        //roomList.add(r2);
+
+        roomList = roomDB.getRoomList();
 
         listView = (ListView) findViewById(R.id.roomList);
 
 
-        ArrayAdapter<Room> adapter = new ArrayAdapter<Room>(MainActivity.this, android.R.layout.simple_list_item_2, android.R.id.text1, roomList) {
+        adapter = new ArrayAdapter<Room>(MainActivity.this, android.R.layout.simple_list_item_2, android.R.id.text1, roomList) {
 
             @NonNull
             @Override
