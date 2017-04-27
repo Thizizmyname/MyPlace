@@ -11,8 +11,12 @@ import java.util.ArrayList;
  */
 
 public class Room {
+    private int roomID;
     private String roomName;
-    public ArrayList<Message> messageList = new ArrayList<>();
+    private Message latestMsg;
+
+
+
 
     public Room(String name) {
         roomName = name;
@@ -27,7 +31,4 @@ public class Room {
         return MainActivity.roomDB.getLastMessage(this.roomName);
     }
 
-    public void addMessage(Message msg) {
-        messageList.add(msg);
-    }
 }
