@@ -2,17 +2,21 @@ package main
 
 import (
     "net"
-    "fmt"
+//    "fmt"
   //"time"
-  "bufio"
+//  "bufio"
 //  "log"
-  "reflect"
+//  "reflect"
   //"data" //importera denna när vi ska implementera databasen
-  "myplaceutils"
+//  "myplaceutils"
 )
 
 
-var connections []net.Conn
+
+func handler(listener net.Listener, gochan chan string){
+   //
+}
+
 
 func signup(username string, password string) {
 
@@ -21,18 +25,21 @@ func signup(username string, password string) {
 
 func signin(username string, password string) /*TOKEN*/ string{
   //throw error
+  return ""
 }
 
 func getRooms(username string /*Kanske byta mot user-type*/) []string{
-  
+  return []string{"h","a","ha"}
 }
 
 func getOlderMessages(roomID string, msgID string) []string /*kanske någon annan returntype*/ {
   //
+  return []string{"he","he","he"}
 }
 
 func getNewerMessages(roomID string, msgID string) []string{
   //
+  return []string{"ho","ho","ho"}
 }
 
 func joinRoom(roomId string, username string) {
