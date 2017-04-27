@@ -23,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
     Toolbar toolbar;
     ListView listView;
     ArrayList<Room> roomList = null;
-    public static ArrayAdapter<Room> adapter = null;
+    public static RoomAdapter adapter = null;
 
     //Defines the database
     public static RoomDbHelper roomDB = null;
@@ -46,32 +46,18 @@ public class MainActivity extends AppCompatActivity {
         Room r1 = new Room("Rum 1");
         roomDB.createRoomTable(r1.getName());
 
-        //roomList.add(r1);
 
         Room r2 = new Room("Rum 2");
         roomDB.createRoomTable(r2.getName());
 
-        //roomList.add(r2);
 
         roomList = roomDB.getRoomList();
 
         listView = (ListView) findViewById(R.id.roomList);
 
 
-        adapter = new ArrayAdapter<Room>(MainActivity.this, android.R.layout.simple_list_item_2, android.R.id.text1, roomList) {
+        adapter = new RoomAdapter(MainActivity.this, roomList);
 
-            @NonNull
-            @Override
-            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-                View view = super.getView(position, convertView, parent);
-                TextView text1 = (TextView) view.findViewById(android.R.id.text1);
-                TextView text2 = (TextView) view.findViewById(android.R.id.text2);
-
-                text1.setText(roomList.get(position).getName());
-                text2.setText(roomList.get(position).getLastMessage());
-                return view;
-            }
-        };
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -79,16 +65,10 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(MainActivity.this, MessageActivity.class);
                 intent.putExtra("Room", roomList.get(position));
-                //intent.putExtra("SongName", listView.getItemAtPosition(position).toString());
                 startActivity(intent);
             }
         });
-/*
 
-        RoomAdapter<Room> adapter = new RoomAdapter<Room>(MainActivity.this,
-                android.R.layout.simple_list_item_2,
-                new ArrayList<Room>(roomList));
-*/
 
         listView.setAdapter(adapter);
 

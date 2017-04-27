@@ -2,6 +2,7 @@ package com.myplace.myplace;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -13,12 +14,12 @@ import java.util.ArrayList;
  * Created by alexis on 2017-04-18.
  */
 
-class RoomAdapter<T> extends ArrayAdapter<Room> {
+class RoomAdapter extends ArrayAdapter<Room> {
 
     ArrayList<Room> rooms;
 
-    public RoomAdapter(MainActivity mainActivity, int simple_list_item_2, ArrayList<Room> rooms) {
-        super(mainActivity, simple_list_item_2);
+    public RoomAdapter(MainActivity context, ArrayList<Room> rooms) {
+        super(context, 0, rooms);
         this.rooms = rooms;
 
     }
@@ -26,15 +27,25 @@ class RoomAdapter<T> extends ArrayAdapter<Room> {
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-
-        View view = super.getView(position, convertView, parent);
-        TextView text1 =  (TextView) view.findViewById(android.R.id.text1);
-        TextView text2 =  (TextView) view.findViewById(android.R.id.text2);
-
-        text1.setText(rooms.get(position).getName());
-        text2.setText(rooms.get(position).getLastMessage());
+        Room room = getItem(position);
 
 
-        return super.getView(position, convertView, parent);
+        if (convertView == null) {
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.custom_room_list_item, parent, false);
+        }
+
+        TextView text1 =  (TextView) convertView.findViewById(R.id.r_title);
+        TextView text2 =  (TextView) convertView.findViewById(R.id.r_subtitle);
+
+        if (room != null) {
+            text1.setText(room.getName());
+            text2.setText(room.getLastMessage());
+        }
+
+
+
+
+
+        return convertView;
     }
 }
