@@ -1,0 +1,42 @@
+// Request
+{
+    "requestID": 286001,
+    "requestIndex": 2,
+    "requestName": "get_rooms",
+
+    "userName": "Joe"
+}
+
+
+// Response
+{
+    "requestID": 286001,
+
+    "rooms": [
+
+        {
+            "id": 101,
+            "roomName": "Room 1",
+            "latestMsg": {
+                "id": 201,
+                "date": "2017-04-27-17-24-00-00",
+                "from": "JohnDoe",
+                "content": "This is a message"
+            }
+            "latestReadMsgId": 123
+        },
+        {
+            "id": 102,
+            "roomName": "Room 2",
+            "latestMsg": {
+                "id": 401,
+                "date": "2017-04-27-17-24-00-00",
+                "from": "JaneDoe",
+                "content": "This is another message"
+            }
+            "latestReadMsgId": 321
+
+        }
+
+    ]
+}

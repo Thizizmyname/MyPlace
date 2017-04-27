@@ -1,0 +1,9 @@
+{
+    "requestResponse": 0000,
+
+    "roomIDAccepted": true/false,
+    "room": {/*room.json*/}
+}
+
+// send roomIDAccepted false if room does not exist 
+// (or if username blocked / not in whitelist)

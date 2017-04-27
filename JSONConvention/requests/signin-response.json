@@ -1,0 +1,11 @@
+{
+    "requestResponse": 1001,
+
+    "signinResponse": true/false,
+    "errorReason": "RESPONSE"
+}
+
+// Possible responses:
+// ""   - No error
+// "noUser"     - Username not in use
+// "incorrPass" - incorrect password given

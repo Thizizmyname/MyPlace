@@ -1,0 +1,8 @@
+{
+    "requestResponse": 0000,
+
+    "users": [
+        {"userName": "NAME"},
+        {"userName": "NAME"}
+    ]
+}

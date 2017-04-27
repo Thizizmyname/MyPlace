@@ -1,0 +1,9 @@
+{
+    "requestID": 0000,
+    "requestIndex": 8,
+    "requestName": "create_room",
+
+    "userName": "NAME",
+    "roomName": "ROOMNAME"
+}
+

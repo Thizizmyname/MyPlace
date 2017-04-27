@@ -1,0 +1,8 @@
+{
+    "id": 123,
+    "RoomName": "room1",
+    "latestMsg": {
+        //message.Json
+    }
+    "latestReadMsgId": 123
+}

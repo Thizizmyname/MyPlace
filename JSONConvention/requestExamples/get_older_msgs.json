@@ -1,0 +1,34 @@
+// Request
+{
+    "requestID": 286001,
+    "requestIndex": 4,
+    "requestName": "get_older_msgs",
+
+    "roomID": 1142,
+    "msgID": 123
+}
+
+
+// Response
+{
+    "requestResponse": 286001,
+
+    "messages": [
+            {
+                "id": 121,
+                "date": "2017-04-27-17-24-00-00",
+                "from": "JohnDoe",
+                "content": "This is a message"
+            },
+            {
+                "id": 122,
+                "date": "2017-04-27-17-24-13-00",
+                "from": "JohnDoe",
+                "content": "This is another message"
+            }
+        }
+    ]
+}
+
+
+

@@ -1,0 +1,10 @@
+{
+    "requestID": 1001, // Reply client requestID
+
+    "rooms": [
+
+        {/*Room.json*/},
+        {/*Room.json*/}
+
+    ]
+}

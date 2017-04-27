@@ -1,0 +1,19 @@
+// Request
+{
+    "requestID": 286001,
+    "requestIndex": 0,
+    "requestName": "signup",
+
+    "userName": "JohnDoe",
+    "password": "qwerty"
+}
+
+
+// Response
+{
+    "requestResponse": 286001,
+
+    "signinResponse": true,
+    "errorReason": ""
+}
+

@@ -1,0 +1,8 @@
+{
+    "requestID": 000,
+    "requestIndex": 0,
+    "requestName": "signup",
+
+    "userName": "NAME",
+    "password": "PASSWORD"
+}

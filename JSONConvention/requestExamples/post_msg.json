@@ -1,0 +1,26 @@
+// Request
+{
+    "requestID": 286001,
+    "requestIndex": 9,
+    "requestName": "post_msg",
+
+    "userName": "JohnDoe",
+    "roomID": 1142,
+    "content": "Is there a JaneDoe anywhere?"
+}
+
+
+// Response
+{
+    "requestResponse": -1, // 286001 to userName JohnDoe
+
+    "requestIndex": 9,
+    "roomID": 1142,
+    "message":
+            {
+                "id": 1157,
+                "date": "2017-04-27-19-46-14-00",
+                "from": "JohnDoe",
+                "content": "Is there a JaneDoe anywhere?"
+            } 
+}

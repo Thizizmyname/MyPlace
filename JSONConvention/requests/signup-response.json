@@ -1,0 +1,11 @@
+{
+    "requestResponse": 1001,
+
+    "signupResponse": true/false,
+    "errorReason": "RESPONSE"
+}
+
+// Possible responses:
+// ""   - Username accepted and constructed
+// "taken"  - Username taken and need to come up with a new
+// "error"  - Undefined error

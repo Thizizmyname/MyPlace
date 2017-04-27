@@ -1,0 +1,6 @@
+{
+    "id": 123,
+    "date": "YYYY-MM-DD-HH-MM-SS-MS",
+    "from": "Username",
+    "content": "MsgString"
+}

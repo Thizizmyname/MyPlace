@@ -1,0 +1,7 @@
+{
+    "requestID": 1001, // unique number set by user
+    "requestIndex": 2,
+    "requestName": "get_rooms",
+
+    "userName": "NAME"
+}

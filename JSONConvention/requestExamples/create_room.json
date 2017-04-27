@@ -1,0 +1,18 @@
+// Request
+{
+    "requestID": 286001,
+    "requestIndex": 8,
+    "requestName": "create_room",
+
+    "userName": "Joe",
+    "roomName": "fooChat"
+}
+
+
+// Response
+{
+    "requestResponse": 286001,
+
+    "roomID": 123
+}
+
