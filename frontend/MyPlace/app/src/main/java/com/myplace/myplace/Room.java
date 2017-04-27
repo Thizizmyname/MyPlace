@@ -39,26 +39,12 @@ public class Room implements Parcelable {
     }
 
     public String getLastMessage() {
-        //return "Detta är ett meddelande";
-        try {
-            return MainActivity.roomDB.getLastMessage(this.roomName);
-
-            //return messageList.get(messageList.size()-1).text;
-        } catch (Exception ignore) {
-            return "This room has no messages";
-        }
+        return MainActivity.roomDB.getLastMessage(this.roomName);
     }
 
     public void addMessage(Message msg) {
         messageList.add(msg);
     }
-
-
-
-
-
-
-
 
     @Override
     public int describeContents() {
