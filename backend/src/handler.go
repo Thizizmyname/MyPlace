@@ -13,7 +13,7 @@ import (
 
 
 
-func handler(listener net.Listener, gochan chan string){
+func handler(connection net.Conn, gochan chan string){
    //
 }
 

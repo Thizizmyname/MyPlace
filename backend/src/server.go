@@ -22,8 +22,8 @@ func listenLoop(listener net.Listener) {
   for { //Denna loopen körs för evigt
     //Här skapas två nya variabler, connection och errs, samma som innan
     // men connection är varje anslutning som inkommer till server
-    // dvs en socket
-    var channel chan string
+   // dvs en socket
+    channel := make(chan string)
     newConnection, errs := listener.Accept()
     if errs != nil { //Här testas igen om det blev något fel
       Error.Printf("Connection Accept error: %v\n",errs)
@@ -31,11 +31,12 @@ func listenLoop(listener net.Listener) {
       connections = append(connections, newConnection)
       Info.Printf("Connection established: %v\n", newConnection)
       Info.Printf("New channel\n", channel)
-      //go handler(newConnection, channel)
+      go handler(newConnection, channel)
     }
   }
 }
 
+//Initialize loggers
 func InitLoggers(
     traceHandle io.Writer,
     infoHandle io.Writer,
