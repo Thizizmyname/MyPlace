@@ -1,7 +1,8 @@
 {
     "requestResponse": 0000, // requestID to poster, -1 to all other in room
-
     "requestIndex": 9,
+    "requestName": "post_msg",
+    
     "roomID": 0000,
     "message":
             {

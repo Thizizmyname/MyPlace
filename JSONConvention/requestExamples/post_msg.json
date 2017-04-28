@@ -13,8 +13,9 @@
 // Response
 {
     "requestResponse": -1, // 286001 to userName JohnDoe
-
     "requestIndex": 9,
+    "requestName": "post_msg",
+
     "roomID": 1142,
     "message":
             {

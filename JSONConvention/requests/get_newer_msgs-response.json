@@ -1,9 +1,11 @@
 {
     "requestResponse": 0000,
+    "requestIndex": 5,
+    "requestName": "get_newer_msgs",
 
     "messages": [
         {/*message.json*/}, 
         {/*message.json*/}, 
-        {/*message.json*/}, 
+        {/*message.json*/}
     ]
 }

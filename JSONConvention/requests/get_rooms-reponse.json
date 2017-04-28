@@ -1,5 +1,7 @@
 {
-    "requestID": 1001, // Reply client requestID
+    "requestID": 0000,
+    "requestIndex": 2,
+    "requestName": "get_rooms",
 
     "rooms": [
 

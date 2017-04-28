@@ -12,7 +12,10 @@
 // Response
 {
     "requestResponse": 286001,
+    "requestIndex": 8,
+    "requestName": "create_room",
 
     "roomID": 123
+
 }
 

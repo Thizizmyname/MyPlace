@@ -11,6 +11,8 @@
 // Response
 {
     "requestResponse": 286001,
+    "requestIndex": 3,
+    "requestName": "get_room_info",
 
     "users": [
         {"userName": "Rachel Green"}, 
@@ -21,5 +23,3 @@
         {"userName": "Ross Geller"}
     ]
 }
-
-

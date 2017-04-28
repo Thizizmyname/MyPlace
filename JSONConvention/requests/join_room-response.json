@@ -1,5 +1,7 @@
 {
     "requestResponse": 0000,
+    "requestIndex": 6,
+    "requestName": "join_room",
 
     "roomIDAccepted": true/false,
     "room": {/*room.json*/}

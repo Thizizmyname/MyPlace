@@ -12,6 +12,8 @@
 // Response
 {
     "requestResponse": 286001,
+    "requestIndex": 0,
+    "requestName": "signup",
 
     "signinResponse": true,
     "errorReason": ""

@@ -11,6 +11,8 @@
 // Response
 {
     "requestID": 286001,
+    "requestIndex": 2,
+    "requestName": "get_rooms",
 
     "rooms": [
 

@@ -12,7 +12,10 @@
 // Response
 {
     "requestID": 286001,
+    "requestIndex": 6,
+    "requestName": "join_room",
 
+    "roomIDAccepted": true,
     "room":
         {
             "id": 101,

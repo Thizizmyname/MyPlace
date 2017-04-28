@@ -1,5 +1,7 @@
 {
-    "requestResponse": 1001,
+    "requestResponse": 0000,
+    "requestIndex": 1,
+    "requestName": "signin",
 
     "signinResponse": true/false,
     "errorReason": "RESPONSE"

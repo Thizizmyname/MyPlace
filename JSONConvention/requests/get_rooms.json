@@ -1,5 +1,5 @@
 {
-    "requestID": 1001, // unique number set by user
+    "requestID": 0000,
     "requestIndex": 2,
     "requestName": "get_rooms",
 
