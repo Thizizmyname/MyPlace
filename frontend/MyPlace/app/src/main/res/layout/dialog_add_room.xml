@@ -8,6 +8,10 @@
     android:background="@drawable/add_room_background">
     <EditText
         android:id="@+id/input_room"
+        android:inputType="text"
+        android:hint="Enter a room name."
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content" >
+        <requestFocus />
+    </EditText>
 </LinearLayout>

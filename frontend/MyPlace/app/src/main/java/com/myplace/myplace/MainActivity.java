@@ -1,5 +1,6 @@
 package com.myplace.myplace;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
@@ -10,8 +11,10 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -27,10 +30,12 @@ import java.util.ArrayList;
 
 import static android.R.id.input;
 import static com.myplace.myplace.R.id.action_create;
+import static com.myplace.myplace.R.id.action_join;
 import static com.myplace.myplace.R.id.input_room;
 
 public class MainActivity extends AppCompatActivity {
 
+    final Context context = this;
     Toolbar toolbar;
     ListView listView;
     ArrayList<Room> roomList = null;
@@ -83,24 +88,64 @@ public class MainActivity extends AppCompatActivity {
 
         listView.setAdapter(adapter);
 
+        //OnClick for createRoom
         final View actionCreate = findViewById(action_create);
 
         actionCreate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext());
-                builder.setView(R.layout.dialog_add_room);
+                LayoutInflater inflater = LayoutInflater.from(context);
+                View dialogView = inflater.inflate(R.layout.dialog_add_room, null);
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setView(dialogView);
+
+                final EditText inputRoom = (EditText) dialogView.findViewById(R.id.input_room);
 
                 builder.setPositiveButton("Create room", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        EditText input = (EditText) findViewById(R.id.input_room);
-                        String roomName = input.getText().toString();
+                        String roomName = inputRoom.getText().toString();
 
+                        //TODO: Send request to create a new room
+                        Room room = new Room(roomName);
+                        adapter.add(room);
                         roomDB.createRoomTable(roomName);
                     }
                 });
-                builder.show();
+
+                AlertDialog alertDialog = builder.create();
+                alertDialog.show();
+            }
+        });
+
+
+        //OnClick for joinRoom
+        final View actionJoin = findViewById(action_join);
+
+        actionJoin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LayoutInflater inflater = LayoutInflater.from(context);
+                View dialogView = inflater.inflate(R.layout.dialog_add_room, null);
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setView(dialogView);
+
+                final EditText inputRoom = (EditText) dialogView.findViewById(R.id.input_room);
+
+                builder.setPositiveButton("Join room", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String roomName = inputRoom.getText().toString();
+
+                        //TODO: Send request to join an existing room
+
+                    }
+                });
+
+                AlertDialog alertDialog = builder.create();
+                alertDialog.show();
             }
         });
     }
