@@ -1,8 +1,5 @@
 package com.myplace.myplace;
 
-import android.content.ContentValues;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -77,7 +74,7 @@ public class MessageActivity extends AppCompatActivity {
                 messageAdapter.add(newMessage);
 
                 roomDB.addMessage(roomName, newMessage);
-                MainActivity.adapter.notifyDataSetChanged();
+                MainActivity.roomAdapter.notifyDataSetChanged();
 
                 //TEST FOR INCOMING AND OUTGOING
                 ++a; //TEST

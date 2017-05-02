@@ -3,35 +3,24 @@ package com.myplace.myplace;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.OvalShape;
+
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 
 
 import java.util.ArrayList;
 
-import static android.R.id.input;
 import static com.myplace.myplace.R.id.action_create;
 import static com.myplace.myplace.R.id.action_join;
-import static com.myplace.myplace.R.id.input_room;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -39,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     Toolbar toolbar;
     ListView listView;
     ArrayList<Room> roomList = null;
-    public static RoomAdapter adapter = null;
+    public static RoomAdapter roomAdapter = null;
 
     //Defines the database
     public static RoomDbHelper roomDB = null;
@@ -59,21 +48,13 @@ public class MainActivity extends AppCompatActivity {
 
         //TODO Tests for viewing temporary items
 
-        Room r1 = new Room("Rum 1");
-        roomDB.createRoomTable(r1.getName());
-
-
-        Room r2 = new Room("Rum 2");
-        roomDB.createRoomTable(r2.getName());
-
-
         roomList = roomDB.getRoomList();
 
         listView = (ListView) findViewById(R.id.roomList);
 
 
-        adapter = new RoomAdapter(MainActivity.this, roomList);
-        listView.setAdapter(adapter);
+        roomAdapter = new RoomAdapter(MainActivity.this, roomList);
+        listView.setAdapter(roomAdapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -97,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         roomDB.deleteRoom(roomName);
                         roomList.remove(position);
-                        adapter.notifyDataSetChanged();
+                        roomAdapter.notifyDataSetChanged();
                         //TODO: Send leave room request
                     }
                 });
@@ -137,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
 
                         //TODO: Send request to create a new room
                         Room room = new Room(roomName);
-                        adapter.add(room);
+                        roomAdapter.add(room);
                         roomDB.createRoomTable(roomName);
                     }
                 });
