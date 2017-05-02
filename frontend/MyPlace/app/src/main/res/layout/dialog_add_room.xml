@@ -4,8 +4,7 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:paddingLeft="5dp"
-    android:paddingRight="5dp"
-    android:background="@drawable/add_room_background">
+    android:paddingRight="5dp">
     <EditText
         android:id="@+id/input_room"
         android:inputType="text"
