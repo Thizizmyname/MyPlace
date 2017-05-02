@@ -7,12 +7,12 @@
     android:fitsSystemWindows="true">
 
     <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:paddingTop="24dp"
         android:paddingLeft="24dp"
         android:paddingRight="24dp"
-        android:paddingTop="24dp"
         android:weightSum="1">
 
         <ImageView
@@ -28,10 +28,25 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:visibility="gone">
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/sign_email"
+                android:hint="@string/prompt_email"
+                android:inputType="textEmailAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp">
 
             <android.support.design.widget.TextInputEditText
-                android:id="@+id/input_username"
+                android:id="@+id/sign_username"
                 android:hint="@string/prompt_username"
                 android:inputType="textWebEditText"
                 android:layout_width="match_parent"
@@ -45,39 +60,28 @@
             android:layout_marginBottom="8dp">
 
             <android.support.design.widget.TextInputEditText
-                android:id="@+id/input_password"
+                android:id="@+id/sign_password"
                 android:hint="@string/prompt_password"
                 android:inputType="textPassword"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
         </android.support.design.widget.TextInputLayout>
 
         <android.support.v7.widget.AppCompatButton
-            android:id="@+id/btn_login"
-            android:text="@string/action_sign_in_short"
-            android:layout_width="fill_parent"
+            android:id="@+id/sign_btn"
+            android:text="@string/action_register"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:layout_marginBottom="24dp"
-            android:padding="12dp" />
+            android:layout_marginBottom="24dp" />
 
         <TextView
-            android:id="@+id/link_signup"
-            android:text="@string/action_register"
+            android:id="@+id/link_login"
+            android:text="@string/action_sign_in_question"
             android:textSize="16sp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="24dp"
             android:gravity="center" />
-
-        <android.support.v7.widget.AppCompatButton
-            android:id="@+id/btn_bypass"
-            android:text="Bypass authentication"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="24dp"
-            android:padding="12dp" />
-
     </LinearLayout>
 </ScrollView>
