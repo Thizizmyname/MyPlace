@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         adapter = new RoomAdapter(MainActivity.this, roomList);
-
+        listView.setAdapter(adapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -85,15 +85,43 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+                final String roomName = roomList.get(position).getName();
 
-        listView.setAdapter(adapter);
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setMessage("Do you want to leave "+roomName+"?");
+                builder.setPositiveButton("Leave room", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        roomDB.deleteRoom(roomName);
+                        roomList.remove(position);
+                        adapter.notifyDataSetChanged();
+                        //TODO: Send leave room request
+                    }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Cancel
+                    }
+                });
+                builder.create();
+                builder.show();
+                return true;
+            }
+        });
 
+
+        final FloatingActionsMenu actionMenu = (FloatingActionsMenu) findViewById(R.id.action_menu);
         //OnClick for createRoom
-        final View actionCreate = findViewById(action_create);
+        final FloatingActionButton actionCreate = (FloatingActionButton) findViewById(action_create);
 
         actionCreate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                actionMenu.collapse();
                 LayoutInflater inflater = LayoutInflater.from(context);
                 View dialogView = inflater.inflate(R.layout.dialog_add_room, null);
 
@@ -121,11 +149,12 @@ public class MainActivity extends AppCompatActivity {
 
 
         //OnClick for joinRoom
-        final View actionJoin = findViewById(action_join);
+        final FloatingActionButton actionJoin = (FloatingActionButton) findViewById(action_join);
 
         actionJoin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                actionMenu.collapse();
                 LayoutInflater inflater = LayoutInflater.from(context);
                 View dialogView = inflater.inflate(R.layout.dialog_add_room, null);
 
