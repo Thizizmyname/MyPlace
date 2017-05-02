@@ -63,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, MessageActivity.class);
                 intent.putExtra("Room", roomList.get(position));
                 startActivity(intent);
+                overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
             }
         });
 

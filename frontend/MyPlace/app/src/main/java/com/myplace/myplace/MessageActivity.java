@@ -2,6 +2,7 @@ package com.myplace.myplace;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -82,5 +83,23 @@ public class MessageActivity extends AppCompatActivity {
                 message.setText(null); // Reset input field
             }
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        overridePendingTransition(R.anim.push_right_in, R.anim.push_right_out);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == android.R.id.home) {
+            onBackPressed();  return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }
