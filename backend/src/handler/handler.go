@@ -13,12 +13,24 @@ import (
 
 
 var connections []net.Conn
-
+/*
+00.signup
+args: uname, pass
+response: -
+note: error if uname is taken/ pass to short/ illegal characters/ ...
+side-effect: updates users_db
+*/
 func signup(username string, password string) {
 
 }
 
-
+/*
+01.signin
+args: uname, pass
+response: -
+note: error if uname not in use/ incorrect pass
+side-effect: new messages from all rooms that the client has joined start being pushed to client
+*/
 func signin(username string, password string) /*TOKEN*/ string{
   //throw error
 }
