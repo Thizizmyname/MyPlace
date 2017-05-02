@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
@@ -149,6 +150,9 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String roomName = inputRoom.getText().toString();
+
+                        Toast toast = Toast.makeText(MainActivity.this, "Not yet implemented", Toast.LENGTH_SHORT);
+                        toast.show();
 
                         //TODO: Send request to join an existing room
 
