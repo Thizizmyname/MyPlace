@@ -2,9 +2,9 @@ package main
 
 import (
     "net"
-//    "fmt"
+    "fmt"
   //"time"
-//  "bufio"
+    "bufio"
 //  "log"
 //  "reflect"
   //"data" //importera denna när vi ska implementera databasen
@@ -14,11 +14,38 @@ import (
 var Users []User
 var Rooms []Room
 
-//var connections []net.Conn
+/*
+Denna funktion ska användas för att ta emot en response från en klient
+Just nu ligger det ett anrop för att den ska parsa meddelandet som den får in, men det kan bytas ut det med.
+Den är inte färdigställd alls så allt från argument till bodyn kan förändras
+Mer rimligt att detta funkar som en void-funktion och skicka vidare stringen till parsern istället för att returnera en string
+*/
+func recieveRequest(clientConnection net.Conn) string{
+  for {
+    clientRequestRaw,err := bufio.NewReader(clientConnection).ReadString('\n')
+    if err!=nil {
+      //clientRequestParsed := PARSE_FUNCTION_FROM_MARTIN(clientRequestRaw)
+      clientRequestParsed := clientRequestRaw //TA BORT DENNA RADEN NÄR PARSE_FUNCTION_FROM_MARTIN finns
+      return clientRequestParsed
+    } else {
+      //Kanske lämpligt att skicka tillbaka ett svar att det gick dåligt
+    }
+  }
+  return ""
+}
+
+//Denna funktion ska användas för att skicka en response till en klient
+//Den är inte färdigställd alls så allt från argument till bodyn kan förändras
+func respondClient(clientConnection net.Conn, msg string){
+  fmt.Fprintf(clientConnection,msg)
+}
 
 
 func handler(connection net.Conn, gochan chan string){
-	Users,Rooms,_ = loadDBs()
+  //Placeholder
+  for {
+
+  }
 }
 
 func getUser(username string) User{
@@ -98,7 +125,7 @@ func joinRoom(roomId string, username string){
 }
 
 func leaveRoom(username string, roomId string) {
-/*
+/* Uppdatera både användaren och rummet
 * workingUser := myplaceutils.getUser(username)
 * workingRoom := getRoom(roomId)
 * workingUser.LeaveRoom(workingRoom)
