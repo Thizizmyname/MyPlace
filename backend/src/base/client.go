@@ -25,7 +25,6 @@ func main() {
 	// err är nil om allt gick bra, annars inte nil
 	tcpLAddr,_ := net.ResolveTCPAddr("tcp","127.0.0.1:1337")
 	conn, err := net.DialTCP("tcp",nil,tcpLAddr) //localhost och port 1337
-	
     if err != nil { //om något gick fel 
 		//Handle errors
 		log.Fatal(err)

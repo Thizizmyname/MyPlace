@@ -8,7 +8,7 @@ import (
 //  "log"
 //  "reflect"
   //"data" //importera denna när vi ska implementera databasen
-//  "myplaceutils"
+	//"myplaceutils"
 )
 
 
@@ -16,6 +16,7 @@ import (
 Denna funktion ska användas för att ta emot en response från en klient
 Just nu ligger det ett anrop för att den ska parsa meddelandet som den får in, men det kan bytas ut det med.
 Den är inte färdigställd alls så allt från argument till bodyn kan förändras
+Mer rimligt att detta funkar som en void-funktion och skicka vidare stringen till parsern istället för att returnera en string
 */
 func recieveRequest(clientConnection net.Conn) string{
   for {
@@ -41,16 +42,29 @@ func respondClient(clientConnection net.Conn, msg string){
 func handler(connection net.Conn, gochan chan string){
   //Placeholder
   for {
-    
+
   }
 }
 
 
+/*
+00.signup
+args: uname, pass
+response: -
+note: error if uname is taken/ pass to short/ illegal characters/ ...
+side-effect: updates users_db
+*/
 func signup(username string, password string) {
 
 }
 
-
+/*
+01.signin
+args: uname, pass
+response: -
+note: error if uname not in use/ incorrect pass
+side-effect: new messages from all rooms that the client has joined start being pushed to client
+*/
 func signin(username string, password string) /*TOKEN*/ string{
   //throw error
   return ""
@@ -70,16 +84,20 @@ func getNewerMessages(roomID string, msgID string) []string{
   return []string{"ho","ho","ho"}
 }
 
-func joinRoom(roomId string, username string) {
+func joinRoom(roomId string, username string){
 // Exempel på hur det kan se ut.	
-//	workingUser = getUser(username)
-//	workingRoom = getRoom(roomId)
+//	workingUser := myplaceutils.getUser(username)
+//	workingRoom := getRoom(roomId)
 //	workingUser.JoinRoom(workingRoom)
 	
 }
 
 func leaveRoom(username string, roomId string) {
-  //
+/*
+* workingUser := myplaceutils.getUser(username)
+* workingRoom := getRoom(roomId)
+* workingUser.LeaveRoom(workingRoom)
+*/
 }
 
 func createRoom(username string, roomName string) {
