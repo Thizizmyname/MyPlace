@@ -1,7 +1,5 @@
-{
+01{
     "requestID": 0000,
-    "requestIndex": 1,
-    "requestName": "signin",
 
     "userName": "NAME",
     "password": "PASSWORD"

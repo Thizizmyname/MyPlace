@@ -1,13 +1,11 @@
-{
-    "requestResponse": 0000,
-    "requestIndex": 1,
-    "requestName": "signin",
+01{
+    "RequestID": 0000,
 
-    "signinResponse": true/false,
-    "errorReason": "RESPONSE"
+    "Result": true/false,
+    "errorCause": "RESPONSE"
 }
 
 // Possible responses:
 // ""   - No error
-// "noUser"     - Username not in use
-// "incorrPass" - incorrect password given
+// "uname"     - Username not in use
+// "Pass" - incorrect password given

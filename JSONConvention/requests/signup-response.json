@@ -1,13 +1,10 @@
-{
-    "requestResponse": 0000,
-    "requestIndex": 0,
-    "requestName": "signup",
+00{
+    "RequestID": 0000,
 
-    "signupResponse": true/false,
-    "errorReason": "RESPONSE"
+    "Result": true/false,
+    "ErrorCause": "RESPONSE"
 }
 
 // Possible responses:
 // ""   - Username accepted and constructed
 // "taken"  - Username taken and need to come up with a new
-// "error"  - Undefined error

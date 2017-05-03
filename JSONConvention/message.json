@@ -1,6 +1,7 @@
 {
-    "id": 123,
-    "date": "YYYY-MM-DD-HH-MM-SS-MS",
+    "MsgID": 123,
+    "RoomID": 0000,
+    "time": int64, //UnixTime
     "from": "Username",
     "content": "MsgString"
 }
