@@ -2,6 +2,8 @@ package com.myplace.myplace;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -49,14 +51,19 @@ public class MessageActivity extends AppCompatActivity {
         ListView listMessages = (ListView) findViewById(R.id.listMessages);
         listMessages.setAdapter(messageAdapter);
 
+        final EditText message = (EditText) findViewById(R.id.editMsg);
+
         final ImageButton btnSend = (ImageButton) findViewById(R.id.btnSendMsg);
+        btnSend.setEnabled(false);
+
+        message.addTextChangedListener(onTextChanged);
+
 
         btnSend.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                final EditText message = (EditText) findViewById(R.id.editMsg);
-                String messageString = message.getText().toString();
 
                 // Check if message is empty
+                String messageString = message.getText().toString();
                 if (messageString.matches("")) {
                     if (messageEmptyToast != null) messageEmptyToast.cancel();
                     messageEmptyToast = Toast.makeText(MessageActivity.this, R.string.message_empty, Toast.LENGTH_SHORT);
@@ -84,6 +91,28 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
     }
+
+    private TextWatcher onTextChanged = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            ImageButton btnSend = (ImageButton) findViewById(R.id.btnSendMsg);
+            if(s.length() > 0) {
+                btnSend.setEnabled(true);
+            } else {
+                btnSend.setEnabled(false);
+            }
+        }
+    };
 
     @Override
     public void onBackPressed() {
