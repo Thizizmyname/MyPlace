@@ -4,6 +4,9 @@ import(
 	"net"
 	"testing"
 	"log"
+
+//	"fmt"
+	"reflect"
 )
 
 func establishConnection() *net.TCPConn{
@@ -27,6 +30,11 @@ func TestJoinRoom(t *testing.T){
 
 	conn := establishConnection()
 	workingUser, workingRoom := createStuff(conn)
+
+	if len(workingUser.Rooms) != 0 {
+		t.Error("The user isn't empty")
+	}
+
 	workingUser.JoinRoom(&workingRoom)
 
 	if len(workingUser.Rooms) != 1 {
@@ -55,7 +63,41 @@ func TestAddUser(t *testing.T){
 	if len(workingRoom.Users) != 2 {
 		t.Error("Failed to update the room with 2 users ")
 	}
+	
+}
 
+
+func TestRemoveUser(t *testing.T){
+	conn := establishConnection()
+	room := CreateRoom("Room 213")
+	user0 := CreateUser("user0", "polis", conn)
+	user1 := CreateUser("user1", "skurk", conn)
+	user2 := CreateUser("user2", "inbrottstjuv", conn)
+
+	room.AddUser(&user0)
+	room.AddUser(&user1)
+	room.AddUser(&user2)
+
+	if room.Users[2].Uname != "user2"{
+		t.Error("The last elmenent isn't equal to user2")
+	}
+
+	room.RemoveUser(&user2)
+
+	// Kollar om user2 finns kvar i room.Users
+	for _, elem := range room.Users{
+		if reflect.DeepEqual(elem,&user2){
+			t.Error("Didn't succed to remove the user")
+		}
+	}
+
+	room.RemoveUser(&user0)
+
+	for _, elem := range room.Users{
+		if reflect.DeepEqual(elem,&user0){
+			t.Error("Didn't succed to remove the user")
+		}
+	}
 	
 }
 
