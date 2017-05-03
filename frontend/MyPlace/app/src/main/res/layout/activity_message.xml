@@ -38,6 +38,7 @@
         <EditText
             android:id="@+id/editMsg"
             android:hint="@string/message_hint"
+            android:inputType="textCapSentences|textAutoCorrect"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="match_parent"
@@ -46,9 +47,10 @@
         <ImageButton
             android:id="@+id/btnSendMsg"
             android:contentDescription="@string/send_button"
-            android:src="@android:drawable/ic_menu_send"
+            android:src="@drawable/send_button_selector"
             android:background="@android:color/transparent"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent" />
+            android:scaleType="fitXY"
+            android:layout_width="30dp"
+            android:layout_height="30dp" />
     </LinearLayout>
 </RelativeLayout>

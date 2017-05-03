@@ -75,6 +75,25 @@ class RoomDbHelper extends SQLiteOpenHelper {
 
     }
 
+    void deleteRoom(String roomName) {
+        roomName = roomName.replace(" ", "_");
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_ROOMS, "roomname = ?", new String[]{roomName});
+        db.close();
+
+        dropTable(roomName);
+    }
+
+    private void dropTable(String roomName) {
+        roomName = roomName.replace(" ", "_");
+        String query = "DROP TABLE IF EXISTS " + roomName;
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL(query);
+        db.close();
+    }
+
     void addMessage(String roomName, Message message) {
         roomName = roomName.replace(" ", "_");
 
