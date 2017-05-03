@@ -66,7 +66,11 @@ func joinRoom(roomId string, username string){
 }
 
 func leaveRoom(username string, roomId string) {
-  //
+/*
+* workingUser := myplaceutils.getUser(username)
+* workingRoom := getRoom(roomId)
+* workingUser.LeaveRoom(workingRoom)
+*/
 }
 
 func createRoom(username string, roomName string) {

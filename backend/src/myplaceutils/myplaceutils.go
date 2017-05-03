@@ -5,34 +5,35 @@ import (
     "fmt"
     "net"
     "time"
+	"reflect"
 )
 
 
 type User struct {
 	Uname string
 	Pass string
-	Rooms []Room
-  ActiveConn net.Conn
+	Rooms []*Room
+	ActiveConn net.Conn
 }
 
 type Room struct {
 	Name string
 	NoPeople int
-  Users []User
-	Messages []Message
+	Users []*User
+	Messages []Message // Den kanske ska innehålla pekare till meddelanden?
 }
 
 type Message struct {
 	Time time.Time
 	Uname string
 	Body string
-  ID string
+	ID string
 }
 
 //User method for binding the current connection to the user
-func (u *User)NewConnection(c net.Conn) bool {
-  u.ActiveConn = c
-  return true
+func (u *User)BindConnection(c net.Conn) bool {
+	u.ActiveConn = c
+	return true
 }
 
 //Method for room to add a new message
@@ -40,36 +41,51 @@ func (u *User)NewConnection(c net.Conn) bool {
 
 
 //Room method to add a user to the room
-func (r Room)AddUser(u User){
-  r.Users = append(r.Users, u)
-  u.JoinRoom(r)
+func (r *Room)AddUser(u *User){
+	r.Users = append(r.Users, u)
+	r.NoPeople ++
+	u.JoinRoom(r)
 }
 
 
 //User method to add a room to the list of room that the user is part of
-func (u *User)JoinRoom(r Room){
-  u.Rooms = append(u.Rooms, r)
+func (u *User)JoinRoom(r *Room){
+	u.Rooms = append(u.Rooms, r)
+
+}
+
+// Removes the user from the room
+func (r *Room)RemoveUser(u *User){
+	for i, elem := range r.Users{
+		if reflect.DeepEqual(elem,u){
+			r.Users = r.Users[:i+copy(r.Users[i:], r.Users[i+1:])]
+		}
+
+	}
+}
+// Removes the room from the user
+func (u *User)LeaveRoom(){
 
 }
 
 func CreateUser(uname string, pass string, c net.Conn) User{
-  u := User{}
-  u.Uname = uname
-  u.Pass = pass
-  u.Rooms = []Room{}
-  u.ActiveConn = c
-  return u
+	u := User{}
+	u.Uname = uname
+	u.Pass = pass
+	u.Rooms = []*Room{}
+	u.ActiveConn = c
+	return u
 }
 
 //Purpose: returns an array of the names of the rooms the user is in
 //Use:    When the client software wants to list rooms, passing a name as an argument for joining a room, etc.
 //Tested: NO
 func (u User)showRooms() []string{
-  var roomNames []string
-  for _,r := range u.Rooms {
-    roomNames = append(roomNames, r.Name)
-  }
-  return roomNames
+	var roomNames []string
+	for _,r := range u.Rooms {
+		roomNames = append(roomNames, r.Name)
+	}
+	return roomNames
 }
 
 
@@ -77,19 +93,35 @@ func (u User)showRooms() []string{
 //Use: To create a new chat room
 //Tested: No
 func CreateRoom(name string) Room{
-  return Room{name, 0, []User{}, []Message{}}
+	return Room{name, 0, []*User{}, []Message{}}
 }
 
 //Purpose: returns an array of the names of the users in the room
 //Use: when the client or server wishes to know what users are in the room
 //Tested: NO
 func ShowUsers(r Room) []string{
-  var users []string
-  for _,u := range r.Users {
-    fmt.Printf("%v\n",u.Uname)
-    users = append(users, u.Uname)
-  }
-  return users
+	var users []string
+	for _,u := range r.Users {
+		fmt.Printf("%v\n",u.Uname)
+		users = append(users, u.Uname)
+	}
+	return users
+}
+
+func getUser(name string){
+
+}
+
+func getRoom(id string){
+
+}
+
+func getOlderMessages(){
+
+}
+
+func getNewerMessages(){
+
 }
 
 //Jävligt snyggt
