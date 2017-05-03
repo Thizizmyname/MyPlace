@@ -1,29 +1,36 @@
 package com.myplace.myplace;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.Toast;
+
+import com.getbase.floatingactionbutton.FloatingActionButton;
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
+
 
 import java.util.ArrayList;
 
+import static com.myplace.myplace.R.id.action_create;
+import static com.myplace.myplace.R.id.action_join;
+
 public class MainActivity extends AppCompatActivity {
 
+    final Context context = this;
     Toolbar toolbar;
     ListView listView;
     ArrayList<Room> roomList = null;
-    public static RoomAdapter adapter = null;
+    public static RoomAdapter roomAdapter = null;
 
     //Defines the database
     public static RoomDbHelper roomDB = null;
@@ -43,21 +50,13 @@ public class MainActivity extends AppCompatActivity {
 
         //TODO Tests for viewing temporary items
 
-        Room r1 = new Room("Rum 1");
-        roomDB.createRoomTable(r1.getName());
-
-
-        Room r2 = new Room("Rum 2");
-        roomDB.createRoomTable(r2.getName());
-
-
         roomList = roomDB.getRoomList();
 
         listView = (ListView) findViewById(R.id.roomList);
 
 
-        adapter = new RoomAdapter(MainActivity.this, roomList);
-
+        roomAdapter = new RoomAdapter(MainActivity.this, roomList);
+        listView.setAdapter(roomAdapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -66,20 +65,109 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, MessageActivity.class);
                 intent.putExtra("Room", roomList.get(position));
                 startActivity(intent);
+                overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+            }
+        });
+
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+                final String roomName = roomList.get(position).getName();
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setMessage("Do you want to leave "+roomName+"?");
+                builder.setPositiveButton(R.string.leave_room, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        roomDB.deleteRoom(roomName);
+                        roomList.remove(position);
+                        roomAdapter.notifyDataSetChanged();
+                        //TODO: Send leave room request
+                    }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Cancel
+                    }
+                });
+                builder.create();
+                builder.show();
+                return true;
             }
         });
 
 
-        listView.setAdapter(adapter);
+        final FloatingActionsMenu actionMenu = (FloatingActionsMenu) findViewById(R.id.action_menu);
+        //OnClick for createRoom
+        final FloatingActionButton actionCreate = (FloatingActionButton) findViewById(action_create);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        actionCreate.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+            public void onClick(View v) {
+                actionMenu.collapse();
+                LayoutInflater inflater = LayoutInflater.from(context);
+                View dialogView = inflater.inflate(R.layout.dialog_add_room, null);
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setView(dialogView);
+
+                final EditText inputRoom = (EditText) dialogView.findViewById(R.id.input_room);
+
+                builder.setPositiveButton(R.string.create_room, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String roomName = inputRoom.getText().toString();
+
+                        //TODO: Send request to create a new room
+                        Room room = new Room(roomName);
+                        roomAdapter.add(room);
+                        roomDB.createRoomTable(roomName);
+                    }
+                });
+
+                AlertDialog alertDialog = builder.create();
+                alertDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+                alertDialog.show();
+            }
+        });
+
+
+        //OnClick for joinRoom
+        final FloatingActionButton actionJoin = (FloatingActionButton) findViewById(action_join);
+
+        actionJoin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                actionMenu.collapse();
+                LayoutInflater inflater = LayoutInflater.from(context);
+                View dialogView = inflater.inflate(R.layout.dialog_add_room, null);
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setView(dialogView);
+
+                final EditText inputRoom = (EditText) dialogView.findViewById(R.id.input_room);
+
+                builder.setPositiveButton(R.string.join_room, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String roomName = inputRoom.getText().toString();
+
+                        Toast toast = Toast.makeText(MainActivity.this, R.string.not_yet_implemented, Toast.LENGTH_SHORT);
+                        toast.show();
+
+                        //TODO: Send request to join an existing room
+
+                    }
+                });
+
+                AlertDialog alertDialog = builder.create();
+
+                alertDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+                alertDialog.show();
             }
         });
     }
+
 
 }

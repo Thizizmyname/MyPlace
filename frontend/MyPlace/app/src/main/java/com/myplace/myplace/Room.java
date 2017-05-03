@@ -12,7 +12,6 @@ import java.util.ArrayList;
 
 public class Room implements Parcelable {
     private String roomName;
-    public ArrayList<Message> messageList = new ArrayList<>();
 
     public Room(String name) {
         roomName = name;
@@ -40,10 +39,6 @@ public class Room implements Parcelable {
 
     public String getLastMessage() {
         return MainActivity.roomDB.getLastMessage(this.roomName);
-    }
-
-    public void addMessage(Message msg) {
-        messageList.add(msg);
     }
 
     @Override

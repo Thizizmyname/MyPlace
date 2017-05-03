@@ -1,10 +1,10 @@
 package com.myplace.myplace;
 
-import android.content.ContentValues;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -51,14 +51,19 @@ public class MessageActivity extends AppCompatActivity {
         ListView listMessages = (ListView) findViewById(R.id.listMessages);
         listMessages.setAdapter(messageAdapter);
 
+        final EditText message = (EditText) findViewById(R.id.editMsg);
+
         final ImageButton btnSend = (ImageButton) findViewById(R.id.btnSendMsg);
+        btnSend.setEnabled(false);
+
+        message.addTextChangedListener(onTextChanged);
+
 
         btnSend.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                final EditText message = (EditText) findViewById(R.id.editMsg);
-                String messageString = message.getText().toString();
 
                 // Check if message is empty
+                String messageString = message.getText().toString();
                 if (messageString.matches("")) {
                     if (messageEmptyToast != null) messageEmptyToast.cancel();
                     messageEmptyToast = Toast.makeText(MessageActivity.this, R.string.message_empty, Toast.LENGTH_SHORT);
@@ -77,7 +82,7 @@ public class MessageActivity extends AppCompatActivity {
                 messageAdapter.add(newMessage);
 
                 roomDB.addMessage(roomName, newMessage);
-                MainActivity.adapter.notifyDataSetChanged();
+                MainActivity.roomAdapter.notifyDataSetChanged();
 
                 //TEST FOR INCOMING AND OUTGOING
                 ++a; //TEST
@@ -85,5 +90,45 @@ public class MessageActivity extends AppCompatActivity {
                 message.setText(null); // Reset input field
             }
         });
+    }
+
+    private TextWatcher onTextChanged = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            ImageButton btnSend = (ImageButton) findViewById(R.id.btnSendMsg);
+            if(s.length() > 0) {
+                btnSend.setEnabled(true);
+            } else {
+                btnSend.setEnabled(false);
+            }
+        }
+    };
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        overridePendingTransition(R.anim.push_right_in, R.anim.push_right_out);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == android.R.id.home) {
+            onBackPressed();  return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }
