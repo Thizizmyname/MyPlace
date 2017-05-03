@@ -91,10 +91,40 @@ func TestRemoveUser(t *testing.T){
 	}
 
 	room.RemoveUser(&user0)
-
+	// Kollar om om user 0 finns kvar i rummet 
 	for _, elem := range room.Users{
 		if reflect.DeepEqual(elem,&user0){
 			t.Error("Didn't succed to remove the user")
+		}
+	}
+
+	if room.NoPeople != 1 {
+		t.Error("Number of users aren't equal to 1")
+	}
+	
+}
+
+
+func TestLeaveRoom(t *testing.T){
+	conn := establishConnection()
+	user := CreateUser("MainUser", "1337", conn)
+	room0 := CreateRoom("Room 0")
+	room1 := CreateRoom("Room 1")
+	room2 := CreateRoom("Room 2")
+	
+	user.JoinRoom(&room0)
+	user.JoinRoom(&room1)
+	user.JoinRoom(&room2)
+
+	if len(user.Rooms) != 3 {
+		t.Error("Failed to update the user, user failed to join  213")
+	}
+
+	user.RemoveRoom(&room0)
+
+	for _, elem := range user.Rooms{
+		if reflect.DeepEqual(elem,&room0){
+			t.Error("Didn't succed to remove the room from the user")
 		}
 	}
 	

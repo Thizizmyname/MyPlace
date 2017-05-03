@@ -66,7 +66,7 @@ func joinRoom(roomId string, username string){
 }
 
 func leaveRoom(username string, roomId string) {
-/*
+/* Uppdatera både användaren och rummet
 * workingUser := myplaceutils.getUser(username)
 * workingRoom := getRoom(roomId)
 * workingUser.LeaveRoom(workingRoom)

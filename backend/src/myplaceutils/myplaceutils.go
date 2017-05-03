@@ -60,11 +60,19 @@ func (r *Room)RemoveUser(u *User){
 		if reflect.DeepEqual(elem,u){
 			r.Users = r.Users[:i+copy(r.Users[i:], r.Users[i+1:])]
 		}
-
 	}
+	r.NoPeople --
+	
+	
 }
 // Removes the room from the user
-func (u *User)LeaveRoom(){
+func (u *User)RemoveRoom(r *Room){
+	for i, elem := range u.Rooms{
+		if reflect.DeepEqual(elem,r){
+			u.Rooms = u.Rooms[:i+copy(u.Rooms[i:], u.Rooms[i+1:])]
+		}
+
+	}
 
 }
 
