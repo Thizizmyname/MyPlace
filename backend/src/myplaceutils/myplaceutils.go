@@ -12,13 +12,13 @@ type User struct {
 	Uname string
 	Pass string
 	Rooms []Room
-  ActiveConn net.Conn
+	ActiveConn net.Conn
 }
 
 type Room struct {
 	Name string
 	NoPeople int
-  Users []User
+	Users []User
 	Messages []Message
 }
 
@@ -26,7 +26,7 @@ type Message struct {
 	Time time.Time
 	Uname string
 	Body string
-  ID string
+	ID string
 }
 
 //User method for binding the current connection to the user
@@ -48,7 +48,7 @@ func (r Room)AddUser(u User){
 
 //User method to add a room to the list of room that the user is part of
 func (u *User)JoinRoom(r Room){
-  u.Rooms = append(u.Rooms, r)
+	u.Rooms = append(u.Rooms, r)
 
 }
 
