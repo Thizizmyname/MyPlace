@@ -1,7 +1,7 @@
 {
-    "MsgID": 123,
-    "RoomID": 0000,
-    "time": int64, //UnixTime
-    "from": "Username",
-    "content": "MsgString"
+    "MsgID": 0000,
+    "roomID": 0000,
+    "fromUser": "POSTERNAME",
+    "Time": int64, // UnixTime
+    "body": "MESSAGE"
 }

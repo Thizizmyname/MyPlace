@@ -7,4 +7,4 @@
 
 // Possible responses:
 // ""   - Username accepted and constructed
-// "taken"  - Username taken and need to come up with a new
+// "takenUserName"  - Username taken and need to come up with a new
