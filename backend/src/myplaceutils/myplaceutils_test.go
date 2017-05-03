@@ -101,3 +101,17 @@ func TestRemoveUser(t *testing.T){
 	
 }
 
+func TestGetUser(t *testing.T){
+	conn := establishConnection()
+	usr0 := CreateUser("ussr0", "pass", conn)
+
+	usr1 := GetUser("ussr0")
+
+	if !(reflect.DeepEqual(usr0,usr1)){
+		t.Error("User not in global User list")
+	}
+
+	//usr2 := GetUser("user0")
+
+	
+}

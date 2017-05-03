@@ -11,34 +11,11 @@ import (
 	//"myplaceutils"
 )
 
-var Users []User
-var Rooms []Room
-
 //var connections []net.Conn
 
 
 func handler(connection net.Conn, gochan chan string){
-	Users,Rooms,_ = loadDBs()
-}
-
-func getUser(username string) User{
-
-	for _,x := range User{
-		if x.Uname == username{
-			return x
-		}
-	}
-	return nil
-}
-
-func getRoom(roomname string) Room{
-
-	for _,x := range Rooms{
-		if x.Name == roomname{
-			return x
-		}
-	}
-	return nil
+	
 }
 
 /*
@@ -73,15 +50,13 @@ func getOlderMessages(roomID string, msgID string) []string /*kanske någon anna
 	// ska användarna eller rummen ha channel i sig?
 	//ME
 
-	r := getRoom(roomID)
-	m := getMsg(r, msgID)
+
 
 	return []string{"he","he","he"}
 }
 
 func getNewerMessages(roomID string, msgID string) []string{
 
-	r := getRoom(roomID)
 	
 	//
 	//ME
@@ -106,10 +81,10 @@ func leaveRoom(username string, roomId string) {
 }
 
 func createRoom(username string, roomName string) {	
-	r := CreateRoom(roomName)
-	u := getUser(username)
-	r.addUser(u) 
-	return r
+	//r := CreateRoom(roomName)
+	//u := getUser(username)
+	//r.addUser(u) 
+	//return r
 }
 
 func postMessage(username string, roomID string, text string){

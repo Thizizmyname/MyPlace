@@ -1,16 +1,16 @@
 package myplaceutils
 
 import (
-    //"strings"
     "fmt"
     "net"
     "time"
 	"reflect"
+	"data"
 )
 
 
 type User struct {
-	Uname strin
+	Uname string
 	Pass string
 	Rooms []*Room
 	ActiveConn net.Conn
@@ -29,6 +29,23 @@ type Message struct {
 	Body string
 	ID string
 }
+
+var Users []User
+var Rooms []Room
+
+// Loads DB to global variables
+func Initialize(){
+	Users,Rooms,err = LoadDbs()
+	//ska hantera erro på nåt sätt
+}
+
+//Store global variables to DB
+func Terminate(){
+	err := StoreDBs(Users,Rooms)
+	//ska hantera error på nåt sätt
+}
+
+
 
 //User method for binding the current connection to the user
 func (u *User)BindConnection(c net.Conn) bool {
@@ -74,6 +91,8 @@ func CreateUser(uname string, pass string, c net.Conn) User{
 	u.Pass = pass
 	u.Rooms = []*Room{}
 	u.ActiveConn = c
+
+	Users = append(Users,&u)
 	return u
 }
 
@@ -108,12 +127,25 @@ func ShowUsers(r Room) []string{
 	return users
 }
 
-func getUser(name string){
+func GetUser(name string) *User{
 
+	for _,x := range Users{
+		usr := *x
+		if usr.Uname == name{
+			return x
+		}
+	}
+	panic("can't find user")
 }
 
-func getRoom(id string){
+func getRoom(id string) Room{
 
+	for _,x := range Rooms{
+		if x.Name == id{
+			return x
+		}
+	}
+	panic("can't find user")	
 }
 
 func getOlderMessages(){
