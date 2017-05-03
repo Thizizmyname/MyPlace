@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
                 builder.setMessage("Do you want to leave "+roomName+"?");
-                builder.setPositiveButton("Leave room", new DialogInterface.OnClickListener() {
+                builder.setPositiveButton(R.string.leave_room, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         roomDB.deleteRoom(roomName);
@@ -114,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
 
                 final EditText inputRoom = (EditText) dialogView.findViewById(R.id.input_room);
 
-                builder.setPositiveButton("Create room", new DialogInterface.OnClickListener() {
+                builder.setPositiveButton(R.string.create_room, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String roomName = inputRoom.getText().toString();
@@ -148,12 +148,12 @@ public class MainActivity extends AppCompatActivity {
 
                 final EditText inputRoom = (EditText) dialogView.findViewById(R.id.input_room);
 
-                builder.setPositiveButton("Join room", new DialogInterface.OnClickListener() {
+                builder.setPositiveButton(R.string.join_room, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String roomName = inputRoom.getText().toString();
 
-                        Toast toast = Toast.makeText(MainActivity.this, "Not yet implemented", Toast.LENGTH_SHORT);
+                        Toast toast = Toast.makeText(MainActivity.this, R.string.not_yet_implemented, Toast.LENGTH_SHORT);
                         toast.show();
 
                         //TODO: Send request to join an existing room
