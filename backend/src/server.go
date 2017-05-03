@@ -70,13 +70,13 @@ func main() {
 
   Info.Println("Creating a listener")
 
-  tcpLAddr,_ := net.ResolveTCPAddr("tcp","127.0.0.1:1337")
-  listener, err := net.ListenTCP("tcp",tcpLAddr)
+  tcpAddress,_ := net.ResolveTCPAddr("tcp","127.0.0.1:1337")
+  listener, err := net.ListenTCP("tcp",tcpAddress)
 
   if err != nil {
     log.Fatalf("Error starting server: %v\n", err)
   } else {
     listenLoop(listener)
   }
-  
+
 }

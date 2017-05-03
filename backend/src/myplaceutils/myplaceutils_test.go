@@ -4,7 +4,8 @@ import (
 	"log"
 	"net"
 	"testing"
-	//	"fmt"
+	"log"
+//	"fmt"
 	"reflect"
 )
 
@@ -29,6 +30,7 @@ func TestJoinRoom(t *testing.T) {
 
 	conn := establishConnection()
 	workingUser, workingRoom := createStuff(conn)
+
 	if len(workingUser.Rooms) != 0 {
 		t.Error("The user isn't empty")
 	}
@@ -134,3 +136,4 @@ func TestLeaveRoom(t *testing.T) {
 	}
 
 }
+
