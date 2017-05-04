@@ -44,8 +44,15 @@ func handler(connection net.Conn, gochan chan string){
   //Placeholder
   for {
     request ,err := bufio.NewReader(connection).ReadString('\n')
-    if err!=nil {
-      parsedRequest := myplaceutils.parse(request)
+    if err==nil {
+      myplaceutils.Info.Printf("Request: %v", request)
+      //parsedRequest := myplaceutils.Parse(request) //DESSA TVÅ RADER SKA BYTAS UT
+      //handleRequest(parsedRequest) 
+    } else {
+      myplaceutils.Error.Println("User disconnected from the server")
+      
+      myplaceutils.RemoveConnection(connection)
+      break
     }
   }
 }

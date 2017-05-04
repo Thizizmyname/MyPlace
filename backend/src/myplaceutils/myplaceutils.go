@@ -6,7 +6,7 @@ import (
 	"net"
 	"reflect"
 	"time"
-  "log"
+	"log"
 )
 
 
@@ -16,6 +16,7 @@ var (
     Info    *log.Logger
     Warning *log.Logger
     Error   *log.Logger
+    connections []net.Conn
 )
 
 type User struct {
@@ -23,6 +24,7 @@ type User struct {
 	Pass       string
 	Rooms      []*Room
 	ActiveConn net.Conn
+  //token   string
 }
 
 type Room struct {
@@ -37,6 +39,19 @@ type Message struct {
 	Uname string
 	Body  string
 	ID    string
+}
+
+
+
+//MÅSTE HA MUTEX LOCK I DENNA FUNKTIONEN
+//MÅSTE KOLLA SÅ INTE newConnection REDAN FINNS I connections
+func AddConnection(newConnection net.Conn) {
+  connections = append(connections, newConnection)
+}
+
+//Kolla genom arrayen om den finns innan den försöker ta bort den
+func RemoveConnection(connection net.Conn) bool{
+  return true
 }
 
 //User method for binding the current connection to the user
