@@ -39,10 +39,7 @@ public class SignupActivity extends AppCompatActivity {
         _linkLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-                startActivity(intent);
-                finish();
-                overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+                onBackPressed();
             }
         });
     }
@@ -62,22 +59,23 @@ public class SignupActivity extends AppCompatActivity {
         progressDialog.setMessage("Creating Account...");
         progressDialog.show();
 
-        String user = _userSign.getText().toString();
-        String email = _emailSign.getText().toString();
+        final String username = _userSign.getText().toString();
         String password = _passSign.getText().toString();
 
         new android.os.Handler().postDelayed(
                 new Runnable() {
                     public void run() {
-                        onSignUpSucces();
+                        onSignUpSuccess(username);
                         progressDialog.dismiss();
                     }
                 }, 3000);
     }
 
-    public void onSignUpSucces() {
+    public void onSignUpSuccess(String username) {
         _btnSign.setEnabled(true);
-        setResult(RESULT_OK, null);
+        Intent result = new Intent();
+        result.putExtra("username", username);
+        setResult(RESULT_OK, result);
         finish();
     }
 
@@ -90,17 +88,9 @@ public class SignupActivity extends AppCompatActivity {
     public boolean validate() {
         Boolean valid = true;
 
-        String email = _emailSign.getText().toString();
         String username = _userSign.getText().toString();
         String password = _passSign.getText().toString();
 
-        if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            _emailSign.setText("Enter a vaild Email");
-            valid = false;
-        }
-        else{
-            _emailSign.setError(null);
-        }
 
         if(username.isEmpty() || username.length() <= 3) {
             _userSign.setText("Username must be longer than 3 characters");
@@ -119,5 +109,11 @@ public class SignupActivity extends AppCompatActivity {
         }
 
         return valid;
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
     }
 }

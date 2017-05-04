@@ -1,6 +1,7 @@
 package com.myplace.myplace;
 
 import android.app.ProgressDialog;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -18,6 +19,7 @@ import butterknife.Bind;
 public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
     private static final int REQUEST_SIGNUP = 0;
+    public static final String LOGIN_PREFS = "login_prefs";
 
     @Bind(R.id.input_username) EditText _username;
     @Bind(R.id.input_password) EditText _password;
@@ -32,11 +34,20 @@ public class LoginActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         getSupportActionBar().hide();
 
+        SharedPreferences loginInfo = getSharedPreferences(LOGIN_PREFS, 0);
+        boolean loggedIn = loginInfo.getBoolean("loggedIn", false);
+        _username.setText(String.valueOf(loggedIn));
+        if(loggedIn == true){
+            Intent startMain = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(startMain);
+            finish();
+        }
+
         _bypass.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                onLoginSuccess();
+                onLoginSuccess("");
             }
         });
 
@@ -53,7 +64,6 @@ public class LoginActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), SignupActivity.class);
                 startActivityForResult(intent, REQUEST_SIGNUP);
-                finish();
                 overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
             }
         });
@@ -74,13 +84,13 @@ public class LoginActivity extends AppCompatActivity {
         progressDialog.setMessage("Authenticating");
         progressDialog.show();
 
-        String username = _username.getText().toString();
+        final String username = _username.getText().toString();
         String password = _password.getText().toString();
 
         new android.os.Handler().postDelayed(
                 new Runnable() {
                     public void run() {
-                        onLoginSuccess();
+                        onLoginSuccess(username);
                         progressDialog.dismiss();
                     }
                 }, 3000);
@@ -88,22 +98,27 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_SIGNUP) {
             if (resultCode == RESULT_OK) {
-
-                this.finish();
+                String username = data.getStringExtra("username");
+                onLoginSuccess(username);
             }
         }
     }
 
     @Override
     public void onBackPressed() {
-        // Disable going back to the MainActivity
         moveTaskToBack(true);
     }
 
-    public void onLoginSuccess() {
+    public void onLoginSuccess(String username) {
         _login.setEnabled(true);
+        SharedPreferences loginInfo = getSharedPreferences(LOGIN_PREFS, 0);
+        SharedPreferences.Editor loginEdit = loginInfo.edit();
+        loginEdit.putBoolean("loggedIn", true);
+        loginEdit.putString("username", username);
+        loginEdit.commit();
         Intent startMain = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(startMain);
         finish();
