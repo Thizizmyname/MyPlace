@@ -6,6 +6,16 @@ import (
 	"net"
 	"reflect"
 	"time"
+  "log"
+)
+
+
+//Dessa loggers är till för att kunna anropas från alla programfiler.
+var (
+    Trace   *log.Logger
+    Info    *log.Logger
+    Warning *log.Logger
+    Error   *log.Logger
 )
 
 type User struct {

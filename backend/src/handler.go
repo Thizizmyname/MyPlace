@@ -8,7 +8,7 @@ import (
 //  "log"
 //  "reflect"
   //"data" //importera denna när vi ska implementera databasen
-	//"myplaceutils"
+	"myplaceutils"
 )
 
 
@@ -40,9 +40,13 @@ func respondClient(clientConnection net.Conn, msg string){
 
 
 func handler(connection net.Conn, gochan chan string){
+  myplaceutils.Info.Printf("Reached handler, connection %v\n",connection)
   //Placeholder
   for {
-
+    request ,err := bufio.NewReader(connection).ReadString('\n')
+    if err!=nil {
+      parsedRequest := myplaceutils.parse(request)
+    }
   }
 }
 
