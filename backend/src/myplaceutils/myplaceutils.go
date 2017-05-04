@@ -5,7 +5,20 @@ import (
     "net"
     "time"
 	"reflect"
-	//"data"
+	"time"
+	"log"
+)
+
+
+//Dessa loggers är till för att kunna anropas från alla programfiler.
+var (
+    Trace   *log.Logger
+    Info    *log.Logger
+    Warning *log.Logger
+    Error   *log.Logger
+    connections []net.Conn
+	Users []*User
+	Rooms []*Room
 )
 
 type User struct {
@@ -13,6 +26,7 @@ type User struct {
 	Pass string
 	Rooms []*Room
 	ActiveConn net.Conn
+  //token   string
 }
 
 type Room struct {
@@ -29,10 +43,8 @@ type Message struct {
 	ID    string
 }
 
-var Users []*User
-var Rooms []*Room
-
-/*
+/* 
+Funkar inte för att data.go är trasig
 // Loads DB to global variables
 func Initialize(){
 	Users,Rooms,err = LoadDbs()
@@ -46,6 +58,18 @@ func Terminate(){
 }
 */
 
+
+
+//MÅSTE HA MUTEX LOCK I DENNA FUNKTIONEN
+//MÅSTE KOLLA SÅ INTE newConnection REDAN FINNS I connections
+func AddConnection(newConnection net.Conn) {
+  connections = append(connections, newConnection)
+}
+
+//Kolla genom arrayen om den finns innan den försöker ta bort den
+func RemoveConnection(connection net.Conn) bool{
+  return true
+}
 
 //User method for binding the current connection to the user
 func (u *User) BindConnection(c net.Conn) bool {
@@ -159,6 +183,14 @@ func GetRoom(id string) *Room{
 		}
 	}
 	panic("can't find room")	
+}
+
+func DestroyUser(id Srting){
+
+}
+
+func DestroyRoom(id string){
+	
 }
 
 func getOlderMessages() {
