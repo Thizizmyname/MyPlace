@@ -38,20 +38,28 @@ func (u *User) BindConnection(c net.Conn) bool {
 //Method for room to add a new message
 //func (r Room)NewMessage(u User, msgbody string)
 
-//Room method to add a user to the room
+// Purpose: Room method to add a user to the room (Field Users)
+// Use: When a user joins the room, this method updates so the user is a member of the room.
+// Argument: The User that joins the room.
+// Tested: Yes 
 func (r *Room) AddUser(u *User) {
 	r.Users = append(r.Users, u)
 	r.NoPeople++
-	u.JoinRoom(r)
 }
 
-//User method to add a room to the list of room that the user is part of
+// Purpose: User method to add a room to the list of room that the user is part of (Field Rooms)
+// Use: When the user joins a room this method updates the user. Argument: The room that the user want to join
+// Argument: The room the user joins.
+// Tested: Yes
 func (u *User) JoinRoom(r *Room) {
 	u.Rooms = append(u.Rooms, r)
 
 }
 
-// Removes the user from the room
+// Purpose:  Removes the user from the room (Field Users)
+// Use: When a user wants to leave a room this method updates the specific room so the user isn't a member of the room.
+// Argument: The user who leaves the room
+// Tested: Yes
 func (r *Room) RemoveUser(u *User) {
 	for i, elem := range r.Users {
 		if reflect.DeepEqual(elem, u) {
@@ -62,7 +70,10 @@ func (r *Room) RemoveUser(u *User) {
 
 }
 
-// Removes the room from the user
+// Purpose:  Removes the room from the user (Field Rooms)
+// Use: When the user wants to leave a room this method updates the specific user
+// Argument: The room the user leaves 
+// Tested: Yes (a few tests)
 func (u *User) RemoveRoom(r *Room) {
 	for i, elem := range u.Rooms {
 		if reflect.DeepEqual(elem, r) {
