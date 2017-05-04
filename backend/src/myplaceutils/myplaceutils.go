@@ -5,7 +5,7 @@ import (
     "net"
     "time"
 	"reflect"
-	"data"
+	//"data"
 )
 
 type User struct {
@@ -29,9 +29,10 @@ type Message struct {
 	ID    string
 }
 
-var Users []User
-var Rooms []Room
+var Users []*User
+var Rooms []*Room
 
+/*
 // Loads DB to global variables
 func Initialize(){
 	Users,Rooms,err = LoadDbs()
@@ -43,7 +44,7 @@ func Terminate(){
 	err := StoreDBs(Users,Rooms)
 	//ska hantera error på nåt sätt
 }
-
+*/
 
 
 //User method for binding the current connection to the user
@@ -90,7 +91,7 @@ func (u *User) RemoveRoom(r *Room) {
 
 }
 
-func CreateUser(uname string, pass string, c net.Conn) User {
+func CreateUser(uname string, pass string, c net.Conn) *User {
 	u := User{}
 	u.Uname = uname
 	u.Pass = pass
@@ -98,7 +99,8 @@ func CreateUser(uname string, pass string, c net.Conn) User {
 	u.ActiveConn = c
 
 	Users = append(Users,&u)
-	return u
+
+	return &u
 }
 
 //Purpose: returns an array of the names of the rooms the user is in
@@ -115,8 +117,16 @@ func (u User) showRooms() []string {
 //Purpose: Creating a new room
 //Use: To create a new chat room
 //Tested: No
-func CreateRoom(name string) Room {
-	return Room{name, 0, []*User{}, []Message{}}
+func CreateRoom(name string) *Room {
+	r := Room{}
+	r.Name = name
+	r.NoPeople = 0
+	r.Users = []*User{}
+	r.Messages = []Message{}
+
+	Rooms = append(Rooms, &r)
+	
+	return &r
 }
 
 //Purpose: returns an array of the names of the users in the room
@@ -131,25 +141,24 @@ func ShowUsers(r Room) []string {
 	return users
 }
 
-func GetUser(name string) *User{
+func GetUser(id string) *User{
 	
 	for _,x := range Users{
-		usr := *x
-		if usr.Uname == name{
+		if x.Uname == id{
 			return x
 		}
 	}
 	panic("can't find user")
 }
 
-func getRoom(id string) Room{
+func GetRoom(id string) *Room{
 
 	for _,x := range Rooms{
 		if x.Name == id{
 			return x
 		}
 	}
-	panic("can't find user")	
+	panic("can't find room")	
 }
 
 func getOlderMessages() {

@@ -1,7 +1,6 @@
 package myplaceutils
 
 import (
-	"log"
 	"net"
 	"testing"
 	"log"
@@ -20,7 +19,7 @@ func establishConnection() *net.TCPConn {
 
 }
 
-func createStuff(conn *net.TCPConn) (User, Room) {
+func createStuff(conn *net.TCPConn) (*User, *Room) {
 	workingRoom := CreateRoom("Room 213")
 	workingUser := CreateUser("Alex", "1337", conn)
 	return workingUser, workingRoom
@@ -35,7 +34,7 @@ func TestJoinRoom(t *testing.T) {
 		t.Error("The user isn't empty")
 	}
 
-	workingUser.JoinRoom(&workingRoom)
+	workingUser.JoinRoom(workingRoom)
 
 	if len(workingUser.Rooms) != 1 {
 		t.Error("Failed to update the user, user failed to join  213")
@@ -51,14 +50,14 @@ func TestAddUser(t *testing.T) {
 		t.Error("Working room isn't empty from the start")
 	}
 
-	workingRoom.AddUser(&user1)
+	workingRoom.AddUser(user1)
 
 	if len(workingRoom.Users) != 1 {
 		t.Error("Failed to update the room, Room failed to get the user Alex ")
 	}
 
 	user2 := CreateUser("Erik", "1821", conn)
-	workingRoom.AddUser(&user2)
+	workingRoom.AddUser(user2)
 
 	if len(workingRoom.Users) != 2 {
 		t.Error("Failed to update the room with 2 users ")
@@ -73,27 +72,27 @@ func TestRemoveUser(t *testing.T) {
 	user1 := CreateUser("user1", "skurk", conn)
 	user2 := CreateUser("user2", "inbrottstjuv", conn)
 
-	room.AddUser(&user0)
-	room.AddUser(&user1)
-	room.AddUser(&user2)
+	room.AddUser(user0)
+	room.AddUser(user1)
+	room.AddUser(user2)
 
 	if room.Users[2].Uname != "user2" {
 		t.Error("The last elmenent isn't equal to user2")
 	}
 
-	room.RemoveUser(&user2)
+	room.RemoveUser(user2)
 
 	// Kollar om user2 finns kvar i room.Users
 	for _, elem := range room.Users {
-		if reflect.DeepEqual(elem, &user2) {
+		if reflect.DeepEqual(elem, user2) {
 			t.Error("Didn't succed to remove the user")
 		}
 	}
 
-	room.RemoveUser(&user0)
+	room.RemoveUser(user0)
 	// Kollar om om user 0 finns kvar i rummet
 	for _, elem := range room.Users {
-		if reflect.DeepEqual(elem, &user0) {
+		if reflect.DeepEqual(elem, user0) {
 			t.Error("Didn't succed to remove the user")
 		}
 	}
@@ -111,31 +110,33 @@ func TestLeaveRoom(t *testing.T) {
 	room1 := CreateRoom("Room 1")
 	room2 := CreateRoom("Room 2")
 
-	user.JoinRoom(&room0)
-	user.JoinRoom(&room1)
-	user.JoinRoom(&room2)
+	user.JoinRoom(room0)
+	user.JoinRoom(room1)
+	user.JoinRoom(room2)
 
 	if len(user.Rooms) != 3 {
 		t.Error("Failed to update the user, user failed to join  213")
 	}
 
-	user.RemoveRoom(&room0)
+	user.RemoveRoom(room0)
 
 	for _, elem := range user.Rooms {
-		if reflect.DeepEqual(elem, &room0) {
+		if reflect.DeepEqual(elem, room0) {
 			t.Error("Didn't succed to remove the room from the user")
 		}
 	}
 
-	user.RemoveRoom(&room2)
+	user.RemoveRoom(room2)
 
 	for _, elem := range user.Rooms {
-		if reflect.DeepEqual(elem, &room2) {
+		if reflect.DeepEqual(elem, room2) {
 			t.Error("Didn't succed to remove the room from the user")
 		}
 	}
 
 }
+
+
 
 func TestGetUser(t *testing.T){
 	conn := establishConnection()
@@ -143,11 +144,17 @@ func TestGetUser(t *testing.T){
 
 	usr1 := GetUser("ussr0")
 
+	usr1.Uname = "fisk" // kollar så att namnet ändras för alla instanser av usr
+	
 	if !(reflect.DeepEqual(usr0,usr1)){
 		t.Error("User not in global User list")
 	}
 
-	//usr2 := GetUser("user0")
+	usr2 := GetUser("MainUser")
 
-	
+	if (reflect.DeepEqual(usr1,usr2)){
+		t.Error("Different users are the same")
+	}
 }
+
+
