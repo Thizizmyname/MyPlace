@@ -8,6 +8,7 @@ import android.util.Log;
 
 import android.content.Intent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -24,32 +25,23 @@ public class LoginActivity extends AppCompatActivity {
     @Bind(R.id.input_username) EditText _username;
     @Bind(R.id.input_password) EditText _password;
     @Bind(R.id.btn_login) Button _login;
-    @Bind(R.id.btn_bypass) Button _bypass;
     @Bind(R.id.link_signup) TextView _signup;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
         getSupportActionBar().hide();
 
         SharedPreferences loginInfo = getSharedPreferences(LOGIN_PREFS, 0);
         boolean loggedIn = loginInfo.getBoolean("loggedIn", false);
-        _username.setText(String.valueOf(loggedIn));
         if(loggedIn == true){
             Intent startMain = new Intent(getApplicationContext(), MainActivity.class);
             startActivity(startMain);
             finish();
         }
-
-        _bypass.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                onLoginSuccess("");
-            }
-        });
 
         _login.setOnClickListener(new View.OnClickListener() {
 
@@ -137,20 +129,18 @@ public class LoginActivity extends AppCompatActivity {
         String password = _password.getText().toString();
 
         if (username.isEmpty() || username.length() <= 3) {
-            _username.setError("Username must be atleast 4 characteters");
+            _username.setError(getResources().getString(R.string.error_incorrect_username));
             valid = false;
         } else {
             _username.setError(null);
         }
 
         if (password.isEmpty() || password.length() <= 5) {
-            _password.setError("Password must be atleast 6 characters");
+            _password.setError(getResources().getString(R.string.error_incorrect_password));
             valid = false;
         } else {
             _password.setError(null);
         }
-
         return valid;
     }
-
 }
