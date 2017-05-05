@@ -42,7 +42,7 @@ func (u *User) BindConnection(c net.Conn) bool {
 // Use: When a user joins the room, this method updates so the user is a member of the room.
 // Argument: The User that joins the room.
 // Tested: Yes 
-func (r *Room) AddUser(u *User) {
+func (r *Room) AddUser(u *User, done chan bool) {
 	r.Users = append(r.Users, u)
 	r.NoPeople++
 }

@@ -5,8 +5,9 @@ import (
 	"net"
 	"testing"
 //  "log"
-//	"fmt"
+	"fmt"
 	"reflect"
+	"strconv"
 )
 
 func establishConnection() *net.TCPConn {
@@ -42,7 +43,7 @@ func TestJoinRoom(t *testing.T) {
 	}
 
 }
-
+/*
 func TestAddUser(t *testing.T) {
 	conn := establishConnection()
 	user1, workingRoom := createStuff(conn)
@@ -103,7 +104,7 @@ func TestRemoveUser(t *testing.T) {
 	}
 
 }
-
+*/
 func TestLeaveRoom(t *testing.T) {
 	conn := establishConnection()
 	user := CreateUser("MainUser", "1337", conn)
@@ -114,7 +115,7 @@ func TestLeaveRoom(t *testing.T) {
 	user.JoinRoom(&room0)
 	user.JoinRoom(&room1)
 	user.JoinRoom(&room2)
-
+	
 	if len(user.Rooms) != 3 {
 		t.Error("Failed to update the user, user failed to join  213")
 	}
@@ -137,3 +138,30 @@ func TestLeaveRoom(t *testing.T) {
 
 }
 
+
+func TestGoroutinesAddUser(t *testing.T) {
+
+	done := make(chan bool)
+
+	room := CreateRoom("203")
+
+	users := make([]User,1000)
+
+	conn := establishConnection()
+
+	hj := CreateUser("Alex","1337",conn)
+	
+	fmt.Printf("Typen av en user är : %v\n", reflect.TypeOf(users[1]))
+	fmt.Printf("Typen av en hj är : %v\n", reflect.TypeOf(hj))
+	for i :=0;i<1000;i++ {
+		users[i] = CreateUser(strconv.Itoa(i),"password",conn)
+	}
+
+	fmt.Printf("Typen av en user är : %v\n", reflect.TypeOf(users[1]))
+
+	for _,elem := range users {
+		go room.AddUser(&elem,done)
+	}
+
+	
+}
