@@ -9,12 +9,6 @@ import (
     "myplaceutils"
 )
 
-var (
-    Trace   *log.Logger
-    Info    *log.Logger
-    Warning *log.Logger
-    Error   *log.Logger
-)
 
 var connections []net.Conn
 
@@ -26,11 +20,11 @@ func listenLoop(listener net.Listener) {
     channel := make(chan string)
     newConnection, errs := listener.Accept()
     if errs != nil { //Här testas igen om det blev något fel
-      Error.Printf("Connection Accept error: %v\n",errs)
+      myplaceutils.Error.Printf("Connection Accept error: %v\n",errs)
     } else { //om inga fel inträffade, kan vi gå vidare
       connections = append(connections, newConnection)
-      Info.Printf("Connection established: %v\n", newConnection)
-      Info.Printf("New channel\n", channel)
+      myplaceutils.Info.Printf("Connection established: %v\n", newConnection)
+      myplaceutils.Info.Printf("New channel\n", channel)
       go handler(newConnection, channel)
     }
   }
@@ -43,19 +37,19 @@ func InitLoggers(
     warningHandle io.Writer,
     errorHandle io.Writer,
     ) {
-    Trace = log.New(traceHandle,
+    myplaceutils.Trace = log.New(traceHandle,
         "TRACE: ",
         log.Ldate|log.Ltime|log.Lshortfile)
 
-    Info = log.New(infoHandle,
+    myplaceutils.Info = log.New(infoHandle,
         "INFO: ",
         log.Ldate|log.Ltime|log.Lshortfile)
 
-    Warning = log.New(warningHandle,
+    myplaceutils.Warning = log.New(warningHandle,
         "WARNING: ",
         log.Ldate|log.Ltime|log.Lshortfile)
 
-    Error = log.New(errorHandle,
+    myplaceutils.Error = log.New(errorHandle,
         "ERROR: ",
         log.Ldate|log.Ltime|log.Lshortfile)
 }
@@ -68,13 +62,13 @@ func main() {
   InitLoggers(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
   log.Println("Initialization complete")
 
-  Info.Println("Creating a listener")
+  myplaceutils.Info.Println("Creating a listener")
 
   tcpAddress,_ := net.ResolveTCPAddr("tcp","127.0.0.1:1337")
   listener, err := net.ListenTCP("tcp",tcpAddress)
 
   if err != nil {
-    log.Fatalf("Error starting server: %v\n", err)
+    log.Fatalf("myplaceutils.Error starting server: %v\n", err)
   } else {
     listenLoop(listener)
   }
