@@ -4,7 +4,7 @@ import (
 	"net"
 	"testing"
 	"log"
-//	"fmt"
+	"fmt"
 	"reflect"
 )
 
@@ -26,7 +26,6 @@ func createStuff(conn *net.TCPConn) (*User, *Room) {
 }
 
 func TestJoinRoom(t *testing.T) {
-
 	conn := establishConnection()
 	workingUser, workingRoom := createStuff(conn)
 
@@ -133,7 +132,6 @@ func TestLeaveRoom(t *testing.T) {
 			t.Error("Didn't succed to remove the room from the user")
 		}
 	}
-
 }
 
 
@@ -157,4 +155,13 @@ func TestGetUser(t *testing.T){
 	}
 }
 
+func TestShowUsers(t *testing.T){
 
+	usr0 := GetUser("MainUser")
+
+	rooms := usr0.ShowRooms()
+
+	for x,y := range rooms{
+		fmt.Printf("%d,%s",x,y)
+	}
+}

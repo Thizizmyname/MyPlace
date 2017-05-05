@@ -10,10 +10,6 @@ import (
   //"data" //importera denna när vi ska implementera databasen
 	"myplaceutils"
 )
-
-var Users []User
-var Rooms []Room
-
 /*
 Denna funktion ska användas för att ta emot en response från en klient
 Just nu ligger det ett anrop för att den ska parsa meddelandet som den får in, men det kan bytas ut det med.
@@ -31,7 +27,6 @@ func recieveRequest(clientConnection net.Conn) string{
       //Kanske lämpligt att skicka tillbaka ett svar att det gick dåligt
     }
   }
-  return ""
 }
 
 //Denna funktion ska användas för att skicka en response till en klient
@@ -90,9 +85,6 @@ func getRooms(username string /*Kanske byta mot user-type*/) []string{
 func getOlderMessages(roomID string, msgID string) []string /*kanske någon annan returntype*/ {
 	// ska användarna eller rummen ha channel i sig?
 	//ME
-
-
-
 	return []string{"he","he","he"}
 }
 
@@ -123,8 +115,8 @@ func leaveRoom(username string, roomId string) {
 
 func createRoom(username string, roomName string) {	
 	//r := CreateRoom(roomName)
-	//u := getUser(username)
-	//r.addUser(u) 
+	//u := GetUser(username)
+	//r.AddUser(u) 
 	//return r
 }
 

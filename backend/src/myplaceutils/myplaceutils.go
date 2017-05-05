@@ -5,7 +5,6 @@ import (
     "net"
     "time"
 	"reflect"
-	"time"
 	"log"
 )
 
@@ -110,9 +109,7 @@ func (u *User) RemoveRoom(r *Room) {
 		if reflect.DeepEqual(elem, r) {
 			u.Rooms = u.Rooms[:i+copy(u.Rooms[i:], u.Rooms[i+1:])]
 		}
-
 	}
-
 }
 
 func CreateUser(uname string, pass string, c net.Conn) *User {
@@ -130,7 +127,7 @@ func CreateUser(uname string, pass string, c net.Conn) *User {
 //Purpose: returns an array of the names of the rooms the user is in
 //Use:    When the client software wants to list rooms, passing a name as an argument for joining a room, etc.
 //Tested: NO
-func (u User) showRooms() []string {
+func (u *User) ShowRooms() []string {
 	var roomNames []string
 	for _, r := range u.Rooms {
 		roomNames = append(roomNames, r.Name)
@@ -185,7 +182,7 @@ func GetRoom(id string) *Room{
 	panic("can't find room")	
 }
 
-func DestroyUser(id Srting){
+func DestroyUser(id string){
 
 }
 
