@@ -30,8 +30,8 @@
     <string name="title_add_room">Add Room</string>
     <string name="button_add_room">Add room</string>
     <string name="enter_a_room_name">Enter a room name.</string>
-    <string name="create_room">Create room</string>
-    <string name="join_room">Join room</string>
+    <string name="create_room">Create room </string>
+    <string name="join_room">Join room </string>
     <string name="not_yet_implemented">Not yet implemented</string>
     <string name="leave_room">Leave room</string>
 </resources>
