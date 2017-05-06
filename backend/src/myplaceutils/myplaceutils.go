@@ -1,11 +1,10 @@
 package myplaceutils
 
 import (
-	//"strings"
-	"fmt"
-	"net"
+    "fmt"
+    "net"
+    "time"
 	"reflect"
-	"time"
 	"log"
 )
 
@@ -17,12 +16,14 @@ var (
     Warning *log.Logger
     Error   *log.Logger
     connections []net.Conn
+	Users []*User
+	Rooms []*Room
 )
 
 type User struct {
-	Uname      string
-	Pass       string
-	Rooms      []*Room
+	Uname string
+	Pass string
+	Rooms []*Room
 	ActiveConn net.Conn
   //token   string
 }
@@ -40,6 +41,21 @@ type Message struct {
 	Body  string
 	ID    string
 }
+
+/* 
+Funkar inte för att data.go är trasig
+// Loads DB to global variables
+func Initialize(){
+	Users,Rooms,err = LoadDbs()
+	//ska hantera erro på nåt sätt
+}
+
+//Store global variables to DB
+func Terminate(){
+	err := StoreDBs(Users,Rooms)
+	//ska hantera error på nåt sätt
+}
+*/
 
 
 
@@ -93,24 +109,25 @@ func (u *User) RemoveRoom(r *Room) {
 		if reflect.DeepEqual(elem, r) {
 			u.Rooms = u.Rooms[:i+copy(u.Rooms[i:], u.Rooms[i+1:])]
 		}
-
 	}
-
 }
 
-func CreateUser(uname string, pass string, c net.Conn) User {
+func CreateUser(uname string, pass string, c net.Conn) *User {
 	u := User{}
 	u.Uname = uname
 	u.Pass = pass
 	u.Rooms = []*Room{}
 	u.ActiveConn = c
-	return u
+
+	Users = append(Users,&u)
+
+	return &u
 }
 
 //Purpose: returns an array of the names of the rooms the user is in
 //Use:    When the client software wants to list rooms, passing a name as an argument for joining a room, etc.
 //Tested: NO
-func (u User) showRooms() []string {
+func (u *User) ShowRooms() []string {
 	var roomNames []string
 	for _, r := range u.Rooms {
 		roomNames = append(roomNames, r.Name)
@@ -121,8 +138,16 @@ func (u User) showRooms() []string {
 //Purpose: Creating a new room
 //Use: To create a new chat room
 //Tested: No
-func CreateRoom(name string) Room {
-	return Room{name, 0, []*User{}, []Message{}}
+func CreateRoom(name string) *Room {
+	r := Room{}
+	r.Name = name
+	r.NoPeople = 0
+	r.Users = []*User{}
+	r.Messages = []Message{}
+
+	Rooms = append(Rooms, &r)
+	
+	return &r
 }
 
 //Purpose: returns an array of the names of the users in the room
@@ -137,12 +162,32 @@ func ShowUsers(r Room) []string {
 	return users
 }
 
-func getUser(name string) {
+func GetUser(id string) *User{
+	
+	for _,x := range Users{
+		if x.Uname == id{
+			return x
+		}
+	}
+	panic("can't find user")
+}
+
+func GetRoom(id string) *Room{
+
+	for _,x := range Rooms{
+		if x.Name == id{
+			return x
+		}
+	}
+	panic("can't find room")	
+}
+
+func DestroyUser(id string){
 
 }
 
-func getRoom(id string) {
-
+func DestroyRoom(id string){
+	
 }
 
 func getOlderMessages() {
