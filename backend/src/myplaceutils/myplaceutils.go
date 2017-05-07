@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"log"
 	"sync"
+	"strings"
 )
 
 
@@ -109,25 +110,30 @@ func (u *User) JoinRoom(r *Room) {
 // Purpose:  Removes a user from the room (Field Users)
 // Use: When a user wants to leave a room this method updates the specific room so the user isn't a member of the room.
 // Argument: The user who leaves the room
+// Return: True if it succeeds to remove a user from the room, else false
 // Tested: Yes
-func (r *Room) RemoveUser(u *User) {
+func (r *Room) RemoveUser(u *User) bool {
 	r.mux.Lock()
-	defer r.mux.Unlock()
+	defer r.mux.Unlock() //NOTIS: Varför behöver man inte ha lås här?
 	for i, elem := range r.Users {
 		if reflect.DeepEqual(elem, u) {
 			r.Users = r.Users[:i+copy(r.Users[i:], r.Users[i+1:])]
+			r.NoPeople--
+			return true
 		}
 	}
-	r.NoPeople--
 
+	return false
 }
 
 // Purpose:  Removes the room from the user (Field Rooms)
 // Use: When the user wants to leave a room this method updates the specific user
 // Argument: The room the user leaves
-// Return: True if it succeds to remove a room from the user, else false
+// Return: True if it succeeds to remove a room from the user, else false
 // Tested: Yes (a few tests)
 func (u *User) RemoveRoom(r *Room) bool {
+	r.mux.Lock()
+	defer r.mux.Unlock() //NOTIS: Varför behöver man inte ha lås här?
 	for i, elem := range u.Rooms {
 		if reflect.DeepEqual(elem, r) {
 			u.Rooms = u.Rooms[:i+copy(u.Rooms[i:], u.Rooms[i+1:])]
@@ -222,6 +228,21 @@ func getOlderMessages() {
 
 func getNewerMessages() {
 
+}
+
+// Retunerar true om det namnet är ledigt
+func CheckUsername(username string)bool {
+	for _,elem := range GlobalUsers {
+		if strings.Compare(elem.Uname,username) == 0 {
+			return false
+		}		
+	}
+	return true
+}
+
+// Check for illegal characters
+func CheckCharacters(userName string) bool{
+	return true
 }
 
 //Jävligt snyggt
