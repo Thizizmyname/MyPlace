@@ -16,8 +16,8 @@ var (
     Warning *log.Logger
     Error   *log.Logger
     connections []net.Conn
-	Users []*User
-	Rooms []*Room
+	GlobalUsers []*User
+	GlobalRooms []*Room
 )
 
 type User struct {
@@ -132,7 +132,7 @@ func CreateUser(uname string, pass string, c net.Conn) *User {
 	u.Rooms = []*Room{}
 	u.ActiveConn = c
 
-	Users = append(Users,&u)
+	GlobalUsers = append(GlobalUsers,&u)
 
 	return &u
 }
@@ -158,7 +158,7 @@ func CreateRoom(name string) *Room {
 	r.Users = []*User{}
 	r.Messages = []Message{}
 
-	Rooms = append(Rooms, &r)
+	GlobalRooms = append(GlobalRooms, &r)
 	
 	return &r
 }
