@@ -68,8 +68,10 @@ func (u *User) BindConnection(c net.Conn) bool {
 // Argument: The User that joins the room.
 // Tested: Yes 
 func (r *Room) AddUser(u *User, done chan bool) {
+	
 	r.Users = append(r.Users, u)
 	r.NoPeople++
+	done <- true
 }
 
 // Purpose: User method to add a room to the list of room that the user is part of (Field Rooms)

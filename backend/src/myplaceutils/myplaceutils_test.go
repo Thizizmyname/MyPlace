@@ -163,5 +163,6 @@ func TestGoroutinesAddUser(t *testing.T) {
 		go room.AddUser(&elem,done)
 	}
 
+	<-done
 	
 }
