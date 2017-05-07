@@ -10,8 +10,6 @@ import (
   //"data" //importera denna när vi ska implementera databasen
 	"myplaceutils"
 )
-
-
 /*
 Denna funktion ska användas för att ta emot en response från en klient
 Just nu ligger det ett anrop för att den ska parsa meddelandet som den får in, men det kan bytas ut det med.
@@ -29,7 +27,6 @@ func recieveRequest(clientConnection net.Conn) string{
       //Kanske lämpligt att skicka tillbaka ett svar att det gick dåligt
     }
   }
-  return ""
 }
 
 //Denna funktion ska användas för att skicka en response till en klient
@@ -57,7 +54,6 @@ func handler(connection net.Conn, gochan chan string){
   }
 }
 
-
 /*
 00.signup
 args: uname, pass
@@ -82,16 +78,22 @@ func signin(username string, password string) /*TOKEN*/ string{
 }
 
 func getRooms(username string /*Kanske byta mot user-type*/) []string{
-  return []string{"h","a","ha"}
+	
+	return []string{"h","a","ha"}
 }
 
 func getOlderMessages(roomID string, msgID string) []string /*kanske någon annan returntype*/ {
-  //
-  return []string{"he","he","he"}
+	// ska användarna eller rummen ha channel i sig?
+	//ME
+	return []string{"he","he","he"}
 }
 
 func getNewerMessages(roomID string, msgID string) []string{
-  //
+
+	
+	//
+	//ME
+	// vet inte riktigt hur denna ska funka.
   return []string{"ho","ho","ho"}
 }
 
@@ -111,8 +113,11 @@ func leaveRoom(username string, roomId string) {
 */
 }
 
-func createRoom(username string, roomName string) {
-  //
+func createRoom(username string, roomName string) {	
+	//r := CreateRoom(roomName)
+	//u := GetUser(username)
+	//r.AddUser(u) 
+	//return r
 }
 
 func postMessage(username string, roomID string, text string){
