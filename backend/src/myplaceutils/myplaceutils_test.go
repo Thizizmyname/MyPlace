@@ -41,7 +41,7 @@ func TestJoinRoom(t *testing.T) {
 	}
 
 }
-/*
+
 func TestAddUser(t *testing.T) {
 	conn := establishConnection()
 	user1, workingRoom := createStuff(conn)
@@ -102,27 +102,33 @@ func TestRemoveUser(t *testing.T) {
 	}
 
 }
-*/
-func TestLeaveRoom(t *testing.T) {
+
+func TestRemoveRoom(t *testing.T) {
 	conn := establishConnection()
 	user := CreateUser("MainUser", "1337", conn)
 	room0 := CreateRoom("Room 0")
 	room1 := CreateRoom("Room 1")
 	room2 := CreateRoom("Room 2")
 
+
+	if user.RemoveRoom(room0) {
+		
+	}
+
+	
 	user.JoinRoom(room0)
 	user.JoinRoom(room1)
 	user.JoinRoom(room2)
 
 	if len(user.Rooms) != 3 {
-		t.Error("Failed to update the user, user failed to join  213")
+		t.Error("Failed to update the user")
 	}
 
 	user.RemoveRoom(room0)
 
 	for _, elem := range user.Rooms {
 		if reflect.DeepEqual(elem, room0) {
-			t.Error("Didn't succed to remove the room from the user")
+			t.Error("Didn't succed to remove room0 from the user")
 		}
 	}
 
@@ -130,7 +136,7 @@ func TestLeaveRoom(t *testing.T) {
 
 	for _, elem := range user.Rooms {
 		if reflect.DeepEqual(elem, room2) {
-			t.Error("Didn't succed to remove the room from the user")
+			t.Error("Didn't succed to remove room2 from the user")
 		}
 	}
 }
@@ -156,9 +162,20 @@ func TestGetUser(t *testing.T){
 	}
 }
 
-func TestGoroutinesAddUser(t *testing.T) {
 
-	done := make(chan bool)
+func TestShowUsers(t *testing.T){
+	
+	usr0 := GetUser("MainUser")
+
+	rooms := usr0.ShowRooms()
+
+	
+	for x,y := range rooms{
+		fmt.Printf("%d,%s",x,y)
+	}
+}
+
+func TestGoroutinesAddUser(t *testing.T) {
 
 	room := CreateRoom("203")
 
@@ -166,31 +183,56 @@ func TestGoroutinesAddUser(t *testing.T) {
 
 	conn := establishConnection()
 
-	hj := CreateUser("Alex","1337",conn)
-	
-	fmt.Printf("Typen av en user är : %v\n", reflect.TypeOf(users[1]))
-	fmt.Printf("Typen av en hj är : %v\n", reflect.TypeOf(hj))
+
 	for i :=0;i<1000;i++ {
 		users[i] = CreateUser(strconv.Itoa(i),"password",conn)
 	}
 
-	fmt.Printf("Typen av en user är : %v\n", reflect.TypeOf(users[1]))
 
 	for _,elem := range users {
-		go room.AddUser(elem,done)
+		go room.AddUser(elem)
 	}
-
-	<-done
 
 }
 
-func TestShowUsers(t *testing.T){
+func TestGoroutinesJoinRoom(t *testing.T) {
+	conn := establishConnection()
+	
+	user := CreateUser("MainUser","Hejsan", conn)
 
-	usr0 := GetUser("MainUser")
+	rooms := make([]*Room,1000)
 
-	rooms := usr0.ShowRooms()
 
-	for x,y := range rooms{
-		fmt.Printf("%d,%s",x,y)
+	for i :=0;i<1000;i++ {
+		rooms[i] = CreateRoom(strconv.Itoa(i))
 	}
+
+
+	for _,elem := range rooms {
+		go user.JoinRoom(elem)
+	}
+
+}
+
+func TestGoroutinesRemoveRoom(t *testing.T) {
+	conn := establishConnection()
+	
+	room := CreateRoom("Room 1337")
+
+	users := make([]*User,1000)
+
+
+	for i :=0;i<1000;i++ {
+		users[i] = CreateUser(strconv.Itoa(i), "TestRemoveRoom", conn)
+	}
+
+
+	for _,elem := range users {
+		go room.RemoveUser(elem)
+	}
+
+	
+
+	
+
 }

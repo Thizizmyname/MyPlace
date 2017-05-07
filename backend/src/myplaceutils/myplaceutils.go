@@ -6,6 +6,7 @@ import (
     "time"
 	"reflect"
 	"log"
+	"sync"
 )
 
 
@@ -25,6 +26,7 @@ type User struct {
 	Pass string
 	Rooms []*Room
 	ActiveConn net.Conn
+	mux sync.Mutex
   //token   string
 }
 
@@ -33,6 +35,8 @@ type Room struct {
 	NoPeople int
 	Users    []*User
 	Messages []Message // Den kanske ska innehålla pekare till meddelanden?
+	mux sync.Mutex
+	
 }
 
 type Message struct {
@@ -83,27 +87,32 @@ func (u *User) BindConnection(c net.Conn) bool {
 // Use: When a user joins the room, this method updates so the user is a member of the room.
 // Argument: The User that joins the room.
 // Tested: Yes 
-func (r *Room) AddUser(u *User, done chan bool) {
-	
+func (r *Room) AddUser(u *User) {
+	r.mux.Lock()
+	defer r.mux.Unlock()
 	r.Users = append(r.Users, u)
 	r.NoPeople++
-	done <- true
+
 }
 
-// Purpose: User method to add a room to the list of room that the user is part of (Field Rooms)
+// Purpose: User method to add a room to the list of rooms that the user is part of (Field Rooms)
 // Use: When the user joins a room this method updates the user. Argument: The room that the user want to join
 // Argument: The room the user joins.
 // Tested: Yes
 func (u *User) JoinRoom(r *Room) {
+	u.mux.Lock()
+	defer u.mux.Unlock()
 	u.Rooms = append(u.Rooms, r)
 
 }
 
-// Purpose:  Removes the user from the room (Field Users)
+// Purpose:  Removes a user from the room (Field Users)
 // Use: When a user wants to leave a room this method updates the specific room so the user isn't a member of the room.
 // Argument: The user who leaves the room
 // Tested: Yes
 func (r *Room) RemoveUser(u *User) {
+	r.mux.Lock()
+	defer r.mux.Unlock()
 	for i, elem := range r.Users {
 		if reflect.DeepEqual(elem, u) {
 			r.Users = r.Users[:i+copy(r.Users[i:], r.Users[i+1:])]
@@ -115,14 +124,18 @@ func (r *Room) RemoveUser(u *User) {
 
 // Purpose:  Removes the room from the user (Field Rooms)
 // Use: When the user wants to leave a room this method updates the specific user
-// Argument: The room the user leaves 
+// Argument: The room the user leaves
+// Return: True if it succeds to remove a room from the user, else false
 // Tested: Yes (a few tests)
-func (u *User) RemoveRoom(r *Room) {
+func (u *User) RemoveRoom(r *Room) bool {
 	for i, elem := range u.Rooms {
 		if reflect.DeepEqual(elem, r) {
 			u.Rooms = u.Rooms[:i+copy(u.Rooms[i:], u.Rooms[i+1:])]
+			return true
 		}
 	}
+
+	return false
 }
 
 func CreateUser(uname string, pass string, c net.Conn) *User {
@@ -177,7 +190,7 @@ func ShowUsers(r Room) []string {
 
 func GetUser(id string) *User{
 	
-	for _,x := range Users{
+	for _,x := range GlobalUsers{
 		if x.Uname == id{
 			return x
 		}
@@ -187,7 +200,7 @@ func GetUser(id string) *User{
 
 func GetRoom(id string) *Room{
 
-	for _,x := range Rooms{
+	for _,x := range GlobalRooms{
 		if x.Name == id{
 			return x
 		}
