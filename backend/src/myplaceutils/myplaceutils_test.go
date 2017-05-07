@@ -72,6 +72,11 @@ func TestRemoveUser(t *testing.T) {
 	user1 := CreateUser("user1", "skurk", conn)
 	user2 := CreateUser("user2", "inbrottstjuv", conn)
 
+	if room.RemoveUser(user0) {
+		t.Error("Error - user0 isn't in the room, shouldn't be able to remove that user")
+	}
+
+	
 	room.AddUser(user0)
 	room.AddUser(user1)
 	room.AddUser(user2)
@@ -112,7 +117,7 @@ func TestRemoveRoom(t *testing.T) {
 
 
 	if user.RemoveRoom(room0) {
-		
+		t.Error("Error - Removed a room which user doesn't have")
 	}
 
 	
@@ -175,6 +180,16 @@ func TestShowUsers(t *testing.T){
 	}
 }
 
+func TestCheckUsername(t *testing.T){
+	conn := establishConnection()
+	user0 := CreateUser("qwerty","hej123",conn)
+
+	if !CheckUsername(user0.Uname) {
+		t.Error("Username allready exists")
+	}	
+
+}
+
 func TestGoroutinesAddUser(t *testing.T) {
 
 	room := CreateRoom("203")
@@ -214,7 +229,7 @@ func TestGoroutinesJoinRoom(t *testing.T) {
 
 }
 
-func TestGoroutinesRemoveRoom(t *testing.T) {
+func TestGoroutinesRemoveUser(t *testing.T) {
 	conn := establishConnection()
 	
 	room := CreateRoom("Room 1337")
@@ -231,8 +246,26 @@ func TestGoroutinesRemoveRoom(t *testing.T) {
 		go room.RemoveUser(elem)
 	}
 
-	
+}
 
+func TestGoroutinesRemoveRoom(t *testing.T) {
+	conn := establishConnection()
 	
+	user := CreateUser("MainUser2", "GoRemoveRoom", conn)
+
+	rooms := make([]*Room,1000)
+
+
+	for i :=0;i<1000;i++ {
+		rooms[i] = CreateRoom(strconv.Itoa(i))
+	}
+
+
+	for _,elem := range rooms {
+		go user.RemoveRoom(elem)
+	}
 
 }
+
+
+
