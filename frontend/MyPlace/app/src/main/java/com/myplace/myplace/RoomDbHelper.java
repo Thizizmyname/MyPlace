@@ -6,13 +6,18 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.myplace.myplace.models.Message;
+import com.myplace.myplace.models.Room;
+
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Created by jesper on 2017-04-26.
  */
 
-class RoomDbHelper extends SQLiteOpenHelper {
+public class RoomDbHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "roomdb";
     private static final int DATABASE_VERSION = 1;
 
@@ -21,7 +26,7 @@ class RoomDbHelper extends SQLiteOpenHelper {
     private static final String TABLE_ROOMS = "roomlist";
 
 
-    RoomDbHelper(Context context) {
+    public RoomDbHelper(Context context) {
         super(context, DATABASE_NAME,null, DATABASE_VERSION);
         this.context = context;
     }
@@ -81,14 +86,14 @@ class RoomDbHelper extends SQLiteOpenHelper {
         ContentValues insertValues = new ContentValues();
         insertValues.put("name", message.getName());
         insertValues.put("message", message.text);
-        insertValues.put("date", message.date);
+        insertValues.put("date", Message.df.format(message.date));
 
         SQLiteDatabase db = this.getWritableDatabase();
         db.insert(roomName, null, insertValues);
         db.close();
     }
 
-    String getLastMessage(String roomName) {
+    public String getLastMessage(String roomName) {
         try {
             roomName = roomName.replace(" ", "_");
 
@@ -140,7 +145,12 @@ class RoomDbHelper extends SQLiteOpenHelper {
             do {
                 String name = c.getString(c.getColumnIndex("name"));
                 String message = c.getString(c.getColumnIndex("message"));
-                String date = c.getString(c.getColumnIndex("date"));
+                Date date = null;
+                try {
+                    date = Message.df.parse(c.getString(c.getColumnIndex("date")));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
 
                 Message newMessage = new Message(name, message, date);
                 list.add(newMessage);

@@ -1,15 +1,15 @@
 package com.myplace.myplace;
 
 import android.content.Context;
-import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.myplace.myplace.models.Message;
+
 import java.util.ArrayList;
-import java.util.TreeSet;
 
 public class MessageAdapter extends ArrayAdapter<Message> {
     private static final int TYPE_INCOMING = 0;
@@ -53,7 +53,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         TextView text = (TextView) convertView.findViewById(R.id.textMessage);
         TextView date = (TextView) convertView.findViewById(R.id.textDate);
 
-        date.setText(message.date);
+        date.setText(Message.df.format(message.date));
         text.setText(message.text);
 
         return convertView;

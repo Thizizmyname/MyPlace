@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.myplace.myplace.models.Room;
+
 import java.util.ArrayList;
 
 /**
@@ -39,7 +41,7 @@ class RoomAdapter extends ArrayAdapter<Room> {
 
         if (room != null) {
             text1.setText(room.getName());
-            text2.setText(room.getLastMessage());
+            text2.setText(room.getLastMessage(getContext()));
         }
 
 
