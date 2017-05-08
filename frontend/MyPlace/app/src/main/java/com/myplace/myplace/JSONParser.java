@@ -23,7 +23,24 @@ public final class JSONParser {
 
     private static int number;
 
+    private static final String KEY_REQUEST_ID = "RequestID";
+    private static final String KEY_USERNAME = "Username";
+    private static final String KEY_PASSWORD = "Password";
+    private static final String KEY_SIGN_ACCEPTANCE = "Result";
+    private static final String KEY_ROOM_ID = "RoomID";
+    private static final String KEY_ROOM_NAME = "RoomName";
+    private static final String KEY_ROOM_ID_ACCEPTED = "RoomIDAccepted";
+    private static final String KEY_ROOM_LIST = "Password";
+    private static final String KEY_ROOM_JOINED = "JoinedRoom";
+    private static final String KEY_USER_LIST = "Users";
+    private static final String KEY_MSG_ID = "MsgID";
+    private static final String KEY_MESSAGE = "Msg";
+    private static final String KEY_MSG_BODY = "Body";
+    private static final String KEY_MSG_LIST = "Messages";
+    private static final String KEY_ERROR_CAUSE = "ErrorCause";
+
     private static final String TWO_CHAR_FORMAT = "%03d";
+    private static final int NO_ID_FOUND = 0;
 
 
 
@@ -37,58 +54,58 @@ public final class JSONParser {
     public static int determineRoomID(String rawString) {
         try {
             JSONObject json = makeProperJsonObject(rawString);
-            return json.getInt("RoomID");
+            return json.getInt(KEY_ROOM_ID);
         } catch (JSONException ignore) {
-            return 0;
+            return NO_ID_FOUND;
         }
     }
 
     public static int determineRequestID(String rawString) {
         try {
             JSONObject json = makeProperJsonObject(rawString);
-            return json.getInt("RequestID");
+            return json.getInt(KEY_REQUEST_ID);
         } catch (JSONException ignore) {
-            return 0;
+            return NO_ID_FOUND;
         }
     }
 
 
     public static String signupRequest(String userName, String password) throws JSONException {
         JSONObject json = constructJSONRequest();
-        json.put("UserName", userName);
-        json.put("Password", password);
+        json.put(KEY_USERNAME, userName);
+        json.put(KEY_PASSWORD, password);
 
         return String.format(TWO_CHAR_FORMAT, SIGN_UP) + json.toString();
     }
 
     public static Boolean signupResponse(String rawString) throws JSONException {
         JSONObject json = makeProperJsonObject(rawString);
-        return json.getBoolean("Result");
+        return json.getBoolean(KEY_SIGN_ACCEPTANCE);
     }
 
     public static String signinRequest(String userName, String password) throws JSONException {
         JSONObject json = constructJSONRequest();
-        json.put("UserName", userName);
-        json.put("Password", password);
+        json.put(KEY_USERNAME, userName);
+        json.put(KEY_PASSWORD, password);
 
         return String.format(TWO_CHAR_FORMAT, SIGN_IN) + json.toString();
     }
 
     public static Boolean signinResponse(String rawString) throws JSONException {
         JSONObject json = makeProperJsonObject(rawString);
-        return json.getBoolean("Result");
+        return json.getBoolean(KEY_SIGN_ACCEPTANCE);
     }
 
     public static String getRoomRequest(String userName) throws JSONException {
         JSONObject json = constructJSONRequest();
-        json.put("UserName", userName);
+        json.put(KEY_USERNAME, userName);
 
         return String.format(TWO_CHAR_FORMAT, GET_ROOMS) + json.toString();
     }
 
     public static ArrayList<Room> getRoomResponse(String rawString) throws JSONException {
         JSONObject json = makeProperJsonObject(rawString);
-        JSONArray jsonRooms = json.getJSONArray("Rooms");
+        JSONArray jsonRooms = json.getJSONArray(KEY_ROOM_LIST);
         ArrayList<Room> rooms = new ArrayList<>(jsonRooms.length());
         for (int i = 0; i < jsonRooms.length(); i++) {
             JSONObject r = jsonRooms.getJSONObject(i);
@@ -100,14 +117,14 @@ public final class JSONParser {
 
     public static String getRoomUsersRequest(int roomID) throws JSONException {
         JSONObject json = constructJSONRequest();
-        json.put("RoomID", roomID);
+        json.put(KEY_ROOM_ID, roomID);
 
         return String.format(TWO_CHAR_FORMAT, GET_USERS) + json.toString();
     }
 
     public static ArrayList<String> getRoomUsersResponse(String rawString) throws JSONException {
         JSONObject json = makeProperJsonObject(rawString);
-        JSONArray jsonUsers = json.getJSONArray("Users");
+        JSONArray jsonUsers = json.getJSONArray(KEY_USER_LIST);
         ArrayList<String> usersList = new ArrayList<>(jsonUsers.length());
         for (int i = 0; i < jsonUsers.length(); i++) {
             String u = jsonUsers.getString(i);
@@ -120,8 +137,8 @@ public final class JSONParser {
 
     public static String getOlderMsgsRequest(int roomID, int msgID) throws JSONException {
         JSONObject json = constructJSONRequest();
-        json.put("RoomID", roomID);
-        json.put("MsgID", msgID);
+        json.put(KEY_ROOM_ID, roomID);
+        json.put(KEY_MSG_ID, msgID);
 
         return String.format(TWO_CHAR_FORMAT, GET_OLDER) + json.toString();
     }
@@ -129,7 +146,7 @@ public final class JSONParser {
 
     public static ArrayList<Message> getOlderMsgsResponse(String rawString) throws JSONException {
         JSONObject json = makeProperJsonObject(rawString);
-        JSONArray jsonMsgs = json.getJSONArray("Messages");
+        JSONArray jsonMsgs = json.getJSONArray(KEY_MSG_LIST);
         ArrayList<Message> messages = new ArrayList<>(jsonMsgs.length());
         for (int i = 0; i < jsonMsgs.length(); i++) {
             JSONObject m = jsonMsgs.getJSONObject(i);
@@ -151,82 +168,81 @@ public final class JSONParser {
 
     public static String joinRoomRequest(int roomID, String username) throws JSONException {
         JSONObject json = constructJSONRequest();
-        json.put("RoomID", roomID);
-        json.put("Username", username);
+        json.put(KEY_ROOM_ID, roomID);
+        json.put(KEY_USERNAME, username);
 
         return String.format(TWO_CHAR_FORMAT, JOIN_ROOM) + json.toString();
     }
 
     public static Room joinRoomResponse(String rawString) throws JSONException, NullPointerException {
         JSONObject json = makeProperJsonObject(rawString);
-        if (!json.getBoolean("RoomIDAccepted")) {
+        if (!json.getBoolean(KEY_ROOM_ID_ACCEPTED)) {
             return null;
         }
-        return new Room(json.getJSONObject("JoinedRoom"));
+        return new Room(json.getJSONObject(KEY_ROOM_JOINED));
     }
-
 
     public static String leaveRoomRequest(int roomID, String username) throws JSONException {
         JSONObject json = constructJSONRequest();
-        json.put("RoomID", roomID);
-        json.put("Username", username);
+        json.put(KEY_ROOM_ID, roomID);
+        json.put(KEY_USERNAME, username);
 
         return String.format(TWO_CHAR_FORMAT, LEAVE_ROOM) + json.toString();
     }
 
     public static int leaveRoomResponse(String rawString) throws JSONException {
         JSONObject json = makeProperJsonObject(rawString);
-        return json.getInt("RequestID");
+        return json.getInt(KEY_REQUEST_ID);
     }
 
     public static String createRoomRequest(String roomName, String username) throws JSONException {
         JSONObject json = constructJSONRequest();
-        json.put("RoomName", roomName);
-        json.put("Username", username);
+        json.put(KEY_ROOM_NAME, roomName);
+        json.put(KEY_USERNAME, username);
 
         return String.format(TWO_CHAR_FORMAT, CREATE_ROOM) + json.toString();
     }
 
     public static int createRoomResponse(String rawString) throws JSONException {
         JSONObject json = makeProperJsonObject(rawString);
-        return json.getInt("RoomID");
+        return json.getInt(KEY_ROOM_ID);
     }
 
     public static String postMsgRequest(String username, Message msg) throws JSONException {
         JSONObject json = constructJSONRequest();
-        json.put("Username", username);
+        json.put(KEY_USERNAME, username);
 
         if (msg.roomID == 0) throw new AssertionError();
-        json.put("RoomID", msg.roomID);
-        json.put("RoomID", msg.text);
+        json.put(KEY_ROOM_ID, msg.roomID);
+        json.put(KEY_MSG_BODY, msg.text);
 
         return String.format(TWO_CHAR_FORMAT, MESSAGE) + json.toString();
     }
 
     public static Message messageRecieved(String rawString) throws JSONException {
         JSONObject json = makeProperJsonObject(rawString);
-        return  new Message(json.getJSONObject("Msg"));
+        return  new Message(json.getJSONObject(KEY_MESSAGE));
     }
 
     public static String messageReadRequest(String username, int roomID, int msgID) throws JSONException {
         JSONObject json = constructJSONRequest();
-        json.put("Username", username);
-        json.put("RoomID", roomID);
-        json.put("MsgID", msgID);
+        json.put(KEY_USERNAME, username);
+        json.put(KEY_ROOM_ID, roomID);
+        json.put(KEY_MSG_ID, msgID);
 
         return String.format(TWO_CHAR_FORMAT, MSG_READ) + json.toString();
     }
 
     public static String signoutRequest(String username) throws JSONException {
         JSONObject json = constructJSONRequest();
-        json.put("Username", username);
+        json.put(KEY_USERNAME, username);
 
         return String.format(TWO_CHAR_FORMAT, SIGN_OUT) + json.toString();
     }
 
     public static String deleteUserRequest(String username) throws JSONException {
         JSONObject json = constructJSONRequest();
-        json.put("Username", username);
+        json.put(KEY_USERNAME, username);
 
         return String.format(TWO_CHAR_FORMAT, DELETE_USER) + json.toString();
     }
@@ -236,7 +252,7 @@ public final class JSONParser {
     public static void readErrorResponse(String rawString) {
         try {
             JSONObject json = makeProperJsonObject(rawString);
-            String error = json.getString("ErrorCause");
+            String error = json.getString(KEY_ERROR_CAUSE);
             throw new RuntimeException(error);
         } catch (JSONException e) {
             e.printStackTrace();
