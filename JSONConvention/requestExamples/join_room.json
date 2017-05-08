@@ -1,0 +1,32 @@
+// Request
+{
+    "requestID": 286001,
+    "requestIndex": 6,
+    "requestName": "join_room",
+
+    "roomID": 101,
+    "userName": "Joe"
+}
+
+
+// Response
+{
+    "requestID": 286001,
+    "requestIndex": 6,
+    "requestName": "join_room",
+
+    "roomIDAccepted": true,
+    "room":
+        {
+            "id": 101,
+            "roomName": "Room 1",
+            "latestMsg": {
+                "id": 201,
+                "date": "2017-04-27-17-24-00-00",
+                "from": "JohnDoe",
+                "content": "This is a message"
+            }
+            "latestReadMsgId": 0
+        }
+}
+

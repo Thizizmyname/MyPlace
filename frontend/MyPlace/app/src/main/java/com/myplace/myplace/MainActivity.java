@@ -14,6 +14,8 @@ import com.myplace.myplace.models.Room;
 
 import java.util.ArrayList;
 
+import org.json.JSONObject;
+
 public class MainActivity extends AppCompatActivity {
 
     Toolbar toolbar;
