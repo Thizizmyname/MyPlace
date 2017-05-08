@@ -3,41 +3,10 @@ package data
 import (
 	"encoding/json"
 	"io/ioutil"
-  "net"
-  "fmt"
- // "myplaceutils"
+	"myplaceutils"
 )
-type UserDB []myplaceutils.User
-type RoomDB []myplaceutils.Room
 
-/*
-//DETTA ÄR FLYTTAT TILL src/myplaceutils/myplaceutils.go för att modularisera
-
-type User struct {
-	Uname string
-	Pass string
-	Rooms []Room
-  ActiveConn net.Conn
-}
-
-type Room struct {
-	Name string
-	NoPeople int
-  Users []User
-	Messages []Message
-}
-
-type Message struct {
-	Time time.Time
-	Uname string
-	Body string
-  ID string
-  
-}
-*/
-
-
-func StoreDBs(us UserDB, rs RoomDB) error {
+func StoreDBs(us myplaceutils.UserDB, rs myplaceutils.RoomDB) error {
 	var usj []byte
 	var rsj []byte
 	var e error
@@ -62,7 +31,7 @@ func StoreDBs(us UserDB, rs RoomDB) error {
 
 }
 
-func LoadDBs() (UserDB, RoomDB, error) {
+func LoadDBs() (myplaceutils.UserDB, myplaceutils.RoomDB, error) {
 	var usj []byte
 	var rsj []byte
 	var e error
@@ -75,8 +44,8 @@ func LoadDBs() (UserDB, RoomDB, error) {
 		return nil, nil, e
 	}
 
-	var us UserDB
-	var rs RoomDB
+	var us myplaceutils.UserDB
+	var rs myplaceutils.RoomDB
 
 	if e = json.Unmarshal(usj, &us); e != nil {
 		return nil, nil, e
@@ -88,4 +57,3 @@ func LoadDBs() (UserDB, RoomDB, error) {
 
 	return us, rs, nil
 }
-
