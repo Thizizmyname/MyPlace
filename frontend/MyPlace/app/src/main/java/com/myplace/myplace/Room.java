@@ -37,6 +37,10 @@ public class Room implements Parcelable {
         return roomName;
     }
 
+    public String getLastSender() {
+        return MainActivity.roomDB.getLastSender(this.roomName);
+    }
+
     public String getLastMessage() {
         return MainActivity.roomDB.getLastMessage(this.roomName);
     }

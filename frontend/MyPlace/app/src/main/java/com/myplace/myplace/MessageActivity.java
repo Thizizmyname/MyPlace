@@ -1,5 +1,6 @@
 package com.myplace.myplace;
 
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -12,6 +13,8 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+
+import static com.myplace.myplace.LoginActivity.LOGIN_PREFS;
 
 public class MessageActivity extends AppCompatActivity {
     private Toast messageEmptyToast = null;
@@ -73,7 +76,9 @@ public class MessageActivity extends AppCompatActivity {
 
                 //TEST FOR INCOMING AND OUTGOING
                 if(mod(a, 2) == 0) {
-                    name = "Anders";
+                    String username = "N/A";
+                    SharedPreferences loginInfo = getSharedPreferences(LOGIN_PREFS, 0);
+                    name = loginInfo.getString("username", username);
                 } else {
                     name = "Joel";
                 }

@@ -177,9 +177,12 @@ public class MainActivity extends AppCompatActivity {
 
                 //TODO: Change below string to JSON-request
 
+                roomDB.createRoomTable(roomName);
+                roomList.add(new Room(roomName));
+                roomAdapter.notifyDataSetChanged();
+
                 TCPClient.request = getResources().getString(createOrJoin)+roomName;
                 new ConnectTask().execute("");
-
             }
         });
 

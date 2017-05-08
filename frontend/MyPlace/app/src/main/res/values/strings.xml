@@ -36,4 +36,5 @@
     <string name="join_room">Join room </string>
     <string name="not_yet_implemented">Not yet implemented</string>
     <string name="leave_room">Leave room</string>
+    <string name="sender_you">You</string>
 </resources>
