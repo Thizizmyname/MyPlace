@@ -1,6 +1,8 @@
 package com.myplace.myplace;
 
 
+import android.support.annotation.NonNull;
+
 import com.myplace.myplace.models.Message;
 import com.myplace.myplace.models.Room;
 
@@ -18,10 +20,19 @@ public class JSONParser {
 
     private static int number;
 
-    public static String signupRequest(String userName, String password) throws JSONException {
+
+
+
+    @NonNull
+    private static JSONObject constructJSONRequest() throws JSONException {
         JSONObject json = new JSONObject();
 
         json.put("RequestID", number++);
+        return json;
+    }
+
+    public static String signupRequest(String userName, String password) throws JSONException {
+        JSONObject json = constructJSONRequest();
         json.put("UserName", userName);
         json.put("Password", password);
 
@@ -34,9 +45,7 @@ public class JSONParser {
     }
 
     public static String signinRequest(String userName, String password) throws JSONException {
-        JSONObject json = new JSONObject();
-
-        json.put("RequestID", number++);
+        JSONObject json = constructJSONRequest();
         json.put("UserName", userName);
         json.put("Password", password);
 
@@ -49,9 +58,7 @@ public class JSONParser {
     }
 
     public static String getRoomRequest(String userName) throws JSONException {
-        JSONObject json = new JSONObject();
-
-        json.put("RequestID", number++);
+        JSONObject json = constructJSONRequest();
         json.put("UserName", userName);
 
         return json.toString();
@@ -71,9 +78,7 @@ public class JSONParser {
 
 
     public static String getRoomUsersRequest(int roomID) throws JSONException {
-        JSONObject json = new JSONObject();
-
-        json.put("RequestID", number++);
+        JSONObject json = constructJSONRequest();
         json.put("RoomID", roomID);
 
         return json.toString();
@@ -93,9 +98,7 @@ public class JSONParser {
     }
 
     public static String getOlderMsgsRequest(int roomID, int msgID) throws JSONException {
-        JSONObject json = new JSONObject();
-
-        json.put("RequestID", number++);
+        JSONObject json = constructJSONRequest();
         json.put("RoomID", roomID);
         json.put("MsgID", msgID);
 
@@ -125,9 +128,7 @@ public class JSONParser {
 
 
     public static String joinRoomRequest(int roomID, String username) throws JSONException {
-        JSONObject json = new JSONObject();
-
-        json.put("RequestID", number++);
+        JSONObject json = constructJSONRequest();
         json.put("RoomID", roomID);
         json.put("Username", username);
 
@@ -143,9 +144,7 @@ public class JSONParser {
     }
 
     public static String leaveRoomRequest(int roomID, String username) throws JSONException {
-        JSONObject json = new JSONObject();
-
-        json.put("RequestID", number++);
+        JSONObject json = constructJSONRequest();
         json.put("RoomID", roomID);
         json.put("Username", username);
 
@@ -158,9 +157,7 @@ public class JSONParser {
     }
 
     public static String createRoomRequest(String roomName, String username) throws JSONException {
-        JSONObject json = new JSONObject();
-
-        json.put("RequestID", number++);
+        JSONObject json = constructJSONRequest();
         json.put("RoomName", roomName);
         json.put("Username", username);
 
@@ -173,9 +170,7 @@ public class JSONParser {
     }
 
     public static String postMsgRequest(String username, Message msg) throws JSONException {
-        JSONObject json = new JSONObject();
-
-        json.put("RequestID", number++);
+        JSONObject json = constructJSONRequest();
         json.put("Username", username);
 
         if (msg.roomID == 0) throw new AssertionError();
