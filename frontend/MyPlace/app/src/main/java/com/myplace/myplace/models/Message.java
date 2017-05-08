@@ -16,6 +16,8 @@ public class Message {
     public Date date;
     public static DateFormat df = new SimpleDateFormat("HH:mm", Locale.getDefault());
 
+    private static final int CROP_LIMIT = 32;
+
     public Message(JSONObject json) throws JSONException {
         id = json.getInt("MsgID");
         roomID = json.getInt("RoomID");
@@ -40,5 +42,12 @@ public class Message {
 
     public String getName() {
         return name;
+    }
+
+    public String abbreviateText() {
+        if (text.length() > CROP_LIMIT) {
+            return text.substring(0, CROP_LIMIT-3) + "...";
+        }
+        else return text;
     }
 }
