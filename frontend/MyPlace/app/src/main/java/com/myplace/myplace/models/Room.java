@@ -4,6 +4,9 @@ import android.content.Context;
 
 import com.myplace.myplace.RoomDbHelper;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Created by alexis on 2017-04-18.
  */
@@ -26,6 +29,15 @@ public class Room {
         roomName = _roomName;
         latestMsg = _latestMsg;
         latestReadMsg = _latestReadMsg;
+    }
+
+    public Room(JSONObject json) throws JSONException {
+        roomID = json.getInt("RoomID");
+        roomName = json.getString("RoomName");
+        latestReadMsg = json.getInt("LatestReadMsgID");
+
+        JSONObject ms = json.getJSONObject("LatestMsg");
+        latestMsg = new Message(ms);
     }
 
 

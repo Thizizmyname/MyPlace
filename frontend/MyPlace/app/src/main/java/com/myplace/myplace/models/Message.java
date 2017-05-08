@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 public class Message {
     public int id;
@@ -13,7 +14,7 @@ public class Message {
     public String name;
     public String text;
     public Date date;
-    public static DateFormat df = new SimpleDateFormat("HH:mm");
+    public static DateFormat df = new SimpleDateFormat("HH:mm", Locale.getDefault());
 
     public Message(JSONObject json) throws JSONException {
         id = json.getInt("MsgID");
