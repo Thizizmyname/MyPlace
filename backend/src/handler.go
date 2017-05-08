@@ -1,6 +1,7 @@
 package main
 
 import (
+	"container/list"
 	"myplaceutils"
 	"requests_responses"
 )
@@ -43,8 +44,26 @@ func handler(incomingChannel chan myplaceutils.HandlerArgs) {
 }
 
 func signUp(request requests_responses.SignUpRequest) requests_responses.Response {
+	//Example:
+	//create a new user and update the db
+	user := myplaceutils.User{
+		request.UName,
+		request.Pass,
+		list.New()}
+
+	//update the db:
+	myplaceutils.Users[user.UName] = user
+
+	//create and return a response to the request
 	response := requests_responses.SignUpResponse{request.RequestID, true, ""}
+
 	return response
+
+	//note: The request needs to be checked.. if UName is in use,
+	//if pass ok etc. If error, the last string in the
+	//SignUpResponse is set to error cause "user" or "pass" and
+	//the bool is set to false, and the db isn't updated.
+	//This stuff is defined in the request-response-interface.
 }
 
 func signIn(request requests_responses.SignInRequest) requests_responses.Response {

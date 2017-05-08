@@ -17,9 +17,9 @@ var (
 	Info    *log.Logger
 	Warning *log.Logger
 	Error   *log.Logger
-	connections []net.Conn
-	Users []*User
-	Rooms []*Room
+	//connections []net.Conn
+	Users UserDB
+	Rooms RoomDB
 )
 
 type User struct {
@@ -51,6 +51,11 @@ type HandlerArgs struct {
 type UserDB map[string]User //UName is key
 type RoomDB map[int]Room //ID is key
 
+func InitDBs() {
+	Users = make(map[string]User)
+	Rooms = make(map[int]Room)
+}
+
 /*
 Funkar inte för att data.go är trasig
 // Loads DB to global variables
@@ -71,7 +76,7 @@ func Terminate(){
 //MÅSTE HA MUTEX LOCK I DENNA FUNKTIONEN
 //MÅSTE KOLLA SÅ INTE newConnection REDAN FINNS I connections
 func AddConnection(newConnection net.Conn) {
-	connections = append(connections, newConnection)
+	//connections = append(connections, newConnection)
 }
 
 //Kolla genom arrayen om den finns innan den försöker ta bort den
@@ -127,7 +132,7 @@ func CreateUser(uname string, pass string, c net.Conn) *User {
 	//u.Rooms = []Room{}
 	//u.ActiveConn = c
 
-	Users = append(Users,&u)
+	//Users = append(Users,&u)
 
 	return &u
 }
@@ -153,7 +158,7 @@ func CreateRoom(name string) *Room {
 	// r.Users = []*User{}
 	// r.Messages = []Message{}
 
-	Rooms = append(Rooms, &r)
+	//Rooms = append(Rooms, &r)
 
 	return &r
 }
@@ -170,24 +175,24 @@ func ShowUsers(r Room) []string {
 	return users
 }
 
-func GetUser(id string) *User{
+func GetUser(uname string) *User{
+	user, exists := Users[uname]
 
-	for _,x := range Users{
-		if x.UName == id{
-			return x
-		}
+	if exists {
+		return &user
+	} else {
+		return nil
 	}
-	panic("can't find user")
 }
 
-func GetRoom(id string) *Room{
+func GetRoom(id int) *Room{
+	room, exists := Rooms[id]
 
-	for _,x := range Rooms{
-		if x.Name == id{
-			return x
-		}
+	if exists {
+		return &room
+	} else {
+		return nil
 	}
-	panic("can't find room")
 }
 
 func DestroyUser(id string){
