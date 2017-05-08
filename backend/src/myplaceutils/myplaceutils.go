@@ -1,21 +1,23 @@
 package myplaceutils
 
 import (
-    "fmt"
-    "net"
-    "time"
+	"fmt"
+	"net"
+	"time"
 	"reflect"
 	"log"
+	"container/list"
+	"requests_responses"
 )
 
 
 //Dessa loggers är till för att kunna anropas från alla programfiler.
 var (
-    Trace   *log.Logger
-    Info    *log.Logger
-    Warning *log.Logger
-    Error   *log.Logger
-    connections []net.Conn
+	Trace   *log.Logger
+	Info    *log.Logger
+	Warning *log.Logger
+	Error   *log.Logger
+	connections []net.Conn
 	Users []*User
 	Rooms []*Room
 )
@@ -23,16 +25,15 @@ var (
 type User struct {
 	Uname string
 	Pass string
-	Rooms []*Room
-	ActiveConn net.Conn
-  //token   string
+	Rooms []Room
 }
 
 type Room struct {
 	Name     string
 	NoPeople int
-	Users    []*User
-	Messages []Message // Den kanske ska innehålla pekare till meddelanden?
+	Users    []User
+	Messages []Message
+	OutgoingChannels []chan requests_responses.Response
 }
 
 type Message struct {
@@ -42,7 +43,12 @@ type Message struct {
 	ID    string
 }
 
-/* 
+type HandlerArguments struct {
+	Req requests_responses.Request
+	ResponseChannel chan string
+}
+
+/*
 Funkar inte för att data.go är trasig
 // Loads DB to global variables
 func Initialize(){
@@ -62,12 +68,12 @@ func Terminate(){
 //MÅSTE HA MUTEX LOCK I DENNA FUNKTIONEN
 //MÅSTE KOLLA SÅ INTE newConnection REDAN FINNS I connections
 func AddConnection(newConnection net.Conn) {
-  connections = append(connections, newConnection)
+	connections = append(connections, newConnection)
 }
 
 //Kolla genom arrayen om den finns innan den försöker ta bort den
 func RemoveConnection(connection net.Conn) bool{
-  return true
+	return true
 }
 
 //User method for binding the current connection to the user
@@ -146,7 +152,7 @@ func CreateRoom(name string) *Room {
 	r.Messages = []Message{}
 
 	Rooms = append(Rooms, &r)
-	
+
 	return &r
 }
 
@@ -163,7 +169,7 @@ func ShowUsers(r Room) []string {
 }
 
 func GetUser(id string) *User{
-	
+
 	for _,x := range Users{
 		if x.Uname == id{
 			return x
@@ -179,7 +185,7 @@ func GetRoom(id string) *Room{
 			return x
 		}
 	}
-	panic("can't find room")	
+	panic("can't find room")
 }
 
 func DestroyUser(id string){
@@ -187,7 +193,7 @@ func DestroyUser(id string){
 }
 
 func DestroyRoom(id string){
-	
+
 }
 
 func getOlderMessages() {
