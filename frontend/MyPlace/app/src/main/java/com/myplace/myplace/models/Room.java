@@ -1,11 +1,8 @@
 package com.myplace.myplace.models;
 
 import android.content.Context;
-import android.content.ContextWrapper;
 
-import com.myplace.myplace.MainActivity;
 import com.myplace.myplace.RoomDbHelper;
-import com.myplace.myplace.models.Message;
 
 /**
  * Created by alexis on 2017-04-18.
@@ -15,12 +12,20 @@ public class Room {
     private int roomID;
     private String roomName;
     private Message latestMsg;
+    private int latestReadMsg;
 
 
 
 
     public Room(String name) {
         roomName = name;
+    }
+
+    public Room(int _roomID, String _roomName, Message _latestMsg, int _latestReadMsg) {
+        roomID = _roomID;
+        roomName = _roomName;
+        latestMsg = _latestMsg;
+        latestReadMsg = _latestReadMsg;
     }
 
 

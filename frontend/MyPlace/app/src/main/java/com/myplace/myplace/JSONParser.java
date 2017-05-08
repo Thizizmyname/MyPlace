@@ -1,6 +1,7 @@
 package com.myplace.myplace;
 
 
+import com.myplace.myplace.models.Message;
 import com.myplace.myplace.models.Room;
 
 import org.json.JSONArray;
@@ -67,11 +68,13 @@ public class JSONParser {
             int _latest = r.getInt("LatestReadMsgID");
 
             JSONObject ms = r.getJSONObject("LatestMsg");
-            //Message msg = new Message();
+            Message _msg = new Message(ms);
 
+            Room room = new Room(_id, _name, _msg, _latest);
+            rooms.add(room);
 
         }
-        return null;
+        return rooms;
     }
 
 
