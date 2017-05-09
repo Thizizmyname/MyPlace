@@ -123,7 +123,8 @@ public class RoomDbHelper extends SQLiteOpenHelper {
             do {
                 String roomName = c.getString(c.getColumnIndex("roomname"));
 
-                Room room = new Room(roomName.replace("_", " "));
+                // TODO Replace ID to proper information
+                Room room = new Room(0, roomName.replace("_", " "));
                 list.add(room);
             } while (c.moveToNext());
             c.close();

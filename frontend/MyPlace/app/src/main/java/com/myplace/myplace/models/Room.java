@@ -20,7 +20,8 @@ public class Room {
 
 
 
-    public Room(String name) {
+    public Room(int id, String name) {
+        roomID = id;
         roomName = name;
     }
 

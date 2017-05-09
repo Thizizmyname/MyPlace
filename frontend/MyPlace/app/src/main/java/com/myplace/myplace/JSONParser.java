@@ -203,9 +203,11 @@ public final class JSONParser {
         return String.format(TWO_CHAR_FORMAT, CREATE_ROOM) + json.toString();
     }
 
-    public static int createRoomResponse(String rawString) throws JSONException {
+    public static Room createRoomResponse(String rawString) throws JSONException {
         JSONObject json = makeProperJsonObject(rawString);
-        return json.getInt(KEY_ROOM_ID);
+        int _id = json.getInt(KEY_ROOM_ID);
+        String _name = json.getString(KEY_ROOM_NAME);
+        return new Room(_id, _name);
     }
 
     public static String postMsgRequest(String username, Message msg) throws JSONException {
