@@ -3,6 +3,7 @@ package com.myplace.myplace;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 class Message {
     public String name;
