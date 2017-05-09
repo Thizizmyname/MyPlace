@@ -14,32 +14,16 @@ import org.json.JSONObject;
 public class Room {
     private int roomID;
     private String roomName;
-    private Message latestMsg;
-    private int latestReadMsg;
 
 
 
 
-    public Room(int id, String name) {
-        roomID = id;
-        roomName = name;
-    }
 
-    public Room(int _roomID, String _roomName, Message _latestMsg, int _latestReadMsg) {
+    public Room(int _roomID, String _roomName) {
         roomID = _roomID;
         roomName = _roomName;
-        latestMsg = _latestMsg;
-        latestReadMsg = _latestReadMsg;
     }
 
-    public Room(JSONObject json) throws JSONException {
-        roomID = json.getInt("RoomID");
-        roomName = json.getString("RoomName");
-        latestReadMsg = json.getInt("LatestReadMsgID");
-
-        JSONObject ms = json.getJSONObject("LatestMsg");
-        latestMsg = new Message(ms);
-    }
 
 
     public String getName() {

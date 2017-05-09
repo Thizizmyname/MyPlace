@@ -5,12 +5,14 @@ import android.support.annotation.NonNull;
 
 import com.myplace.myplace.models.Message;
 import com.myplace.myplace.models.Room;
+import com.myplace.myplace.models.RoomInfo;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import static com.myplace.myplace.models.RequestTypes.*;
 
@@ -103,14 +105,14 @@ public final class JSONParser {
         return String.format(TWO_CHAR_FORMAT, GET_ROOMS) + json.toString();
     }
 
-    public static ArrayList<Room> getRoomResponse(String rawString) throws JSONException {
+    public static ArrayList<RoomInfo> getRoomResponse(String rawString) throws JSONException {
         JSONObject json = makeProperJsonObject(rawString);
         JSONArray jsonRooms = json.getJSONArray(KEY_ROOM_LIST);
-        ArrayList<Room> rooms = new ArrayList<>(jsonRooms.length());
+        ArrayList<RoomInfo> rooms = new ArrayList<>(jsonRooms.length());
         for (int i = 0; i < jsonRooms.length(); i++) {
             JSONObject r = jsonRooms.getJSONObject(i);
 
-            rooms.add(new Room(r));
+            rooms.add(constructRoom(r));
         }
         return rooms;
     }
@@ -151,7 +153,7 @@ public final class JSONParser {
         for (int i = 0; i < jsonMsgs.length(); i++) {
             JSONObject m = jsonMsgs.getJSONObject(i);
 
-            Message _msg = new Message(m);
+            Message _msg = constructMessage(m);
             messages.add(_msg);
         }
         return messages;
@@ -174,12 +176,12 @@ public final class JSONParser {
         return String.format(TWO_CHAR_FORMAT, JOIN_ROOM) + json.toString();
     }
 
-    public static Room joinRoomResponse(String rawString) throws JSONException, NullPointerException {
+    public static RoomInfo joinRoomResponse(String rawString) throws JSONException, NullPointerException {
         JSONObject json = makeProperJsonObject(rawString);
         if (!json.getBoolean(KEY_ROOM_ID_ACCEPTED)) {
             return null;
         }
-        return new Room(json.getJSONObject(KEY_ROOM_JOINED));
+        return constructRoom(json.getJSONObject(KEY_ROOM_JOINED));
     }
 
     public static String leaveRoomRequest(int roomID, String username) throws JSONException {
@@ -223,7 +225,7 @@ public final class JSONParser {
 
     public static Message messageRecieved(String rawString) throws JSONException {
         JSONObject json = makeProperJsonObject(rawString);
-        return  new Message(json.getJSONObject(KEY_MESSAGE));
+        return constructMessage(json.getJSONObject(KEY_MESSAGE));
     }
 
     public static String messageReadRequest(String username, int roomID, int msgID) throws JSONException {
@@ -278,5 +280,28 @@ public final class JSONParser {
 
         json.put("RequestID", number++);
         return json;
+    }
+
+    private static Message constructMessage(JSONObject json) throws JSONException {
+        int id = json.getInt("MsgID");
+        int roomID = json.getInt("RoomID");
+        String fromUser = json.getString("FromUser");
+        Date date = new Date(json.getInt("Time"));
+        String body = json.getString("Body");
+
+        return new Message(id, roomID, fromUser, body, date);
+    }
+
+    private static RoomInfo constructRoom(JSONObject json) throws JSONException {
+        int roomID = json.getInt("RoomID");
+        String roomName = json.getString("RoomName");
+        Room room = new Room(roomID, roomName);
+
+        JSONObject ms = json.getJSONObject("LatestMsg");
+        Message msg = constructMessage(ms);
+
+        int latestReadMsg = json.getInt("LatestReadMsgID");
+
+        return new RoomInfo(room, msg, latestReadMsg);
     }
 }

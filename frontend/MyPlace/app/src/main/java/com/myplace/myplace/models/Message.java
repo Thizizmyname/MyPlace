@@ -18,13 +18,12 @@ public class Message {
 
     private static final int CROP_LIMIT = 32;
 
-    public Message(JSONObject json) throws JSONException {
-        id = json.getInt("MsgID");
-        roomID = json.getInt("RoomID");
-        name = json.getString("FromUser");
-        date = new Date(json.getInt("Time"));
-        text = json.getString("Body");
-
+    public Message(int id, int roomID, String name, String text, Date date) {
+        this.id = id;
+        this.roomID = roomID;
+        this.name = name;
+        this.text = text;
+        this.date = date;
     }
 
     public Message(String name, String message, Date date) {
