@@ -132,7 +132,7 @@ public class RoomDbHelper extends SQLiteOpenHelper {
         }
     }
 
-    String getLastSender(String roomName) {
+    public String getLastSender(String roomName) {
         try {
             roomName = roomName.replace(" ", "_");
             String query = "SELECT name FROM "+roomName;

@@ -32,7 +32,6 @@ import static com.myplace.myplace.R.id.action_join;
 public class MainActivity extends AppCompatActivity {
     private TCPClient mTcpClient;
     final Context context = this;
-    Toolbar toolbar;
 
     FloatingActionsMenu actionMenu;
     ListView listView;
@@ -132,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void onThreadClick(int position) {
         Intent intent = new Intent(MainActivity.this, MessageActivity.class);
-        intent.putExtra("Room", roomList.get(position));
+        intent.putExtra("RoomName", roomList.get(position).getName());
         startActivity(intent);
         overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
     }

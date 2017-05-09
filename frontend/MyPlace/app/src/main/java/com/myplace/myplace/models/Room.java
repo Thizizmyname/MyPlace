@@ -30,6 +30,11 @@ public class Room {
         return roomName;
     }
 
+    public String getLastSender(Context ctx) {
+        RoomDbHelper roomDB = new RoomDbHelper(ctx);
+        return roomDB.getLastSender(this.roomName);
+    }
+
     public String getLastMessage(Context ctx) {
         RoomDbHelper roomDB = new RoomDbHelper(ctx);
         return roomDB.getLastMessage(this.roomName);
