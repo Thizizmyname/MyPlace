@@ -17,9 +17,6 @@ import android.widget.EditText;
 import android.widget.ListView;
 import com.myplace.myplace.models.Room;
 import java.util.ArrayList;
-import android.view.WindowManager;
-import android.widget.EditText;
-import android.widget.Toast;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
@@ -39,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     public static RoomAdapter roomAdapter = null;
 
     //Defines the database
-    public static RoomDbHelper roomDB = null;
+    public RoomDbHelper roomDB = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
