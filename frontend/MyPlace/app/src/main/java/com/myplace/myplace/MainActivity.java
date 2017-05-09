@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
         roomList = roomDB.getRoomList();
         listView = (ListView) findViewById(R.id.roomList);
 
-        roomAdapter = new RoomAdapter(MainActivity.this, roomList);
+        roomAdapter = new RoomAdapter(this, roomList);
         listView.setAdapter(roomAdapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
