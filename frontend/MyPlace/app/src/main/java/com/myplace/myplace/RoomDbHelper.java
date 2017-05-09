@@ -12,6 +12,7 @@ import com.myplace.myplace.models.Room;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by jesper on 2017-04-26.
@@ -129,6 +130,26 @@ public class RoomDbHelper extends SQLiteOpenHelper {
         } catch (Exception ignore) {
             return context.getString(R.string.room_empty);
         }
+    }
+
+    String getLastSender(String roomName) {
+        try {
+            roomName = roomName.replace(" ", "_");
+            String query = "SELECT name FROM "+roomName;
+            SQLiteDatabase db = getReadableDatabase();
+
+            Cursor c = db.rawQuery(query, null);
+            c.moveToLast();
+            String name = c.getString(c.getColumnIndex("name"));
+
+            c.close();
+            db.close();
+            return name;
+        } catch (Exception ignore) {
+            return "";
+        }
+
+
     }
 
     ArrayList<Room> getRoomList(){

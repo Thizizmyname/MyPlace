@@ -1,15 +1,18 @@
 package com.myplace.myplace;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import com.myplace.myplace.models.Message;
-
 import java.util.ArrayList;
+import java.util.TreeSet;
+
+import static com.myplace.myplace.LoginActivity.LOGIN_PREFS;
 
 public class MessageAdapter extends ArrayAdapter<Message> {
     private static final int TYPE_INCOMING = 0;
@@ -23,7 +26,10 @@ public class MessageAdapter extends ArrayAdapter<Message> {
     @Override
     public int getItemViewType(int position) {
         Message message = getItem(position);
-        if(message.getName().equals("Anders")) { // TO TEST INCOMING AND OUTGOING
+
+        String username = "N/A";
+        SharedPreferences loginInfo = getContext().getSharedPreferences(LOGIN_PREFS, 0);
+        if(message.getName().equals(loginInfo.getString("username", username))) { // TO TEST INCOMING AND OUTGOING
             return TYPE_OUTGOING;
         } else {
             return TYPE_INCOMING;
