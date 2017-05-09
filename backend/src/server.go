@@ -17,15 +17,15 @@ func listenLoop(listener net.Listener) {
     //Här skapas två nya variabler, connection och errs, samma som innan
     // men connection är varje anslutning som inkommer till server
    // dvs en socket
-    channel := make(chan string)
+    //channel := make(chan string)
     newConnection, errs := listener.Accept()
     if errs != nil { //Här testas igen om det blev något fel
       myplaceutils.Error.Printf("Connection Accept error: %v\n",errs)
     } else { //om inga fel inträffade, kan vi gå vidare
       connections = append(connections, newConnection)
       myplaceutils.Info.Printf("Connection established: %v\n", newConnection)
-      myplaceutils.Info.Printf("New channel\n", channel)
-      go handler(newConnection, channel)
+      // myplaceutils.Info.Printf("New channel\n", channel)
+      // go handler(newConnection, channel)
     }
   }
 }

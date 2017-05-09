@@ -1,93 +1,120 @@
 package data
 
 import (
+	"testing"
 	"fmt"
 	"time"
-	"math/rand"
-	"reflect"
-	"testing"
+	//"reflect"
+	"container/list"
+	"myplaceutils"
+	"requests_responses"
 )
 
 func TestStoreLoad(t *testing.T) {
-	userDB := make(UserDB, 10)
-	roomDB := make(RoomDB, 10)
+	var userDB myplaceutils.UserDB = make(myplaceutils.UserDB)
+	var roomDB myplaceutils.RoomDB = make(myplaceutils.RoomDB)
 
-	//math.Seed(time.Now().Unix())
-	initUsers(userDB)
-	initRooms(roomDB)
+	initUsers(userDB, 100, 10)
+	initRooms(roomDB, 100, 100, 10, 10)
 	var err error
 
 	if err = StoreDBs(userDB, roomDB); err != nil {
 		panic(err)
 	}
 
-	var userDB2 UserDB
-	var roomDB2 RoomDB
+	var userDB2 myplaceutils.UserDB
+	var roomDB2 myplaceutils.RoomDB
 
 	if userDB2, roomDB2, err = LoadDBs(); err != nil {
 		panic(err)
 	}
 
-	if reflect.DeepEqual(roomDB, roomDB2) != true {
-		t.Errorf("roomDB != roomDB2")
+	// if equalRoomDBs.DeepEqual(roomDB, roomDB2) != true {
+	// 	t.Errorf("roomDB != roomDB2")
+	// }
+
+	// if equalUserDBs.DeepEqual(userDB, userDB2) != true {
+	// 	t.Errorf("userDB != userDB2")
+	// }
+
+	if len(roomDB) != len(roomDB2) {
+		t.Errorf("len(roomDB) != len(roomDB2)")
 	}
 
-	if reflect.DeepEqual(userDB, userDB2) != true {
-		t.Errorf("userDB != userDB2")
+	if len(userDB) != len(userDB2) {
+		t.Errorf("len(userDB) != len(userDB2)")
 	}
 }
 
-func initUsers(users UserDB) {
-	for i := 0; i < len(users); i++ {
-		users[i].Uname = fmt.Sprintf("user%v", i)
-		users[i].Pass = fmt.Sprintf("pass%v", i)
-		rs := make([]string, rand.Intn(5))
+func initUsers(users myplaceutils.UserDB, no_users int, no_rooms int) {
+	for i := 0; i < no_users; i++ {
+		var u myplaceutils.User
+		u.UName = fmt.Sprintf("user%v", i)
+		u.Pass = fmt.Sprintf("pass%v", i)
+		u.Rooms = list.New()
 
-		for j := 0; j < len(rs); j++ {
-			rs[j] = fmt.Sprintf("room%v", j)
+		for j := 0; j < no_rooms; j++ {
+			u.Rooms.PushBack(j)
 		}
 
-		users[i].Rooms = rs
+		users[u.UName] = u
 	}
 }
 
-func initRooms(rooms RoomDB) {
-	for i := 0; i < len(rooms); i++ {
-		rooms[i].Name = fmt.Sprintf("room%v", i)
-		rooms[i].NoPeople = rand.Intn(50)
-		msgs := make([]Message, rand.Intn(20))
+func initRooms(rooms myplaceutils.RoomDB, no_rooms, no_users int, no_msgs int, no_chans int) {
+	for i := 0; i < no_rooms; i++ {
+		var r myplaceutils.Room
+		r.ID = i
+		r.Name = fmt.Sprintf("room%v", i)
 
-		for j := 0; j < len(msgs); j++ {
-			msgs[j].Time = time.Now()
-			msgs[j].Uname = "some user"
-			msgs[j].Body = fmt.Sprintf("message%v", j)
+		r.Users = list.New()
+		for j := 0; j < no_users; j++ {
+			r.Users.PushBack(fmt.Sprintf("user%v", j))
 		}
-		rooms[i].Messages = msgs
-	}
-}
 
-func printRooms(rs []Room) {
-	fmt.Println("\nRooms:");
+		r.Messages = make(map[int]myplaceutils.Message)
+		for j := 0; j < no_msgs; j++ {
+			msg := myplaceutils.Message{
+				j,
+				time.Now(),
+				fmt.Sprintf("user%v", j),
+				"msg body" }
 
-	for _, r := range rs {
-		fmt.Printf("\nName: %s\n", r.Name)
-		fmt.Printf("No people: %v\n", r.NoPeople)
-		fmt.Println("Messages:")
-
-		for _, m := range r.Messages {
-			fmt.Printf("Time: %v\n", m.Time)
-			fmt.Printf("User: %s\n", m.Uname)
-			fmt.Printf("Text: %s\n", m.Body)
+			r.Messages[j] = msg
 		}
+
+		r.OutgoingChannels = list.New()
+		for j := 0; j < no_chans; j++ {
+			c := make(chan requests_responses.Response)
+			r.OutgoingChannels.PushBack(c)
+		}
+
+		rooms[i] = r
 	}
 }
 
-func printUsers(us []User) {
-	fmt.Println("\nUsers:")
+// func printRooms(rs []Room) {
+// 	fmt.Println("\nRooms:");
 
-	for _, u := range us {
-		fmt.Printf("\nName: %s\n", u.Uname)
-		fmt.Printf("Pass: %s\n", u.Pass)
-		fmt.Printf("Rooms: %v\n", u.Rooms)
-	}
-}
+// 	for _, r := range rs {
+// 		fmt.Printf("\nName: %s\n", r.Name)
+// 		fmt.Printf("No people: %v\n", r.NoPeople)
+// 		fmt.Println("Messages:")
+
+// 		for _, m := range r.Messages {
+// 			fmt.Printf("Time: %v\n", m.Time)
+// 			fmt.Printf("User: %s\n", m.Uname)
+// 			fmt.Printf("Text: %s\n", m.Body)
+// 		}
+// 	}
+// }
+
+// func printUsers(us []User) {
+// 	fmt.Println("\nUsers:")
+
+// 	for _, u := range us {
+// 		fmt.Printf("\nName: %s\n", u.Uname)
+// 		fmt.Printf("Pass: %s\n", u.Pass)
+// 		fmt.Printf("Rooms: %v\n", u.Rooms)
+// 	}
+// }

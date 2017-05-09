@@ -133,6 +133,15 @@ type MsgReadResponse struct {
 	RequestID int
 }
 
+type SignOutRequest struct {
+	RequestID int
+	UName string
+}
+
+type SignOutResponse struct {
+	RequestID int
+}
+
 type ErrorResponse struct {
 	RequestID int
 	RequestIndex int

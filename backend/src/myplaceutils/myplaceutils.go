@@ -1,48 +1,62 @@
 package myplaceutils
 
 import (
-    "fmt"
-    "net"
-    "time"
-	"reflect"
+	"fmt"
+	"net"
+	"time"
+	//"reflect"
 	"log"
+	"container/list"
+	"requests_responses"
 )
 
 
 //Dessa loggers är till för att kunna anropas från alla programfiler.
 var (
-    Trace   *log.Logger
-    Info    *log.Logger
-    Warning *log.Logger
-    Error   *log.Logger
-    connections []net.Conn
-	Users []*User
-	Rooms []*Room
+	Trace   *log.Logger
+	Info    *log.Logger
+	Warning *log.Logger
+	Error   *log.Logger
+	//connections []net.Conn
+	Users UserDB
+	Rooms RoomDB
 )
 
 type User struct {
-	Uname string
+	UName string
 	Pass string
-	Rooms []*Room
-	ActiveConn net.Conn
-  //token   string
+	Rooms *list.List //list of ints:roomID
 }
 
 type Room struct {
+	ID int
 	Name     string
-	NoPeople int
-	Users    []*User
-	Messages []Message // Den kanske ska innehålla pekare till meddelanden?
+	Users *list.List //list of strings:UName
+	Messages map[int]Message //ID is key
+	OutgoingChannels *list.List //[]chan requests_responses.Response
 }
 
 type Message struct {
+	ID    int
 	Time  time.Time
 	Uname string
 	Body  string
-	ID    string
 }
 
-/* 
+type HandlerArgs struct {
+	IncomingRequest requests_responses.Request
+	ResponseChannel chan requests_responses.Response
+}
+
+type UserDB map[string]User //UName is key
+type RoomDB map[int]Room //ID is key
+
+func InitDBs() {
+	Users = make(map[string]User)
+	Rooms = make(map[int]Room)
+}
+
+/*
 Funkar inte för att data.go är trasig
 // Loads DB to global variables
 func Initialize(){
@@ -62,17 +76,17 @@ func Terminate(){
 //MÅSTE HA MUTEX LOCK I DENNA FUNKTIONEN
 //MÅSTE KOLLA SÅ INTE newConnection REDAN FINNS I connections
 func AddConnection(newConnection net.Conn) {
-  connections = append(connections, newConnection)
+	//connections = append(connections, newConnection)
 }
 
 //Kolla genom arrayen om den finns innan den försöker ta bort den
 func RemoveConnection(connection net.Conn) bool{
-  return true
+	return true
 }
 
 //User method for binding the current connection to the user
 func (u *User) BindConnection(c net.Conn) bool {
-	u.ActiveConn = c
+	//u.ActiveConn = c
 	return true
 }
 
@@ -81,45 +95,44 @@ func (u *User) BindConnection(c net.Conn) bool {
 
 //Room method to add a user to the room
 func (r *Room) AddUser(u *User) {
-	r.Users = append(r.Users, u)
-	r.NoPeople++
+	//r.Users = append(r.Users, u)
 	u.JoinRoom(r)
 }
 
 //User method to add a room to the list of room that the user is part of
 func (u *User) JoinRoom(r *Room) {
-	u.Rooms = append(u.Rooms, r)
+	//u.Rooms = append(u.Rooms, r)
 
 }
 
 // Removes the user from the room
 func (r *Room) RemoveUser(u *User) {
-	for i, elem := range r.Users {
-		if reflect.DeepEqual(elem, u) {
-			r.Users = r.Users[:i+copy(r.Users[i:], r.Users[i+1:])]
-		}
-	}
-	r.NoPeople--
+	// for i, elem := range r.Users {
+	// 	if reflect.DeepEqual(elem, u) {
+	// 		r.Users = r.Users[:i+copy(r.Users[i:], r.Users[i+1:])]
+	// 	}
+	// }
+	// r.NoPeople--
 
 }
 
 // Removes the room from the user
 func (u *User) RemoveRoom(r *Room) {
-	for i, elem := range u.Rooms {
-		if reflect.DeepEqual(elem, r) {
-			u.Rooms = u.Rooms[:i+copy(u.Rooms[i:], u.Rooms[i+1:])]
-		}
-	}
+	// for i, elem := range u.Rooms {
+	// 	if reflect.DeepEqual(elem, r) {
+	// 		u.Rooms = u.Rooms[:i+copy(u.Rooms[i:], u.Rooms[i+1:])]
+	// 	}
+	// }
 }
 
 func CreateUser(uname string, pass string, c net.Conn) *User {
 	u := User{}
-	u.Uname = uname
+	u.UName = uname
 	u.Pass = pass
-	u.Rooms = []*Room{}
-	u.ActiveConn = c
+	//u.Rooms = []Room{}
+	//u.ActiveConn = c
 
-	Users = append(Users,&u)
+	//Users = append(Users,&u)
 
 	return &u
 }
@@ -128,11 +141,12 @@ func CreateUser(uname string, pass string, c net.Conn) *User {
 //Use:    When the client software wants to list rooms, passing a name as an argument for joining a room, etc.
 //Tested: NO
 func (u *User) ShowRooms() []string {
-	var roomNames []string
-	for _, r := range u.Rooms {
-		roomNames = append(roomNames, r.Name)
-	}
-	return roomNames
+	// var roomNames []string
+	// for _, r := range u.Rooms {
+	// 	roomNames = append(roomNames, r.Name)
+	// }
+	// return roomNames
+	return nil
 }
 
 //Purpose: Creating a new room
@@ -141,12 +155,11 @@ func (u *User) ShowRooms() []string {
 func CreateRoom(name string) *Room {
 	r := Room{}
 	r.Name = name
-	r.NoPeople = 0
-	r.Users = []*User{}
-	r.Messages = []Message{}
+	// r.Users = []*User{}
+	// r.Messages = []Message{}
 
-	Rooms = append(Rooms, &r)
-	
+	//Rooms = append(Rooms, &r)
+
 	return &r
 }
 
@@ -155,31 +168,31 @@ func CreateRoom(name string) *Room {
 //Tested: NO
 func ShowUsers(r Room) []string {
 	var users []string
-	for _, u := range r.Users {
-		fmt.Printf("%v\n", u.Uname)
-		users = append(users, u.Uname)
-	}
+	// for _, u := range r.Users {
+	// 	fmt.Printf("%v\n", u.Uname)
+	// 	users = append(users, u.Uname)
+	// }
 	return users
 }
 
-func GetUser(id string) *User{
-	
-	for _,x := range Users{
-		if x.Uname == id{
-			return x
-		}
+func GetUser(uname string) *User{
+	user, exists := Users[uname]
+
+	if exists {
+		return &user
+	} else {
+		return nil
 	}
-	panic("can't find user")
 }
 
-func GetRoom(id string) *Room{
+func GetRoom(id int) *Room{
+	room, exists := Rooms[id]
 
-	for _,x := range Rooms{
-		if x.Name == id{
-			return x
-		}
+	if exists {
+		return &room
+	} else {
+		return nil
 	}
-	panic("can't find room")	
 }
 
 func DestroyUser(id string){
@@ -187,7 +200,7 @@ func DestroyUser(id string){
 }
 
 func DestroyRoom(id string){
-	
+
 }
 
 func getOlderMessages() {
