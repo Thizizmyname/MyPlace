@@ -184,7 +184,7 @@ func TestCheckUsername(t *testing.T){
 	conn := establishConnection()
 	user0 := CreateUser("qwerty","hej123",conn)
 
-	if !CheckUsername(user0.Uname) {
+	if CheckUsername(user0.Uname) {
 		t.Error("Username allready exists")
 	}	
 

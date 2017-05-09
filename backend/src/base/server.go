@@ -30,7 +30,7 @@ func main() {
   }
   globalRoom := myplaceutils.CreateRoom("bigroom")
   fmt.Println("Skapade ett nytt rum")
-  bigroomusers := myplaceutils.ShowUsers(globalRoom)
+  bigroomusers := myplaceutils.ShowUsers(*globalRoom)
   fmt.Printf("Amount of users in globalRoom: %d\n",len(bigroomusers))
   for { //Denna loopen körs för evigt
     //Här skapas två nya variabler, connection och errs, samma som innan
@@ -45,7 +45,7 @@ func main() {
       fmt.Printf("Connection established: %v\n", connection)
       globalRoom.AddUser(newUser)
       fmt.Println("Added user to room")
-      fmt.Printf("Amount of users in globalRoom(should>=1): %d\n",len(myplaceutils.ShowUsers(globalRoom)))
+      fmt.Printf("Amount of users in globalRoom(should>=1): %d\n",len(myplaceutils.ShowUsers(*globalRoom)))
       go handleConnection(connection)
       go readMsg(connection)
       

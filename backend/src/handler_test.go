@@ -33,9 +33,14 @@ func TestSignUp(t *testing.T){
 	conn := establishConnection()
 	SignUp("Alex","hej123",conn)
 
+	if SignUp("Erik","1337",conn) {
+		
+	}
+
 	if SignUp("Alex","lol123",conn) {
 		t.Error("Username allready taken\n")
 	}
+
 
 	
 	

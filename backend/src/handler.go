@@ -54,6 +54,8 @@ func handler(connection net.Conn, gochan chan string){
 	}
 }
 
+
+
 /*
 00.signup
 args: uname, pass
@@ -61,25 +63,27 @@ response: -
 note: error if uname is taken/ pass to short/ illegal characters/ ...
 side-effect: updates users_db
 */
-func SignUp(username string, password string, conn net.Conn) (bool){
+
+func SignUp(username string, password string, conn net.Conn) bool{
 	if myplaceutils.CheckCharacters(username) {
 		
 		if myplaceutils.CheckUsername(username) {
-		//	fmt.Printf("The user name isn't taken")
 			myplaceutils.CreateUser(username,password,conn)
 
 		}else{
-		//	fmt.Printf("The Username is allready taken. Chose a new username\n")
+			fmt.Printf("The Username is already taken. Choose a new username\n")
 			return false
 		}
 		
 	}else{
-	//	fmt.Printf("Illegal characters")
+		fmt.Printf("Illegal characters")
 		return false
-
 	}
+	
 	return true
 }
+
+
 
 /*
 01.signin
