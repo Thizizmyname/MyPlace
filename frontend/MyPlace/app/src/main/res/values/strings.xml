@@ -4,13 +4,15 @@
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
-    <string name="prompt_username">Username</string>
-    <string name="prompt_password">Password</string>
+    <string name="prompt_username">Username(at least 4 characters)</string>
+    <string name="prompt_password">Password(at least 6 characters)</string>
+    <string name="prompt_retype">Retype Password</string>
     <string name="action_sign_in">Sign in or register</string>
     <string name="action_sign_in_short">Login</string>
     <string name="action_sign_in_question">Already a member?</string>
     <string name="action_register">Create Account</string>
     <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_incorrect_username">This username is incorrect</string>
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
@@ -27,4 +29,11 @@
     <string name="send_button">Send</string>
     <string name="message_empty">Please enter a message.</string>
     <string name="room_empty">This room has no messages.</string>
+    <string name="title_add_room">Add Room</string>
+    <string name="button_add_room">Add room</string>
+    <string name="enter_a_room_name">Enter a room name.</string>
+    <string name="create_room">Create room</string>
+    <string name="join_room">Join room</string>
+    <string name="not_yet_implemented">Not yet implemented</string>
+    <string name="leave_room">Leave room</string>
 </resources>
