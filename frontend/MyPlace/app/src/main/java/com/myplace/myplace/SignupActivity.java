@@ -95,8 +95,8 @@ public class SignupActivity extends AppCompatActivity {
         String password = _passSign.getText().toString();
         String reType = _passRetype.getText().toString();
 
-        if(password == reType){
-            _passRetype.setText(getResources().getString(R.string.error_incorrect_password));
+        if(!(reType.equals(password))){
+            _passRetype.setError(getResources().getString(R.string.error_incorrect_password));
             valid = false;
         }
         else {
@@ -104,7 +104,7 @@ public class SignupActivity extends AppCompatActivity {
         }
 
         if(username.isEmpty() || username.length() <= 3) {
-            _userSign.setText(getResources().getString(R.string.error_incorrect_username));
+            _userSign.setError(getResources().getString(R.string.error_incorrect_username));
             valid = false;
         }
         else {
@@ -112,7 +112,7 @@ public class SignupActivity extends AppCompatActivity {
         }
 
         if(password.isEmpty() || password.length() <= 5){
-            _passSign.setText(getResources().getString(R.string.error_incorrect_password));
+            _passSign.setError(getResources().getString(R.string.error_incorrect_password));
             valid = false;
         }
         else {
