@@ -10,42 +10,42 @@ import (
 //----------------------INTERFACE START
 
 type SignUpRequest struct {
-	RequestID int
-	UName string
-	Pass string
+RequestID int
+UName string
+Pass string
 }
 
 type SignUpResponse struct {
-	RequestID int
-	Result bool
-	ErrorCause string
+RequestID int
+Result bool
+ErrorCause string
 }
 
 type SignInRequest struct {
-	RequestID int
-	UName string
-	Pass string
+RequestID int
+UName string
+Pass string
 }
 
 type SignInResponse struct {
-	RequestID int
-	Result bool
-	ErrorCause string
+RequestID int
+Result bool
+ErrorCause string
 }
 
 type GetRoomsRequest struct {
-	RequestID int
-	UName string
+RequestID int
+UName string
 }
 
 type GetRoomsResponse struct {
-	RequestID int
-	Rooms []roomInfo
+RequestID int
+Rooms []roomInfo
 }
 
 type GetRoomUsersRequest struct {
-	RequestID int
-	RoomID int
+RequestID int
+RoomID int
 }
 
 type GetRoomUsersResponse struct {
@@ -194,7 +194,7 @@ func FromRequestString(requestString string) (Request, error) {
 	case 3:
 		var r GetRoomUsersRequest
 		err := json.Unmarshal([]byte(jsonRequest), &r)
-		return r, err
+		sdasdreturn r, err
 	case 4:
 		var r GetOlderMsgsRequest
 		err := json.Unmarshal([]byte(jsonRequest), &r)

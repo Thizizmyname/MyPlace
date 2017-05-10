@@ -7,6 +7,7 @@ import (
     "log"
     "os"
     "myplaceutils"
+    "requests_responses"
 )
 
 
@@ -25,7 +26,8 @@ func listenLoop(listener net.Listener) {
       connections = append(connections, newConnection)
       myplaceutils.Info.Printf("Connection established: %v\n", newConnection)
       // myplaceutils.Info.Printf("New channel\n", channel)
-      go clientHandler(newConnection, channel)
+      clientChannel := make(chan requests_responses.Response, 8)
+      go clientHandler(newConnection, clientChannel)
     }
   }
 }
@@ -68,7 +70,9 @@ func main() {
   log.Println("Initializing loggers")
   InitLoggers(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
   log.Println("Initialization complete")
-
+  //255 känns som en lämplig size så länge MAGIC NUMBER
+  myplaceutils.ResponseChannel = make(chan myplaceutils.HandlerArgs, 255)
+  
   myplaceutils.Info.Println("Creating a listener")
 
   tcpAddress,_ := net.ResolveTCPAddr("tcp","127.0.0.1:1337")

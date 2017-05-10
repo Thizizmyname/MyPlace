@@ -4,11 +4,32 @@ import (
 	"container/list"
 	"myplaceutils"
 	"requests_responses"
+  "net"
+  "bufio"
 )
 
 
-func clientHandler(conn net.Connection, clientChannel chan string) {
-  
+func clientHandler(conn net.Conn, clientChannel chan requests_responses.Response) {
+  myplaceutils.Info.Println("Connection sent to clientHandler in go routine")
+  for {
+    request ,err := bufio.NewReader(conn).ReadString('\n')
+    if err!=nil {
+      myplaceutils.Error.Println("User disconnected from the server")
+      break
+    }
+    myplaceutils.Info.Printf("New request: %v",request)
+		var requestParsed myplaceutils.HandlerArgs
+    var parseError error
+    requestParsed.IncomingRequest, parseError = requests_responses.FromRequestString(request)
+    requestParsed.ResponseChannel = clientChannel
+    if parseError==nil {
+      myplaceutils.ResponseChannel <- requestParsed
+    } else {
+      myplaceutils.Error.Printf("Bad request from client: %v\n", parseError)
+      //Bad request
+      //Har vi en default Bad request?
+    }
+  }
 }
 
 func responseHandler(incomingChannel chan myplaceutils.HandlerArgs) {

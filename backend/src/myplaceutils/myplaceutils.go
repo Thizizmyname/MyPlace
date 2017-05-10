@@ -20,6 +20,7 @@ var (
 	//connections []net.Conn
 	Users UserDB
 	Rooms RoomDB
+  ResponseChannel chan HandlerArgs
 )
 
 type User struct {
