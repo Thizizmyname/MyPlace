@@ -40,7 +40,7 @@ type GetRoomsRequest struct {
 
 type GetRoomsResponse struct {
 	RequestID int
-	Rooms []roomInfo
+	Rooms []RoomInfo
 }
 
 type GetRoomUsersRequest struct {
@@ -62,7 +62,7 @@ type GetOlderMsgsRequest struct {
 
 type GetOlderMsgsResponse struct {
 	RequestID int
-	Messages []msgInfo
+	Messages []MsgInfo
 }
 
 type GetNewerMsgsRequest struct {
@@ -73,7 +73,7 @@ type GetNewerMsgsRequest struct {
 
 type GetNewerMsgsResponse struct {
 	RequestID int
-	Messages []msgInfo
+	Messages []MsgInfo
 }
 
 type JoinRoomRequest struct {
@@ -84,7 +84,7 @@ type JoinRoomRequest struct {
 
 type JoinRoomResponse struct {
 	RequestID int
-	JoinedRoom roomInfo
+	JoinedRoom RoomInfo
 	RoomIDAccepted bool
 }
 
@@ -119,7 +119,7 @@ type PostMsgRequest struct {
 
 type PostMsgResponse struct {
 	RequestID int //-1 if no request was made
-	Msg msgInfo
+	Msg MsgInfo
 }
 
 type MsgReadRequest struct {
@@ -148,16 +148,32 @@ type ErrorResponse struct {
 	ErrorCause string
 }
 
+const (
+	SignUpIndex = 0
+	SignInIndex = 1
+	GetRoomsIndex = 2
+	GetRoomUsersIndex = 3
+	GetOlderMsgsIndex = 4
+	GetNewerMsgsIndex = 5
+	JoinRoomIndex = 6
+	LeaveRoomIndex = 7
+	CreateRoomIndex = 8
+	PostMsgIndex = 9
+	MsgReadIndex = 10
+	SignOutIndex = 11
+	ErrorIndex = 12
+)
+
 //---------------------------INTERFACE STOP
 
-type roomInfo struct {
+type RoomInfo struct {
 	ID int
 	Name string
-	LatestMsg msgInfo
+	LatestMsg MsgInfo
 	LatestReadMsgID int
 }
 
-type msgInfo struct {
+type MsgInfo struct {
 	MsgID int
 	RoomID int
 	UName string
