@@ -7,7 +7,11 @@ import (
 )
 
 
-func handler(incomingChannel chan myplaceutils.HandlerArgs) {
+func clientHandler(conn net.Connection, clientChannel chan string) {
+  
+}
+
+func responseHandler(incomingChannel chan myplaceutils.HandlerArgs) {
 	for args := range incomingChannel {
 		var request requests_responses.Request = args.IncomingRequest
 		var response requests_responses.Response

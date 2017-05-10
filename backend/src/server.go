@@ -25,7 +25,7 @@ func listenLoop(listener net.Listener) {
       connections = append(connections, newConnection)
       myplaceutils.Info.Printf("Connection established: %v\n", newConnection)
       // myplaceutils.Info.Printf("New channel\n", channel)
-      // go handler(newConnection, channel)
+      go clientHandler(newConnection, channel)
     }
   }
 }
@@ -52,6 +52,13 @@ func InitLoggers(
     myplaceutils.Error = log.New(errorHandle,
         "ERROR: ",
         log.Ldate|log.Ltime|log.Lshortfile)
+}
+
+//Om servern trycker ctrl+c ska denna anropas.
+func disconnectAll() {
+  for _,conn := range connections {
+    conn.Close()
+  }
 }
 
 func main() {
