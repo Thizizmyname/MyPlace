@@ -17,7 +17,7 @@ func listenLoop(listener net.Listener) {
   for { //Denna loopen körs för evigt
     //Här skapas två nya variabler, connection och errs, samma som innan
     // men connection är varje anslutning som inkommer till server
-   // dvs en socket
+    // dvs en socket
     //channel := make(chan string)
     newConnection, errs := listener.Accept()
     if errs != nil { //Här testas igen om det blev något fel
@@ -25,7 +25,6 @@ func listenLoop(listener net.Listener) {
     } else { //om inga fel inträffade, kan vi gå vidare
       connections = append(connections, newConnection)
       myplaceutils.Info.Printf("Connection established: %v\n", newConnection)
-      // myplaceutils.Info.Printf("New channel\n", channel)
       clientChannel := make(chan requests_responses.Response, 8)
       go clientHandler(newConnection, clientChannel)
     }
@@ -69,10 +68,11 @@ func main() {
   //Initialize loggers
   log.Println("Initializing loggers")
   InitLoggers(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
-  log.Println("Initialization complete")
+  log.Println("Initialization complete\n-------------------------")
   //255 känns som en lämplig size så länge MAGIC NUMBER
   myplaceutils.ResponseChannel = make(chan myplaceutils.HandlerArgs, 255)
-  
+  //Initialize RequestChannel, TODO döp om skiten till RequestChannel från ResponseChannel
+  go responseHandler(myplaceutils.ResponseChannel)
   myplaceutils.Info.Println("Creating a listener")
 
   tcpAddress,_ := net.ResolveTCPAddr("tcp","127.0.0.1:1337")
