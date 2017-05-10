@@ -18,6 +18,7 @@ var (
     connections []net.Conn
 	Users []*User
 	Rooms []*Room
+	
 )
 
 type User struct {
@@ -32,14 +33,14 @@ type Room struct {
 	Name     string
 	NoPeople int
 	Users    []*User
-	Messages []Message // Den kanske ska innehålla pekare till meddelanden?
+	Messages []*Message // Den kanske ska innehålla pekare till meddelanden?
 }
 
 type Message struct {
 	Time  time.Time
 	Uname string
 	Body  string
-	ID    string
+	ID    int
 }
 
 /* 
@@ -47,7 +48,7 @@ Funkar inte för att data.go är trasig
 // Loads DB to global variables
 func Initialize(){
 	Users,Rooms,err = LoadDbs()
-	//ska hantera erro på nåt sätt
+	//ska hantera error på nåt sätt
 }
 
 //Store global variables to DB
@@ -104,7 +105,7 @@ func (r *Room) RemoveUser(u *User) {
 }
 
 // Removes the room from the user
-func (u *User) RemoveRoom(r *Room) {
+func (u *User)RemoveRoom(r *Room) {
 	for i, elem := range u.Rooms {
 		if reflect.DeepEqual(elem, r) {
 			u.Rooms = u.Rooms[:i+copy(u.Rooms[i:], u.Rooms[i+1:])]
@@ -117,7 +118,7 @@ func CreateUser(uname string, pass string, c net.Conn) *User {
 	u.Uname = uname
 	u.Pass = pass
 	u.Rooms = []*Room{}
-	u.ActiveConn = c
+	u.ActiveConn = c // ska denna ta in en conn eller ska det ske först vid inlogg?
 
 	Users = append(Users,&u)
 
@@ -143,11 +144,21 @@ func CreateRoom(name string) *Room {
 	r.Name = name
 	r.NoPeople = 0
 	r.Users = []*User{}
-	r.Messages = []Message{}
+	r.Messages = []*Message{}
 
 	Rooms = append(Rooms, &r)
 	
 	return &r
+}
+
+func CreateMessage(Uname string, text string, id int) *Message{
+	m := Message{}
+	m.Time = time.Now()
+	m.Uname = Uname
+	m.Body = text
+	m.ID = id
+
+	return &m
 }
 
 //Purpose: returns an array of the names of the users in the room
@@ -179,7 +190,28 @@ func GetRoom(id string) *Room{
 			return x
 		}
 	}
-	panic("can't find room")	
+	//panic("can't find room")	
+	return nil
+}
+
+func (u *User)PostMsg(r *Room,text string){
+	len := len(r.Messages)
+	//oldmsg := msgs[len(msgs)-1] //senaste meddelandet
+
+	newmsg := CreateMessage(u.Uname, text, len)
+
+	r.Messages = append(r.Messages, newmsg)
+}
+
+func GetMessage(msgId int, r *Room) *Message{
+	msg := r.Messages
+	return msg[msgId]
+}
+
+func GetMessages(msgId int, r *Room) []*Message{
+	msg := r.Messages
+	msgs := msg[msgId:]
+	return msgs
 }
 
 func DestroyUser(id string){
@@ -190,7 +222,7 @@ func DestroyRoom(id string){
 	
 }
 
-func getOlderMessages() {
+func getOlderMessages(name string, room string) {
 
 }
 
