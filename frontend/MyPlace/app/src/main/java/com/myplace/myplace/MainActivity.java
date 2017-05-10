@@ -15,12 +15,13 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
+import com.myplace.myplace.models.Room;
+import java.util.ArrayList;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 
 
-import java.util.ArrayList;
 
 import static com.myplace.myplace.R.id.action_create;
 import static com.myplace.myplace.R.id.action_join;
@@ -28,7 +29,6 @@ import static com.myplace.myplace.R.id.action_join;
 public class MainActivity extends AppCompatActivity {
     private TCPClient mTcpClient;
     final Context context = this;
-    Toolbar toolbar;
 
     FloatingActionsMenu actionMenu;
     ListView listView;
@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     public static RoomAdapter roomAdapter = null;
 
     //Defines the database
-    public static RoomDbHelper roomDB = null;
+    public RoomDbHelper roomDB = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void onThreadClick(int position) {
         Intent intent = new Intent(MainActivity.this, MessageActivity.class);
-        intent.putExtra("Room", roomList.get(position));
+        intent.putExtra("RoomName", roomList.get(position).getName());
         startActivity(intent);
         overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
     }
@@ -178,7 +178,7 @@ public class MainActivity extends AppCompatActivity {
                 //TODO: Change below string to JSON-request
 
                 roomDB.createRoomTable(roomName);
-                roomList.add(new Room(roomName));
+                roomList.add(new Room(0,roomName));
                 roomAdapter.notifyDataSetChanged();
 
                 TCPClient.request = getResources().getString(createOrJoin)+roomName;

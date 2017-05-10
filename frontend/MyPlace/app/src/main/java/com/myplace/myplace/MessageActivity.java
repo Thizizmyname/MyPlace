@@ -12,6 +12,8 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.myplace.myplace.models.Message;
+
 import java.util.ArrayList;
 
 import static com.myplace.myplace.LoginActivity.LOGIN_PREFS;
@@ -37,9 +39,8 @@ public class MessageActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_message);
-        Room room = getIntent().getParcelableExtra("Room");
 
-        final String roomName = room.getName();
+        final String roomName = getIntent().getExtras().getString("RoomName");
 
         //noinspection ConstantConditions
         getSupportActionBar().setTitle(roomName);

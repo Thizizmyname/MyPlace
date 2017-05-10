@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.myplace.myplace.models.Room;
+
 import java.util.ArrayList;
 
 import static com.myplace.myplace.LoginActivity.LOGIN_PREFS;
@@ -44,7 +46,7 @@ class RoomAdapter extends ArrayAdapter<Room> {
 
         if (room != null) {
             text1.setText(room.getName());
-            String sender = room.getLastSender();
+            String sender = room.getLastSender(getContext());
 
             String username = "N/A";
             SharedPreferences loginInfo = getContext().getSharedPreferences(LOGIN_PREFS, 0);
@@ -57,7 +59,7 @@ class RoomAdapter extends ArrayAdapter<Room> {
             } else {
                 text2.setText(sender);
             }
-            text3.setText(room.getLastMessage());
+            text3.setText(room.getLastMessage(getContext()));
         }
 
 
