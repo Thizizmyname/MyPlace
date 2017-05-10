@@ -179,7 +179,7 @@ type MsgInfo struct {
 	UName string
 	Time int64 //number of milliseconds since January 1, 1970 UTC
 	Body string
-
+}
 
 type Request interface {}
 type Response interface {}

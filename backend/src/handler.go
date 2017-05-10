@@ -4,8 +4,6 @@ import (
   "container/list"
   "myplaceutils"
   "requests_responses"
-  "net"
-  "bufio"
 )
 
 
