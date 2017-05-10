@@ -194,7 +194,7 @@ func FromRequestString(requestString string) (Request, error) {
 	case 3:
 		var r GetRoomUsersRequest
 		err := json.Unmarshal([]byte(jsonRequest), &r)
-		sdasdreturn r, err
+		return r, err
 	case 4:
 		var r GetOlderMsgsRequest
 		err := json.Unmarshal([]byte(jsonRequest), &r)
