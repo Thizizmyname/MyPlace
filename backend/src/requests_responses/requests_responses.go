@@ -1,41 +1,41 @@
 package requests_responses
 
 import (
-	"encoding/json"
-	"strconv"
-	"fmt"
-	"errors"
+  "encoding/json"
+  "strconv"
+  "fmt"
+  "errors"
 )
 
 //----------------------INTERFACE START
 
 type SignUpRequest struct {
-	RequestID int
-	UName string
-	Pass string
+RequestID int
+UName string
+Pass string
 }
 
 type SignUpResponse struct {
-	RequestID int
-	Result bool
-	ErrorCause string
+RequestID int
+Result bool
+ErrorCause string
 }
 
 type SignInRequest struct {
-	RequestID int
-	UName string
-	Pass string
+RequestID int
+UName string
+Pass string
 }
 
 type SignInResponse struct {
-	RequestID int
-	Result bool
-	ErrorCause string
+RequestID int
+Result bool
+ErrorCause string
 }
 
 type GetRoomsRequest struct {
-	RequestID int
-	UName string
+RequestID int
+UName string
 }
 
 type GetRoomsResponse struct {
@@ -44,20 +44,20 @@ type GetRoomsResponse struct {
 }
 
 type GetRoomUsersRequest struct {
-	RequestID int
-	RoomID int
+RequestID int
+RoomID int
 }
 
 type GetRoomUsersResponse struct {
-	RequestID int
-	RoomID int
-	UNames []string
+  RequestID int
+  RoomID int
+  UNames []string
 }
 
 type GetOlderMsgsRequest struct {
-	RequestID int
-	RoomID int
-	MsgID int
+  RequestID int
+  RoomID int
+  MsgID int
 }
 
 type GetOlderMsgsResponse struct {
@@ -66,9 +66,9 @@ type GetOlderMsgsResponse struct {
 }
 
 type GetNewerMsgsRequest struct {
-	RequestID int
-	RoomID int
-	MsgID int
+  RequestID int
+  RoomID int
+  MsgID int
 }
 
 type GetNewerMsgsResponse struct {
@@ -77,9 +77,9 @@ type GetNewerMsgsResponse struct {
 }
 
 type JoinRoomRequest struct {
-	RequestID int
-	RoomID int
-	UName string
+  RequestID int
+  RoomID int
+  UName string
 }
 
 type JoinRoomResponse struct {
@@ -89,32 +89,32 @@ type JoinRoomResponse struct {
 }
 
 type LeaveRoomRequest struct {
-	RequestID int
-	RoomID int
-	UName string
+  RequestID int
+  RoomID int
+  UName string
 }
 
 type LeaveRoomResponse struct {
-	RequestID int
+  RequestID int
 }
 
 type CreateRoomRequest struct {
-	RequestID int
-	RoomName string
-	UName string
+  RequestID int
+  RoomName string
+  UName string
 }
 
 type CreateRoomResponse struct {
-	RequestID int
-	RoomID int
-	RoomName string
+  RequestID int
+  RoomID int
+  RoomName string
 }
 
 type PostMsgRequest struct {
-	RequestID int
-	UName string
-	RoomID int
-	Body string
+  RequestID int
+  UName string
+  RoomID int
+  Body string
 }
 
 type PostMsgResponse struct {
@@ -123,29 +123,29 @@ type PostMsgResponse struct {
 }
 
 type MsgReadRequest struct {
-	RequestID int
-	MsgID int
-	RoomID int
-	UName string
+  RequestID int
+  MsgID int
+  RoomID int
+  UName string
 }
 
 type MsgReadResponse struct {
-	RequestID int
+  RequestID int
 }
 
 type SignOutRequest struct {
-	RequestID int
-	UName string
+  RequestID int
+  UName string
 }
 
 type SignOutResponse struct {
-	RequestID int
+  RequestID int
 }
 
 type ErrorResponse struct {
-	RequestID int
-	RequestIndex int
-	ErrorCause string
+  RequestID int
+  RequestIndex int
+  ErrorCause string
 }
 
 const (
@@ -179,105 +179,103 @@ type MsgInfo struct {
 	UName string
 	Time int64 //number of milliseconds since January 1, 1970 UTC
 	Body string
-}
 
 
 type Request interface {}
 type Response interface {}
 
 func FromRequestString(requestString string) (Request, error) {
-	reqType, err := strconv.Atoi(requestString[:2])
+  reqType, err := strconv.Atoi(requestString[:2])
 
-	if (err != nil) {
-		return nil, err
-	}
+  if (err != nil) {
+    return nil, err
+  }
 
-	jsonRequest := requestString[2:]
+  jsonRequest := requestString[2:]
 
-	switch reqType {
-	case 0:
-		var r SignUpRequest
-		err := json.Unmarshal([]byte(jsonRequest), &r)
-		return r, err
-	case 1:
-		var r SignInRequest
-		err := json.Unmarshal([]byte(jsonRequest), &r)
-		return r, err
-	case 2:
-		var r GetRoomsRequest
-		err := json.Unmarshal([]byte(jsonRequest), &r)
-		return r, err
-	case 3:
-		var r GetRoomUsersRequest
-		err := json.Unmarshal([]byte(jsonRequest), &r)
-		return r, err
-	case 4:
-		var r GetOlderMsgsRequest
-		err := json.Unmarshal([]byte(jsonRequest), &r)
-		return r, err
-	case 5:
-		var r GetNewerMsgsRequest
-		err := json.Unmarshal([]byte(jsonRequest), &r)
-		return r, err
-	case 6:
-		var r JoinRoomRequest
-		err := json.Unmarshal([]byte(jsonRequest), &r)
-		return r, err
-	case 7:
-		var r LeaveRoomRequest
-		err := json.Unmarshal([]byte(jsonRequest), &r)
-		return r, err
-	case 8:
-		var r CreateRoomRequest
-		err := json.Unmarshal([]byte(jsonRequest), &r)
-		return r, err
-	case 9:
-		var r PostMsgRequest
-		err := json.Unmarshal([]byte(jsonRequest), &r)
-		return r, err
-	case 10:
-		var r MsgReadRequest
-		err := json.Unmarshal([]byte(jsonRequest), &r)
-		return r, err
-	default:
-		return nil, errors.New("illegal reqType")
-	}
+  switch reqType {
+  case 0:
+    var r SignUpRequest
+    err := json.Unmarshal([]byte(jsonRequest), &r)
+    return r, err
+  case 1:
+    var r SignInRequest
+    err := json.Unmarshal([]byte(jsonRequest), &r)
+    return r, err
+  case 2:
+    var r GetRoomsRequest
+    err := json.Unmarshal([]byte(jsonRequest), &r)
+    return r, err
+  case 3:
+    var r GetRoomUsersRequest
+    err := json.Unmarshal([]byte(jsonRequest), &r)
+    return r, err
+  case 4:
+    var r GetOlderMsgsRequest
+    err := json.Unmarshal([]byte(jsonRequest), &r)
+    return r, err
+  case 5:
+    var r GetNewerMsgsRequest
+    err := json.Unmarshal([]byte(jsonRequest), &r)
+    return r, err
+  case 6:
+    var r JoinRoomRequest
+    err := json.Unmarshal([]byte(jsonRequest), &r)
+    return r, err
+  case 7:
+    var r LeaveRoomRequest
+    err := json.Unmarshal([]byte(jsonRequest), &r)
+    return r, err
+  case 8:
+    var r CreateRoomRequest
+    err := json.Unmarshal([]byte(jsonRequest), &r)
+    return r, err
+  case 9:
+    var r PostMsgRequest
+    err := json.Unmarshal([]byte(jsonRequest), &r)
+    return r, err
+  case 10:
+    var r MsgReadRequest
+    err := json.Unmarshal([]byte(jsonRequest), &r)
+    return r, err
+  default:
+    return nil, errors.New("illegal reqType")
+  }
 }
 
 func ToResponseString(response Response) (string, error) {
-	jsonResponse, err := json.Marshal(response)
+  jsonResponse, err := json.Marshal(response)
 
-	if (err != nil) {
-		return "", err
-	}
+  if (err != nil) {
+    return "", err
+  }
 
-	switch response.(type) {
-	case SignUpResponse:
-		return fmt.Sprintf("00%s", jsonResponse), nil
-	case SignInResponse:
-		return fmt.Sprintf("01%s", jsonResponse), nil
-	case GetRoomsResponse:
-		return fmt.Sprintf("02%s", jsonResponse), nil
-	case GetRoomUsersResponse:
-		return fmt.Sprintf("03%s", jsonResponse), nil
-	case GetOlderMsgsResponse:
-		return fmt.Sprintf("04%s", jsonResponse), nil
-	case GetNewerMsgsResponse:
-		return fmt.Sprintf("05%s", jsonResponse), nil
-	case JoinRoomResponse:
-		return fmt.Sprintf("06%s", jsonResponse), nil
-	case LeaveRoomResponse:
-		return fmt.Sprintf("07%s", jsonResponse), nil
-	case CreateRoomResponse:
-		return fmt.Sprintf("08%s", jsonResponse), nil
-	case PostMsgResponse:
-		return fmt.Sprintf("09%s", jsonResponse), nil
-	case MsgReadRequest:
-		return fmt.Sprintf("10%s", jsonResponse), nil
-	case ErrorResponse:
-		return fmt.Sprintf("-1%s", jsonResponse), nil
-	default:
-		return "", errors.New("illegal response type")
-
-	}
+  switch response.(type) {
+  case SignUpResponse:
+    return fmt.Sprintf("00%s", jsonResponse), nil
+  case SignInResponse:
+    return fmt.Sprintf("01%s", jsonResponse), nil
+  case GetRoomsResponse:
+    return fmt.Sprintf("02%s", jsonResponse), nil
+  case GetRoomUsersResponse:
+    return fmt.Sprintf("03%s", jsonResponse), nil
+  case GetOlderMsgsResponse:
+    return fmt.Sprintf("04%s", jsonResponse), nil
+  case GetNewerMsgsResponse:
+    return fmt.Sprintf("05%s", jsonResponse), nil
+  case JoinRoomResponse:
+    return fmt.Sprintf("06%s", jsonResponse), nil
+  case LeaveRoomResponse:
+    return fmt.Sprintf("07%s", jsonResponse), nil
+  case CreateRoomResponse:
+    return fmt.Sprintf("08%s", jsonResponse), nil
+  case PostMsgResponse:
+    return fmt.Sprintf("09%s", jsonResponse), nil
+  case MsgReadRequest:
+    return fmt.Sprintf("10%s", jsonResponse), nil
+  case ErrorResponse:
+    return fmt.Sprintf("-1%s", jsonResponse), nil
+  default:
+    return "", errors.New("illegal response type")
+  }
 }
