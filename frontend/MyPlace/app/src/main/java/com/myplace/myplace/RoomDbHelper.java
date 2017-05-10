@@ -30,6 +30,9 @@ public class RoomDbHelper extends SQLiteOpenHelper {
     public RoomDbHelper(Context context) {
         super(context, DATABASE_NAME,null, DATABASE_VERSION);
         this.context = context;
+        SQLiteDatabase db = this.getWritableDatabase();
+        onCreate(db);
+        db.close();
     }
 
     public void onCreate(SQLiteDatabase db) {
@@ -200,6 +203,43 @@ public class RoomDbHelper extends SQLiteOpenHelper {
         }
         db.close();
         return list;
+    }
+
+    private void dropRoomTable(String roomName) {
+        roomName = roomName.replace(" ", "_");
+
+        String query = "DROP TABLE IF EXISTS "+roomName;
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        db.execSQL(query);
+        db.close();
+    }
+
+    private void dropRoomListTable() {
+
+        String query = "DROP TABLE IF EXISTS "+TABLE_ROOMS;
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        db.execSQL(query);
+        db.close();
+    }
+
+    public void dropAllTables() {
+        String selectQuery = "SELECT * FROM "+TABLE_ROOMS;
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor c = db.rawQuery(selectQuery,null);
+
+        if (c.moveToFirst()) {
+            do {
+                String roomName = c.getString(c.getColumnIndex("roomname"));
+
+                dropRoomTable(roomName);
+            } while (c.moveToNext());
+            c.close();
+        }
+        db.close();
+        dropRoomListTable();
     }
 
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {

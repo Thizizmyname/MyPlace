@@ -3,6 +3,7 @@ package com.myplace.myplace;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -10,6 +11,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
@@ -22,7 +25,7 @@ import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 
 
-
+import static com.myplace.myplace.LoginActivity.LOGIN_PREFS;
 import static com.myplace.myplace.R.id.action_create;
 import static com.myplace.myplace.R.id.action_join;
 
@@ -189,5 +192,55 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog alertDialog = builder.create();
         alertDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         alertDialog.show();
+    }
+
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    public void logout() {
+        SharedPreferences loginInfo = getSharedPreferences(LOGIN_PREFS, 0);
+        SharedPreferences.Editor loginEdit = loginInfo.edit();
+        loginEdit.putString("username", "");
+        loginEdit.putBoolean("loggedIn", false);
+        loginEdit.commit();
+    }
+
+    public void onLogoutClick() {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setMessage(R.string.logout_question);
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // TODO: Send logout request
+                roomDB.dropAllTables();
+                logout();
+
+                Intent startLogin = new Intent(getApplicationContext(), LoginActivity.class);
+                startActivity(startLogin);
+                finish();
+            }
+        });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // Cancel
+            }
+        });
+        builder.create();
+        builder.show();
+    }
+
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_logout) {
+            onLogoutClick();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
