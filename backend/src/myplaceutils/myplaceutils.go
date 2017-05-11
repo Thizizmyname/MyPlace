@@ -22,6 +22,10 @@ var (
   ResponseChannel chan HandlerArgs
 )
 
+const (
+	MsgMaxLength = 1256
+)
+
 type User struct {
   UName string
   Pass string
@@ -37,10 +41,10 @@ type Room struct {
 }
 
 type Message struct {
-  ID    int
-  Time  time.Time
-  Uname string
-  Body  string
+	ID    int
+	Time  time.Time
+	UName string
+	Body  string
 }
 
 type HandlerArgs struct {
@@ -93,14 +97,16 @@ func (u *User) BindConnection(c net.Conn) bool {
 
 //Room method to add a user to the room
 func (r *Room) AddUser(u *User) {
-  //r.Users = append(r.Users, u)
-  u.JoinRoom(r)
+	//r.Users = append(r.Users, u)
+	//u.JoinRoom(r)
 }
 
-//User method to add a room to the list of room that the user is part of
-func (u *User) JoinRoom(r *Room) {
-  //u.Rooms = append(u.Rooms, r)
+//Updates dbs accordingly.
+func (user *User) JoinRoom(room *Room) {
+	if UserIsInRoom(user.UName, room) { return }
 
+	user.Rooms.PushBack(room.Name)
+	room.Users.PushBack(user.UName)
 }
 
 // Removes the user from the room
@@ -123,19 +129,12 @@ func (u *User) RemoveRoom(r *Room) {
   // }
 }
 
-func CreateUser(uname string, pass string, c net.Conn) *User {
-  u := User{}
-  u.UName = uname
-  u.Pass = pass
-  //u.Rooms = []Room{}
-  //u.ActiveConn = c
-
-  //Users = append(Users,&u)
-
-  return &u
+func CreateUser(uname string, pass string) *User {
+	u := User{uname, pass, list.New()}
+	return &u
 }
 
-//Purpose: returns an array of the names of the rooms the user is in
+//purpose: returns an array of the names of the rooms the user is in
 //Use:    When the client software wants to list rooms, passing a name as an argument for joining a room, etc.
 //Tested: NO
 func (u *User) ShowRooms() []string {
@@ -161,6 +160,8 @@ func CreateRoom(name string) *Room {
   return &r
 }
 
+//Purpose: Create
+
 //Purpose: returns an array of the names of the users in the room
 //Use: when the client or server wishes to know what users are in the room
 //Tested: NO
@@ -173,6 +174,37 @@ func ShowUsers(r Room) []string {
   return users
 }
 
+//Purpose: Create a new user and add it to db, and return it.
+func AddNewUser(uname string, pass string) *User {
+	if UserExists(uname) {
+		return nil
+	} else {
+		newUser := User{uname, pass, list.New()}
+		Users[uname] = newUser
+		return &newUser
+	}
+}
+
+//Purpose: Create a new room and add it to db, and return it.
+func AddNewRoom(name string) *Room {
+	newRoomID := findFreeRoomID()
+	newRoom := Room{newRoomID, name, list.New(), make(map[int]Message), list.New()}
+	Rooms[newRoomID] = newRoom
+	return &newRoom
+}
+
+//Purpose: Create a new msg and add it to db, and return it.
+func AddNewMessage(uname string, room *Room, body string) *Message {
+	if UserIsInRoom(uname, room) == false {
+		return nil
+	}
+
+	newMsgID := findFreeMsgID(room)
+	newMsg := Message{newMsgID, time.Now(), uname, body}
+	room.Messages[newMsg.ID] = newMsg
+	return &newMsg
+}
+
 func GetUser(uname string) *User{
   user, exists := Users[uname]
 
@@ -183,14 +215,54 @@ func GetUser(uname string) *User{
   }
 }
 
-func GetRoom(id int) *Room{
-  room, exists := Rooms[id]
+func UserExists(uname string) bool {
+	return GetUser(uname) != nil
+}
+
+func GetRoom(id int) *Room {
+	room, exists := Rooms[id]
 
   if exists {
     return &room
   } else {
     return nil
   }
+}
+
+func RoomExists(roomID int) bool {
+	return GetRoom(roomID) != nil
+}
+
+func UserIsInRoom(uname string, room *Room) bool {
+	unameList := room.Users
+
+	for e := unameList.Front(); e != nil; e = e.Next() {
+		if e.Value.(string) == uname {
+			return true
+		}
+	}
+
+	return false
+}
+
+func findFreeRoomID() int {
+	maxID := -1
+
+	for id, _ := range Rooms {
+		if id > maxID { maxID = id }
+	}
+
+	return maxID + 1
+}
+
+func findFreeMsgID(r *Room) int {
+	maxID := -1
+
+	for id, _ := range r.Messages {
+		if id > maxID { maxID = id }
+	}
+
+	return maxID + 1
 }
 
 func DestroyUser(id string){
