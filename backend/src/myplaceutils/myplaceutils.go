@@ -56,8 +56,8 @@ type UserDB map[string]*User //UName is key
 type RoomDB map[int]*Room //ID is key
 
 func InitDBs() {
-  Users = make(map[string]*User)
-  Rooms = make(map[int]*Room)
+  Users = make(UserDB)
+  Rooms = make(RoomDB)
 }
 
 /*
