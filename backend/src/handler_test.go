@@ -25,10 +25,72 @@ func executeAndTestResponse(t *testing.T, request requests_responses.Request, ex
 	handlerChan <- handlerArgs //send args to handler
 	response := <-responseChan
 
-	if response != expectedResponse {
-		t.Error(reflect.TypeOf(request))
+	if r, ok := response.(requests_responses.PostMsgResponse); ok {
+		r2 := expectedResponse.(requests_responses.PostMsgResponse)
+		if r.RequestID != r2.RequestID ||
+			r.Msg.MsgID != r2.Msg.MsgID ||
+			r.Msg.RoomID != r2.Msg.RoomID ||
+			r.Msg.UName != r2.Msg.UName ||
+			r.Msg.Body != r2.Msg.Body {
+
+			t.Errorf("request: %v\nresponse: %v\nactual response: %v\nexpected response:%v",
+			reflect.TypeOf(r), reflect.TypeOf(r2), r, r2)
+
+		}
+	} else if response != expectedResponse {
+		t.Errorf("request: %v\nresponse: %v\nactual response: %v\nexpected response:%v",
+			reflect.TypeOf(request),
+			reflect.TypeOf(response),
+			response,
+			expectedResponse)
 	}
 }
+
+// func executeAndTestResponsePostMsg(t *testing.T, request requests_responses.PostMsgRequest, r2 requests_responses.PostMsgResponse, room *myplaceutils.Room) {
+// 	handlerChan := make(chan myplaceutils.HandlerArgs)
+// 	go handler(handlerChan) //now handler is waiting for requests
+// 	defer close(handlerChan)
+
+// 	responseChan := make(chan requests_responses.Response)
+// 	handlerArgs := myplaceutils.HandlerArgs{request, responseChan}
+
+// 	handlerChan <- handlerArgs //send args to handler
+// 	r := (<-responseChan).(requests_responses.PostMsgResponse)
+
+// 	if r.RequestID != r2.RequestID ||
+// 		r.Msg.MsgID != r2.Msg.MsgID ||
+// 		r.Msg.RoomID != r2.Msg.RoomID ||
+// 		r.Msg.UName != r2.Msg.UName ||
+// 		r.Msg.Body != r2.Msg.Body {
+
+// 		//t.Error(reflect.TypeOf(request))
+// 	}
+
+// 	for e := room.OutgoingChannels.Front(); e != nil; e = e.Next() {
+// 		uChan := e.Value.(chan requests_responses.Response)
+// 		r := (<-responseChan).(requests_responses.PostMsgResponse)
+// 		if (uChan == responseChan) {
+// 			if r.RequestID != r2.RequestID ||
+// 				r.Msg.MsgID != r2.Msg.MsgID ||
+// 				r.Msg.RoomID != r2.Msg.RoomID ||
+// 				r.Msg.UName != r2.Msg.UName ||
+// 				r.Msg.Body != r2.Msg.Body {
+
+// 				t.Error(reflect.TypeOf(request))
+// 			}
+// 		} else {
+// 			if r.RequestID != -1 ||
+// 				r.Msg.MsgID != r2.Msg.MsgID ||
+// 				r.Msg.RoomID != r2.Msg.RoomID ||
+// 				r.Msg.UName != r2.Msg.UName ||
+// 				r.Msg.Body != r2.Msg.Body {
+
+// 				t.Error(reflect.TypeOf(request))
+// 			}
+// 		}
+// 	}
+// }
+
 
 /*
 00.signup
@@ -61,4 +123,57 @@ func TestSignUp(t *testing.T) {
 	if exists == false {
 		t.Error("User not added to userDB after signed up")
 	}
+}
+
+
+
+func TestPostMsg(t *testing.T) {
+	myplaceutils.InitDBs()
+	u1 := myplaceutils.AddNewUser("ask", "embla")
+	u2 := myplaceutils.AddNewUser("adam", "eva")
+	r1 := myplaceutils.AddNewRoom("livingroom")
+	r2 := myplaceutils.AddNewRoom("bedroom")
+	u1.JoinRoom(r1)
+	u1.JoinRoom(r2)
+	u2.JoinRoom(r1)
+
+	str := "hello? who are you?"
+	req := requests_responses.PostMsgRequest{12345, u1.UName, r1.ID, str}
+	msgI := requests_responses.MsgInfo{0, r1.ID, u1.UName, -1, str}
+	resp := requests_responses.PostMsgResponse{12345, msgI}
+	executeAndTestResponse(t, req, resp)
+
+	str = "anybody there?"
+	req = requests_responses.PostMsgRequest{12345, u1.UName, r1.ID, str}
+	msgI = requests_responses.MsgInfo{1, r1.ID, u1.UName, -1, str}
+	resp = requests_responses.PostMsgResponse{12345, msgI}
+	executeAndTestResponse(t, req, resp)
+
+	str = "..."
+	req = requests_responses.PostMsgRequest{12345, u1.UName, r1.ID, str}
+	msgI = requests_responses.MsgInfo{2, r1.ID, u1.UName, -1, str}
+	resp = requests_responses.PostMsgResponse{12345, msgI}
+	executeAndTestResponse(t, req, resp)
+
+	str = "no..yes"
+	req = requests_responses.PostMsgRequest{12345, u2.UName, r1.ID, str}
+	msgI = requests_responses.MsgInfo{3, r1.ID, u2.UName, -1, str}
+	resp = requests_responses.PostMsgResponse{12345, msgI}
+	executeAndTestResponse(t, req, resp)
+
+	str = ""
+	req = requests_responses.PostMsgRequest{12345, u1.UName, r2.ID, str}
+	eresp := requests_responses.ErrorResponse{12345, requests_responses.PostMsgIndex, "bad msg length"}
+	executeAndTestResponse(t, req, eresp)
+
+	str = "que?\npor pue"
+	req = requests_responses.PostMsgRequest{12345, u1.UName, r2.ID, str}
+	msgI = requests_responses.MsgInfo{0, r2.ID, u1.UName, -1, str}
+	resp = requests_responses.PostMsgResponse{12345, msgI}
+	executeAndTestResponse(t, req, resp)
+
+	str = "..."
+	req = requests_responses.PostMsgRequest{12345, u2.UName, r2.ID, str}
+	eresp = requests_responses.ErrorResponse{12345, requests_responses.PostMsgIndex, "user not in room"}
+	executeAndTestResponse(t, req, eresp)
 }
