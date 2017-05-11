@@ -1,11 +1,14 @@
 package com.myplace.myplace;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -32,6 +35,8 @@ import static com.myplace.myplace.R.id.action_join;
 public class MainActivity extends AppCompatActivity {
     private TCPClient mTcpClient;
     final Context context = this;
+    TCPService mService;
+    boolean mBound = false;
 
     FloatingActionsMenu actionMenu;
     ListView listView;
@@ -40,6 +45,43 @@ public class MainActivity extends AppCompatActivity {
 
     //Defines the database
     public RoomDbHelper roomDB = null;
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // Bind to LocalService
+        Intent intent = new Intent(this, TCPClient.class);
+        bindService(intent, mTConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // Unbind from the service
+        if (mBound) {
+            unbindService(mTConnection);
+            mBound = false;
+        }
+    }
+
+    /** Defines callbacks for service binding, passed to bindService() */
+    private ServiceConnection mTConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            TCPService.TCPBinder binder = (TCPService.TCPBinder) service;
+            mService = binder.getService();
+            mBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +116,8 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
+
+        startService(new Intent(this, TCPService.class));
 
 
         actionMenu = (FloatingActionsMenu) findViewById(R.id.action_menu);
@@ -184,8 +228,10 @@ public class MainActivity extends AppCompatActivity {
                 roomList.add(new Room(0,roomName));
                 roomAdapter.notifyDataSetChanged();
 
-                TCPClient.request = getResources().getString(createOrJoin)+roomName;
-                new ConnectTask().execute("");
+                Log.e("MainActivity", "Running setUpConnection");
+                mService.setUpConnection();
+                //TCPClient.request = getResources().getString(createOrJoin)+roomName;
+                //new ConnectTask().execute("");
             }
         });
 
