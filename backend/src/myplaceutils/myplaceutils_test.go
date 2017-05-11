@@ -156,24 +156,6 @@ func TestGetUser(t *testing.T){
 }
 
 func TestShowUsers(t *testing.T){
-
-	usr0 := GetUser("MainUser")
-
-	rooms := usr0.ShowRooms()
-
-	for x,y := range rooms{
-		fmt.Printf("%d,%s",x,y)
-	}
-}
-
-func TestPostMsg(t *testing.T){
-	conn := establishConnection()
-	usr0 := CreateUser("ussr1", "pass", conn)
-	room0 := CreateRoom("Rum0")
-
-	usr0.PostMsg(room0,"hej detta är ett meddelande")
-
-	msg := room0.Messages[0]
 	
-	fmt.Printf("%v",msg)
+	
 }

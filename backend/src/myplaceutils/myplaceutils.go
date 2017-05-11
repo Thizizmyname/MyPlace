@@ -117,31 +117,21 @@ func (r *Room) RemoveUser(u *User) {
 }
 
 // Removes the room from the user
-<<<<<<< HEAD
-func (u *User)RemoveRoom(r *Room) {
-	for i, elem := range u.Rooms {
-		if reflect.DeepEqual(elem, r) {
-			u.Rooms = u.Rooms[:i+copy(u.Rooms[i:], u.Rooms[i+1:])]
-		}
-	}
-=======
 func (u *User) RemoveRoom(r *Room) {
 	// for i, elem := range u.Rooms {
 	// 	if reflect.DeepEqual(elem, r) {
 	// 		u.Rooms = u.Rooms[:i+copy(u.Rooms[i:], u.Rooms[i+1:])]
 	// 	}
 	// }
->>>>>>> 37c131a232a316ee80b37a72f3b95d0417e0ccec
 }
 
-func CreateUser(uname string, pass string, c net.Conn) *User {
+func CreateUser(uname string, pass string) *User {
 	u := User{}
 	u.UName = uname
 	u.Pass = pass
-	//u.Rooms = []Room{}
-	//u.ActiveConn = c
+	u.Rooms = list.New()
 	
-	//Users = append(Users,&u)
+	Users[uname] = u
 
 	return &u
 }
@@ -161,13 +151,15 @@ func (u *User) ShowRooms() []string {
 //Purpose: Creating a new room
 //Use: To create a new chat room
 //Tested: No
-func CreateRoom(name string) *Room {
+func CreateRoom(name string, id int) *Room {
 	r := Room{}
+	r.ID = id
 	r.Name = name
-	// r.Users = []*User{}
-	// r.Messages = []Message{}
+	r.Users = list.New()
+	r.Messages = make(map[int]Message)
+	r.OutgoingChannels = list.New()
 
-	//Rooms = append(Rooms, &r)
+	Rooms[id] = r
 
 	return &r
 }
@@ -185,13 +177,17 @@ func CreateMessage(Uname string, text string, id int) *Message{
 //Purpose: returns an array of the names of the users in the room
 //Use: when the client or server wishes to know what users are in the room
 //Tested: NO
-func ShowUsers(r Room) []string {
-	var users []string
-	// for _, u := range r.Users {
-	// 	fmt.Printf("%v\n", u.Uname)
-	// 	users = append(users, u.Uname)
-	// }
-	return users
+func ShowUsers(r *Room) []string {
+	var names []string
+	users := r.Users
+
+	if r != nil{
+		for e := users.Front(); e != nil; e = e.Next() {
+			names = append(names, e.Value.(string))
+		}
+		return names
+	}
+	panic("invalid room")
 }
 
 func GetUser(uname string) *User{
@@ -214,11 +210,12 @@ func GetRoom(id int) *Room{
 	}
 }
 
+/*
 func (u *User)PostMsg(r *Room,text string){
 	len := len(r.Messages)
 	//oldmsg := msgs[len(msgs)-1] //senaste meddelandet
 
-	newmsg := CreateMessage(u.Uname, text, len)
+	newmsg := CreateMessage(u.UName, text, len)
 
 	r.Messages = append(r.Messages, newmsg)
 }
@@ -233,7 +230,7 @@ func GetMessages(msgId int, r *Room) []*Message{
 	msgs := msg[msgId:]
 	return msgs
 }
-
+*/
 func DestroyUser(id string){
 
 }

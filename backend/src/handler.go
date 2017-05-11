@@ -71,10 +71,28 @@ func signIn(request requests_responses.SignInRequest) requests_responses.Respons
 }
 
 func getRooms(request requests_responses.GetRoomsRequest) requests_responses.Response {
+
+	//id := request.RequestID
+	//name := request.UName
+
+	//usr := myplaceutils.GetUser(name)
+	//rooms := usr.Rooms
+
+	
+	
 	return nil
 }
 
 func getRoomUsers(request requests_responses.GetRoomUsersRequest) requests_responses.Response {
+
+	//id := request.RequestID
+	//roomId := request.RoomID
+
+	//room := myplaceutils.GetRoom(roomId)
+	//users := room.Users
+
+	//response := requests_responses.GetRoomUsersResponse{id, roomId, users}
+	
 	return nil
 }
 
