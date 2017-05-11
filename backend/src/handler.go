@@ -54,7 +54,7 @@ func signUp(request requests_responses.SignUpRequest) requests_responses.Respons
     list.New()}
 
   //update the db:
-  myplaceutils.Users[user.UName] = user
+  myplaceutils.Users[user.UName] = &user
 
   //create and return a response to the request
   response := requests_responses.SignUpResponse{request.RequestID, true, ""}
@@ -69,7 +69,23 @@ func signUp(request requests_responses.SignUpRequest) requests_responses.Respons
 }
 
 func signIn(request requests_responses.SignInRequest, responseChan chan requests_responses.Response) requests_responses.Response {
-	return nil
+	requestID := request.RequestID
+	user := myplaceutils.GetUser(request.UName)
+	pass := request.Pass
+
+	if user == nil {
+		return requests_responses.SignInResponse{requestID, false, "uname"}
+	} else if pass != user.Pass {
+		return requests_responses.SignInResponse{requestID, false, "pass"}
+	}
+
+	for e := user.Rooms.Front(); e != nil; e = e.Next() {
+		roomID := e.Value.(int)
+		room := myplaceutils.GetRoom(roomID)
+		room.OutgoingChannels.PushBack(responseChan)
+	}
+
+	return requests_responses.SignInResponse{requestID, true, ""}
 }
 
 func getRooms(request requests_responses.GetRoomsRequest) requests_responses.Response {

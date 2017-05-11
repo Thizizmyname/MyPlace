@@ -161,7 +161,7 @@ const (
 	PostMsgIndex = 9
 	MsgReadIndex = 10
 	SignOutIndex = 11
-	ErrorIndex = 12
+	ErrorIndex = -1
 )
 
 //---------------------------INTERFACE STOP

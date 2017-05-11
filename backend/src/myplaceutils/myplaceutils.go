@@ -36,7 +36,7 @@ type Room struct {
   ID int
   Name     string
   Users *list.List //list of strings:UName
-  Messages map[int]Message //ID is key
+  Messages map[int]*Message //ID is key
   OutgoingChannels *list.List //[]chan requests_responses.Response
 }
 
@@ -52,12 +52,12 @@ type HandlerArgs struct {
   ResponseChannel chan requests_responses.Response
 }
 
-type UserDB map[string]User //UName is key
-type RoomDB map[int]Room //ID is key
+type UserDB map[string]*User //UName is key
+type RoomDB map[int]*Room //ID is key
 
 func InitDBs() {
-  Users = make(map[string]User)
-  Rooms = make(map[int]Room)
+  Users = make(map[string]*User)
+  Rooms = make(map[int]*Room)
 }
 
 /*
@@ -105,7 +105,7 @@ func (r *Room) AddUser(u *User) {
 func (user *User) JoinRoom(room *Room) {
 	if UserIsInRoom(user.UName, room) { return }
 
-	user.Rooms.PushBack(room.Name)
+	user.Rooms.PushBack(room.ID)
 	room.Users.PushBack(user.UName)
 }
 
@@ -180,7 +180,7 @@ func AddNewUser(uname string, pass string) *User {
 		return nil
 	} else {
 		newUser := User{uname, pass, list.New()}
-		Users[uname] = newUser
+		Users[uname] = &newUser
 		return &newUser
 	}
 }
@@ -188,8 +188,8 @@ func AddNewUser(uname string, pass string) *User {
 //Purpose: Create a new room and add it to db, and return it.
 func AddNewRoom(name string) *Room {
 	newRoomID := findFreeRoomID()
-	newRoom := Room{newRoomID, name, list.New(), make(map[int]Message), list.New()}
-	Rooms[newRoomID] = newRoom
+	newRoom := Room{newRoomID, name, list.New(), make(map[int]*Message), list.New()}
+	Rooms[newRoomID] = &newRoom
 	return &newRoom
 }
 
@@ -201,7 +201,7 @@ func AddNewMessage(uname string, room *Room, body string) *Message {
 
 	newMsgID := findFreeMsgID(room)
 	newMsg := Message{newMsgID, time.Now(), uname, body}
-	room.Messages[newMsg.ID] = newMsg
+	room.Messages[newMsg.ID] = &newMsg
 	return &newMsg
 }
 
@@ -209,7 +209,7 @@ func GetUser(uname string) *User{
   user, exists := Users[uname]
 
   if exists {
-    return &user
+    return user
   } else {
     return nil
   }
@@ -223,7 +223,7 @@ func GetRoom(id int) *Room {
 	room, exists := Rooms[id]
 
   if exists {
-    return &room
+    return room
   } else {
     return nil
   }
