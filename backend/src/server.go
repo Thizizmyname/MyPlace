@@ -75,7 +75,7 @@ func main() {
   var loadError error
   myplaceutils.Users, myplaceutils.Rooms, loadError = data.LoadDBs()
   if loadError!=nil {
-    myplaceutils.Error.Fatalf("Error loading database, exiting\nError message: %v\n",loadError)
+    myplaceutils.Error.Printf("Error loading database, exiting\nError message: %v\n",loadError)
   }
   err := data.StoreDBs(myplaceutils.Users, myplaceutils.Rooms)
   if err!=nil {
