@@ -23,6 +23,9 @@ type RoomStore struct {
 type UserDBStore map[string]*UserStore
 type RoomDBStore map[int]*RoomStore
 
+
+//Stores dbs to files named "rooms" and "users" in same folder as this.
+//Encrypted using json.
 func StoreDBs(us myplaceutils.UserDB, rs myplaceutils.RoomDB) error {
 	usStore, rsStore := toStoreFormat(us, rs)
 
@@ -50,31 +53,36 @@ func StoreDBs(us myplaceutils.UserDB, rs myplaceutils.RoomDB) error {
 
 }
 
+
+//Reads from files "users" and "rooms" is same folder as this file.
+//If read or decryption fails, empty dbs are returned.
 func LoadDBs() (myplaceutils.UserDB, myplaceutils.RoomDB, error) {
 	var usj []byte
 	var rsj []byte
 	var e error
+	us := make(myplaceutils.UserDB)
+	rs := make(myplaceutils.RoomDB)
 
 	if usj, e = ioutil.ReadFile("users"); e != nil {
-		return nil, nil, e
+		return us, rs, e
 	}
 
 	if rsj, e = ioutil.ReadFile("rooms"); e != nil {
-		return nil, nil, e
+		return us, rs, e
 	}
 
 	var usStore UserDBStore
 	var rsStore RoomDBStore
 
 	if e = json.Unmarshal(usj, &usStore); e != nil {
-		return nil, nil, e
+		return us, rs, e
 	}
 
 	if e = json.Unmarshal(rsj, &rsStore); e != nil {
-		return nil, nil, e
+		return us, rs, e
 	}
 
-	us, rs := fromStoreFormat(usStore, rsStore)
+	us, rs = fromStoreFormat(usStore, rsStore)
 	return us, rs, nil
 }
 
