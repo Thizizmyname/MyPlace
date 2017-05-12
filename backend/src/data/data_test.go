@@ -10,6 +10,17 @@ import (
 )
 
 
+func TestLoad(t *testing.T) {
+	//delete rooms and users
+	us, rs, e := LoadDBs()
+
+	if e == nil {
+		fmt.Println("Remove 'rooms' and 'users'")
+	}else if len(us) != 0 || len(rs) != 0 {
+		t.Error("Wrong size after failed db-read")
+	}
+}
+
 func TestStoreLoad(t *testing.T) {
 	testStoreLoad(t, 100, 100, 100)
 	testStoreLoad(t, 0, 0, 0)
