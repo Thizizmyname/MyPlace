@@ -8,6 +8,7 @@ import (
     "os"
     "myplaceutils"
     "requests_responses"
+    "data"
 )
 
 
@@ -65,9 +66,21 @@ func disconnectAll() {
 func main() {
   //Title
   myplaceutils.PrintTitle()
-  //Initialize loggers
+  //Initializing
+  //Loggers
   log.Println("Initializing loggers")
   InitLoggers(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
+  //Users and Rooms
+  myplaceutils.Info.Println("Loading database..")
+  var loadError error
+  myplaceutils.Users, myplaceutils.Rooms, loadError = data.LoadDBs()
+  if loadError!=nil {
+    myplaceutils.Error.Fatalf("Error loading database, exiting\nError message: %v\n",loadError)
+  }
+  err := data.StoreDBs(myplaceutils.Users, myplaceutils.Rooms)
+  if err!=nil {
+    myplaceutils.Error.Println(err)
+  }
   log.Println("Initialization complete\n-------------------------")
   //255 känns som en lämplig size så länge MAGIC NUMBER
   myplaceutils.ResponseChannel = make(chan myplaceutils.HandlerArgs, 255)
