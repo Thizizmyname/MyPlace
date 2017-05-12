@@ -140,14 +140,16 @@ func postMsg(request requests_responses.PostMsgRequest, responseChan chan reques
 			"bad msg length"}
 	}
 
+
 	msg := myplaceutils.AddNewMessage(uname, room, body)
 	msgResp := requests_responses.MsgInfo{msg.ID, roomID, msg.UName, msg.Time.Unix(), msg.Body}
 
 	requestIDToAllButSender := -1
 	response := requests_responses.PostMsgResponse{requestIDToAllButSender, msgResp}
 
-	for e := room.OutgoingChannels.Front(); e != nil; e.Next() {
+	for e := room.OutgoingChannels.Front(); e != nil; e = e.Next() {
 		roomChan := e.Value.(chan requests_responses.Response)
+
 		if roomChan != responseChan {
 			roomChan <- response
 		}

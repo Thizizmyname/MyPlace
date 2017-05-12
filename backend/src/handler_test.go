@@ -11,32 +11,25 @@ import (
 func TestMain(m *testing.M) {
 	myplaceutils.InitDBs()
 	retCode := m.Run()
+	//time.Sleep(3 * time.Second)
 	os.Exit(retCode)
 }
 
 func executeAndTestResponse(t *testing.T, request requests_responses.Request, expectedResponse requests_responses.Response) {
 	handlerChan := make(chan myplaceutils.HandlerArgs)
 	go handler(handlerChan) //now handler is waiting for requests
-	defer close(handlerChan)
+	//defer close(handlerChan)
 
-	responseChan := make(chan requests_responses.Response)
+	responseChan := make(chan requests_responses.Response, 1)
 	handlerArgs := myplaceutils.HandlerArgs{request, responseChan}
 
 	handlerChan <- handlerArgs //send args to handler
 	response := <-responseChan
 
 	if r, ok := response.(requests_responses.PostMsgResponse); ok {
-		r2 := expectedResponse.(requests_responses.PostMsgResponse)
-		if r.RequestID != r2.RequestID ||
-			r.Msg.MsgID != r2.Msg.MsgID ||
-			r.Msg.RoomID != r2.Msg.RoomID ||
-			r.Msg.UName != r2.Msg.UName ||
-			r.Msg.Body != r2.Msg.Body {
-
-			t.Errorf("request: %v\nresponse: %v\nactual response: %v\nexpected response:%v",
-			reflect.TypeOf(r), reflect.TypeOf(r2), r, r2)
-
-		}
+		req := request.(requests_responses.PostMsgRequest)
+		expResp := expectedResponse.(requests_responses.PostMsgResponse)
+		testPostMsgResponse(t, req, expResp, r)
 	} else if response != expectedResponse {
 		t.Errorf("request: %v\nresponse: %v\nactual response: %v\nexpected response:%v",
 			reflect.TypeOf(request),
@@ -46,50 +39,35 @@ func executeAndTestResponse(t *testing.T, request requests_responses.Request, ex
 	}
 }
 
-// func executeAndTestResponsePostMsg(t *testing.T, request requests_responses.PostMsgRequest, r2 requests_responses.PostMsgResponse, room *myplaceutils.Room) {
-// 	handlerChan := make(chan myplaceutils.HandlerArgs)
-// 	go handler(handlerChan) //now handler is waiting for requests
-// 	defer close(handlerChan)
+func testPostMsgResponse(t *testing.T, req requests_responses.PostMsgRequest, r2 requests_responses.PostMsgResponse, senderResp requests_responses.PostMsgResponse) {
+	r := senderResp
 
-// 	responseChan := make(chan requests_responses.Response)
-// 	handlerArgs := myplaceutils.HandlerArgs{request, responseChan}
+	if r.RequestID != r2.RequestID ||
+		r.Msg.MsgID != r2.Msg.MsgID ||
+		r.Msg.RoomID != r2.Msg.RoomID ||
+		r.Msg.UName != r2.Msg.UName ||
+		r.Msg.Body != r2.Msg.Body {
 
-// 	handlerChan <- handlerArgs //send args to handler
-// 	r := (<-responseChan).(requests_responses.PostMsgResponse)
+		t.Errorf("request: %v\nresponse: %v\nactual response: %v\nexpected response:%v",
+			reflect.TypeOf(r), reflect.TypeOf(r2), r, r2)
+	}
 
-// 	if r.RequestID != r2.RequestID ||
-// 		r.Msg.MsgID != r2.Msg.MsgID ||
-// 		r.Msg.RoomID != r2.Msg.RoomID ||
-// 		r.Msg.UName != r2.Msg.UName ||
-// 		r.Msg.Body != r2.Msg.Body {
+	room := myplaceutils.Rooms[req.RoomID]
 
-// 		//t.Error(reflect.TypeOf(request))
-// 	}
+	for e := room.OutgoingChannels.Front(); e != nil; e = e.Next() {
+		outChan := e.Value.(chan requests_responses.Response)
+		r = (<-outChan).(requests_responses.PostMsgResponse)
 
-// 	for e := room.OutgoingChannels.Front(); e != nil; e = e.Next() {
-// 		uChan := e.Value.(chan requests_responses.Response)
-// 		r := (<-responseChan).(requests_responses.PostMsgResponse)
-// 		if (uChan == responseChan) {
-// 			if r.RequestID != r2.RequestID ||
-// 				r.Msg.MsgID != r2.Msg.MsgID ||
-// 				r.Msg.RoomID != r2.Msg.RoomID ||
-// 				r.Msg.UName != r2.Msg.UName ||
-// 				r.Msg.Body != r2.Msg.Body {
+		if r.RequestID != -1 ||
+			r.Msg.MsgID != r2.Msg.MsgID ||
+			r.Msg.RoomID != r2.Msg.RoomID ||
+			r.Msg.UName != r2.Msg.UName ||
+			r.Msg.Body != r2.Msg.Body {
 
-// 				t.Error(reflect.TypeOf(request))
-// 			}
-// 		} else {
-// 			if r.RequestID != -1 ||
-// 				r.Msg.MsgID != r2.Msg.MsgID ||
-// 				r.Msg.RoomID != r2.Msg.RoomID ||
-// 				r.Msg.UName != r2.Msg.UName ||
-// 				r.Msg.Body != r2.Msg.Body {
-
-// 				t.Error(reflect.TypeOf(request))
-// 			}
-// 		}
-// 	}
-// }
+			t.Errorf("request: %v\nresponse: %v\nactual response: %v\nexpected response:%v", reflect.TypeOf(r), reflect.TypeOf(r2), r, r2)
+		}
+	}
+}
 
 
 /*
@@ -186,43 +164,72 @@ func TestPostMsg(t *testing.T) {
 	u1.JoinRoom(r2)
 	u2.JoinRoom(r1)
 
+	//login
+	lrq := requests_responses.SignInRequest{1234, u1.UName, u1.Pass}
+	lrp := requests_responses.SignInResponse{1234, true, ""}
+	executeAndTestResponse(t, lrq, lrp)
+	lrq = requests_responses.SignInRequest{1234, u2.UName, u2.Pass}
+	lrp = requests_responses.SignInResponse{1234, true, ""}
+	executeAndTestResponse(t, lrq, lrp)
+
 	str := "hello? who are you?"
 	req := requests_responses.PostMsgRequest{12345, u1.UName, r1.ID, str}
 	msgI := requests_responses.MsgInfo{0, r1.ID, u1.UName, -1, str}
 	resp := requests_responses.PostMsgResponse{12345, msgI}
 	executeAndTestResponse(t, req, resp)
 
-	str = "anybody there?"
-	req = requests_responses.PostMsgRequest{12345, u1.UName, r1.ID, str}
-	msgI = requests_responses.MsgInfo{1, r1.ID, u1.UName, -1, str}
-	resp = requests_responses.PostMsgResponse{12345, msgI}
-	executeAndTestResponse(t, req, resp)
+	// str = "anybody there?"
+	// req = requests_responses.PostMsgRequest{12345, u1.UName, r1.ID, str}
+	// msgI = requests_responses.MsgInfo{1, r1.ID, u1.UName, -1, str}
+	// resp = requests_responses.PostMsgResponse{12345, msgI}
+	// executeAndTestResponse(t, req, resp)
 
-	str = "..."
-	req = requests_responses.PostMsgRequest{12345, u1.UName, r1.ID, str}
-	msgI = requests_responses.MsgInfo{2, r1.ID, u1.UName, -1, str}
-	resp = requests_responses.PostMsgResponse{12345, msgI}
-	executeAndTestResponse(t, req, resp)
+	// str = "..."
+	// req = requests_responses.PostMsgRequest{12345, u1.UName, r1.ID, str}
+	// msgI = requests_responses.MsgInfo{2, r1.ID, u1.UName, -1, str}
+	// resp = requests_responses.PostMsgResponse{12345, msgI}
+	// executeAndTestResponse(t, req, resp)
 
-	str = "no..yes"
-	req = requests_responses.PostMsgRequest{12345, u2.UName, r1.ID, str}
-	msgI = requests_responses.MsgInfo{3, r1.ID, u2.UName, -1, str}
-	resp = requests_responses.PostMsgResponse{12345, msgI}
-	executeAndTestResponse(t, req, resp)
+	// str = "no..yes"
+	// req = requests_responses.PostMsgRequest{12345, u2.UName, r1.ID, str}
+	// msgI = requests_responses.MsgInfo{3, r1.ID, u2.UName, -1, str}
+	// resp = requests_responses.PostMsgResponse{12345, msgI}
+	// executeAndTestResponse(t, req, resp)
 
-	str = ""
-	req = requests_responses.PostMsgRequest{12345, u1.UName, r2.ID, str}
-	eresp := requests_responses.ErrorResponse{12345, requests_responses.PostMsgIndex, "bad msg length"}
-	executeAndTestResponse(t, req, eresp)
+	// str = ""
+	// req = requests_responses.PostMsgRequest{12345, u1.UName, r2.ID, str}
+	// eresp := requests_responses.ErrorResponse{12345, requests_responses.PostMsgIndex, "bad msg length"}
+	// executeAndTestResponse(t, req, eresp)
 
-	str = "que?\npor pue"
-	req = requests_responses.PostMsgRequest{12345, u1.UName, r2.ID, str}
-	msgI = requests_responses.MsgInfo{0, r2.ID, u1.UName, -1, str}
-	resp = requests_responses.PostMsgResponse{12345, msgI}
-	executeAndTestResponse(t, req, resp)
+	// str = "que?\npor pue"
+	// req = requests_responses.PostMsgRequest{12345, u1.UName, r2.ID, str}
+	// msgI = requests_responses.MsgInfo{0, r2.ID, u1.UName, -1, str}
+	// resp = requests_responses.PostMsgResponse{12345, msgI}
+	// executeAndTestResponse(t, req, resp)
 
-	str = "..."
-	req = requests_responses.PostMsgRequest{12345, u2.UName, r2.ID, str}
-	eresp = requests_responses.ErrorResponse{12345, requests_responses.PostMsgIndex, "user not in room"}
-	executeAndTestResponse(t, req, eresp)
+	// str = "..."
+	// req = requests_responses.PostMsgRequest{12345, u2.UName, r2.ID, str}
+	// eresp = requests_responses.ErrorResponse{12345, requests_responses.PostMsgIndex, "user not in room"}
+	// executeAndTestResponse(t, req, eresp)
 }
+
+// func TestSignInAndPostMsg(t *testing.T) {
+// 	myplaceutils.InitDBs()
+// 	u1 := myplaceutils.AddNewUser("ask", "embla")
+// 	u2 := myplaceutils.AddNewUser("adam", "eva")
+// 	r1 := myplaceutils.AddNewRoom("livingroom")
+// 	r2 := myplaceutils.AddNewRoom("bedroom")
+// 	u1.JoinRoom(r1)
+// 	u1.JoinRoom(r2)
+// 	u2.JoinRoom(r1)
+
+// 	req := requests_responses.SignInRequest{1234, u1.UName, u1.Pass}
+// 	resp := requests_responses.SignInResponse{1234, true, ""}
+// 	executeAndTestResponse(t, req, resp)
+
+// 	req = requests_responses.SignInRequest{1234, u2.UName, u2.Pass}
+// 	resp = requests_responses.SignInResponse{1234, true, ""}
+// 	executeAndTestResponse(t, req, resp)
+
+
+// }
