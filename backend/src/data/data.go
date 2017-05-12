@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"myplaceutils"
 	"container/list"
+	"strconv"
 )
 
 type UserStore struct {
@@ -17,11 +18,11 @@ type RoomStore struct {
   ID int
   Name     string
   Users []string
-  Messages map[int]*myplaceutils.Message //ID is key
+  Messages map[string]*myplaceutils.Message //ID is key
 }
 
 type UserDBStore map[string]*UserStore
-type RoomDBStore map[int]*RoomStore
+type RoomDBStore map[string]*RoomStore
 
 
 //Stores dbs to files named "rooms" and "users" in same folder as this.
@@ -98,8 +99,14 @@ func toStoreFormat(us myplaceutils.UserDB, rs myplaceutils.RoomDB) (UserDBStore,
 
 	for roomID, room := range rs {
 		us := toUserSlice(room.Users)
-		rStore := RoomStore{roomID, room.Name, us, room.Messages}
-		rsStore[roomID] = &rStore
+
+		msgs := make(map[string]*myplaceutils.Message)
+		for is, msg := range room.Messages {
+			msgs[strconv.Itoa(is)] = msg
+		}
+
+		rStore := RoomStore{roomID, room.Name, us, msgs}
+		rsStore[strconv.Itoa(roomID)] = &rStore
 	}
 
 	return usStore, rsStore
@@ -117,8 +124,17 @@ func fromStoreFormat(usStore UserDBStore, rsStore RoomDBStore) (myplaceutils.Use
 
 	for roomID, rStore := range rsStore {
 		us := fromUserSlice(rStore.Users)
-		r := myplaceutils.Room{roomID, rStore.Name, us, rStore.Messages, list.New()}
-		rs[roomID] = &r
+		msgs := make(map[int]*myplaceutils.Message)
+
+		for msgIDStr, msg := range rStore.Messages {
+			mID, _ := strconv.Atoi(msgIDStr)
+			msgs[mID] = msg
+		}
+
+		id1, _ := strconv.Atoi(roomID)
+		r := myplaceutils.Room{id1, rStore.Name, us, msgs, list.New()}
+		id2, _ := strconv.Atoi(roomID)
+		rs[id2] = &r
 	}
 
 	return us, rs
