@@ -169,7 +169,7 @@ const (
 type RoomInfo struct {
 	ID int
 	Name string
-	LatestMsg MsgInfo
+	LatestMsg *MsgInfo
 	LatestReadMsgID int
 }
 
@@ -279,3 +279,5 @@ func ToResponseString(response Response) (string, error) {
     return "", errors.New("illegal response type")
   }
 }
+
+

@@ -233,6 +233,29 @@ func RoomExists(roomID int) bool {
 	return GetRoom(roomID) != nil
 }
 
+// Purpose: Get the latest message from a room
+// Argument: A room, which purpose is to get the latest message
+// Returns a pointer to the latest message and the ID of the latest. If There are no messages in the room, returns nil and -1.
+// Tested: Yes
+func GetLatestMsg(room *Room) (*Message,int){
+	maxID := -1
+
+	if len(room.Messages) == 0 {
+		return nil,maxID
+	}
+
+	
+	for id,_ := range room.Messages{
+		if id > maxID {
+			maxID = id
+		}
+	}
+
+	latestMsg := room.Messages[maxID]
+	return &latestMsg,maxID
+
+}
+
 func UserIsInRoom(uname string, room *Room) bool {
 	unameList := room.Users
 
@@ -278,6 +301,35 @@ func getOlderMessages() {
 }
 
 func getNewerMessages() {
+
+}
+
+
+func CreateRoomInfo(room *Room, msg *Message, username string) requests_responses.RoomInfo{
+	msgInfo := CreateMsgInfo(room,msg,username)
+	_,latestMsgID := GetLatestMsg(room)
+
+	roomInfo := requests_responses.RoomInfo{room.ID,room.Name,msgInfo,latestMsgID}
+	return roomInfo
+}
+
+
+func CreateMsgInfo(room *Room, msg *Message, username string) *requests_responses.MsgInfo {
+	latestMsg,latestMsgID := GetLatestMsg(room)
+
+	if len(room.Messages) == 0 {
+		return nil
+	}
+
+	
+	msgInfo := requests_responses.MsgInfo{
+		latestMsgID,
+		room.ID,
+		username,
+		(latestMsg.Time).Unix(),
+		latestMsg.Body }
+
+	return &msgInfo
 
 }
 
