@@ -11,14 +11,13 @@ import (
 func TestMain(m *testing.M) {
 	myplaceutils.InitDBs()
 	retCode := m.Run()
-	//time.Sleep(3 * time.Second)
 	os.Exit(retCode)
 }
 
 func executeAndTestResponse(t *testing.T, request requests_responses.Request, expectedResponse requests_responses.Response) {
 	handlerChan := make(chan myplaceutils.HandlerArgs)
 	go handler(handlerChan) //now handler is waiting for requests
-	//defer close(handlerChan)
+	defer close(handlerChan)
 
 	responseChan := make(chan requests_responses.Response, 1)
 	handlerArgs := myplaceutils.HandlerArgs{request, responseChan}
