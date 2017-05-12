@@ -304,6 +304,10 @@ func getNewerMessages() {
 
 }
 
+// Purpose: Creates RoomInfo
+// Argument: A room, a message and a username
+// Returns: RoomInfo about a room
+// Tested: No
 
 func CreateRoomInfo(room *Room, msg *Message, username string) requests_responses.RoomInfo{
 	msgInfo := CreateMsgInfo(room,msg,username)
@@ -314,6 +318,10 @@ func CreateRoomInfo(room *Room, msg *Message, username string) requests_response
 }
 
 
+// Purpose: Creates MessageInfo
+// Argument: A room, a message and a username
+// Returns: Info about a the latest message
+// Tested: No
 func CreateMsgInfo(room *Room, msg *Message, username string) *requests_responses.MsgInfo {
 	latestMsg,latestMsgID := GetLatestMsg(room)
 
