@@ -237,6 +237,10 @@ func FromRequestString(requestString string) (Request, error) {
   case 10:
     var r MsgReadRequest
     err := json.Unmarshal([]byte(jsonRequest), &r)
+	  return r, err
+  case 11:
+    var r SignOutRequest
+    err := json.Unmarshal([]byte(jsonRequest), &r)
     return r, err
   default:
     return nil, errors.New("illegal reqType")
@@ -271,8 +275,10 @@ func ToResponseString(response Response) (string, error) {
     return fmt.Sprintf("08%s", jsonResponse), nil
   case PostMsgResponse:
     return fmt.Sprintf("09%s", jsonResponse), nil
-  case MsgReadRequest:
+  case MsgReadResponse:
     return fmt.Sprintf("10%s", jsonResponse), nil
+  case SignOutResponse:
+    return fmt.Sprintf("11%s", jsonResponse), nil
   case ErrorResponse:
     return fmt.Sprintf("-1%s", jsonResponse), nil
   default:
