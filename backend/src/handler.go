@@ -77,7 +77,7 @@ func signIn(request requests_responses.SignInRequest, responseChan chan requests
 	for e := user.Rooms.Front(); e != nil; e = e.Next() {
 		roomID := e.Value.(int)
 		room := myplaceutils.GetRoom(roomID)
-		room.OutgoingChannels.PushBack(responseChan)
+		room.AddOutgoingChannel(responseChan)
 	}
 
 	return requests_responses.SignInResponse{requestID, true, ""}
@@ -121,7 +121,7 @@ func createRoom(request requests_responses.CreateRoomRequest, responseChan chan 
 
 	newRoom := myplaceutils.AddNewRoom(roomName)
 	user.JoinRoom(newRoom)
-	newRoom.OutgoingChannels.PushBack(responseChan)
+	newRoom.AddOutgoingChannel(responseChan)
 
 	response := requests_responses.CreateRoomResponse{requestID, newRoom.ID, newRoom.Name}
 

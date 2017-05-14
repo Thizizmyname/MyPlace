@@ -263,6 +263,23 @@ func RemoveUsersOutgoingChannels(uname string, uOutChan chan requests_responses.
 	}
 }
 
+//Adds an outgoing channel to the rooms list. If channel is already
+//in the list, does nothing.
+func (r *Room) AddOutgoingChannel(c chan requests_responses.Response) {
+	if !outChanInUse(c, r.OutgoingChannels) {
+		r.OutgoingChannels.PushBack(c)
+	}
+}
+
+func outChanInUse(c chan requests_responses.Response, outChans *list.List) bool {
+	for e := outChans.Front(); e != nil; e = e.Next() {
+		outChan := e.Value.(chan requests_responses.Response)
+		if c == outChan { return true }
+	}
+
+	return false
+}
+
 func findFreeRoomID() int {
 	maxID := -1
 
