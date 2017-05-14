@@ -72,7 +72,9 @@ func readMsg(conn net.Conn){
       
       fmt.Printf("Message recieved from %v: %v",conn, msg)
       for _, cons := range connections{
-        sendMsg(cons,msg)
+        if cons != conn {
+          sendMsg(cons,msg)
+        }
       }
     }else{
 

@@ -51,7 +51,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         // Bind to LocalService
-        Intent intent = new Intent(this, TCPClient.class);
+        Log.e("Main_Activity", "I'm in onStart!");
+        Intent intent = new Intent(this, TCPService.class);
         bindService(intent, mTConnection, Context.BIND_AUTO_CREATE);
     }
 
@@ -75,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
             TCPService.TCPBinder binder = (TCPService.TCPBinder) service;
             mService = binder.getService();
             mBound = true;
+            mService.setUpConnection();
         }
 
         @Override
@@ -117,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        startService(new Intent(this, TCPService.class));
+        //startService(new Intent(this, TCPService.class));
 
 
         actionMenu = (FloatingActionsMenu) findViewById(R.id.action_menu);
@@ -144,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public class ConnectTask extends AsyncTask<String,String,TCPClient> {
+    public class ConnecttTask extends AsyncTask<String,String,TCPClient> {
 
         @Override
         protected TCPClient doInBackground(String... message) {
@@ -193,8 +195,8 @@ public class MainActivity extends AppCompatActivity {
                 roomAdapter.notifyDataSetChanged();
 
                 //TODO: Change below code to JSON-request
-                TCPClient.request = "Leave room "+roomName;
-                new ConnectTask().execute("");
+                //TCPClient.request = "Leave room "+roomName;
+                //new ConnectTask().execute("");
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -228,10 +230,10 @@ public class MainActivity extends AppCompatActivity {
                 roomList.add(new Room(0,roomName));
                 roomAdapter.notifyDataSetChanged();
 
-                Log.e("MainActivity", "Running setUpConnection");
-                mService.setUpConnection();
-                //TCPClient.request = getResources().getString(createOrJoin)+roomName;
+                //Log.e("MainActivity", "Running sendMessage");
+                mService.sendMessage(roomName);
                 //new ConnectTask().execute("");
+                //TCPClient.request = getResources().getString(createOrJoin)+roomName;
             }
         });
 
