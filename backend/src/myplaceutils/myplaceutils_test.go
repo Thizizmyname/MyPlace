@@ -4,8 +4,8 @@ import (
 	"net"
 	"testing"
 	"log"
-	"fmt"
-	"reflect"
+//	"fmt"
+//	"reflect"
 )
 
 func establishConnection() *net.TCPConn {
@@ -19,6 +19,44 @@ func establishConnection() *net.TCPConn {
 
 }
 
+func TestGetLatestMsg(t *testing.T){
+	InitDBs()
+	u1 := AddNewUser("ask", "embla")
+	u2 := AddNewUser("adam", "eva")
+	r1 := AddNewRoom("livingroom")
+	u1.JoinRoom(r1)
+	u2.JoinRoom(r1)
+
+	returnLatestMsg, _ := GetLatestMsg(r1)
+	
+	if returnLatestMsg != nil {
+		t.Error("The room shouldn't have any messages yet")
+	}
+
+	AddNewMessage(u1.UName,r1,"Hello, can you hear me?")
+	AddNewMessage(u2.UName,r1,"Yes I Can")
+	
+	returnLatestMsg, _ = GetLatestMsg(r1)
+
+	if returnLatestMsg.ID != 1 {
+		t.Error("Didn't get latest message")
+	}
+
+	AddNewMessage(u1.UName,r1,"How are you?")
+	AddNewMessage(u2.UName,r1,"Im fine thank you")
+	AddNewMessage(u1.UName,r1,"Nice, have to go, bb!")
+
+	returnLatestMsg, _ = GetLatestMsg(r1)
+	
+	if returnLatestMsg.ID != 4 {
+		t.Error("Didn't get the latest message")
+
+	}
+
+	
+}
+
+/*
 func createStuff(conn *net.TCPConn) (*User, *Room) {
 	workingRoom := CreateRoom("Room 213")
 	workingUser := CreateUser("Alex", "1337", conn)
@@ -177,3 +215,6 @@ func TestPostMsg(t *testing.T){
 	
 	fmt.Printf("%v",msg)
 }
+
+*/
+
