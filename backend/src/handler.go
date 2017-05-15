@@ -1,9 +1,9 @@
 package main
 
 import (
-  "container/list"
-  "myplaceutils"
-  "requests_responses"
+	"container/list"
+	"myplaceutils"
+	"requests_responses"
 )
 
 
@@ -118,19 +118,83 @@ func getRoomUsers(request requests_responses.GetRoomUsersRequest) requests_respo
 }
 
 func getOlderMsgs(request requests_responses.GetOlderMsgsRequest) requests_responses.Response {
-  return nil
+	return nil
 }
 
 func getNewerMsgs(request requests_responses.GetNewerMsgsRequest) requests_responses.Response {
-  return nil
+	return nil
 }
 
 func joinRoom(request requests_responses.JoinRoomRequest, responseChan chan requests_responses.Response) requests_responses.Response {
-	return nil
+	// Vill uppdatera ett rum så att en user är medlem i det
+	
+	requestID := request.RequestID
+	roomID := request.RoomID
+	username := request.UName
+
+
+	room := myplaceutils.GetRoom(roomID)
+	user := myplaceutils.GetUser(username)
+	latestMsg,_ := myplaceutils.GetLatestMsg(room)
+
+	if user == nil{
+		return requests_responses.ErrorResponse{
+			requestID,
+			requests_responses.JoinRoomIndex,
+			"There is no such user"}
+
+	}
+	
+	if room == nil { // Kan inte skapa en respons utan att skapa en ha ett rum
+		roomInfo := requests_responses.RoomInfo{}
+		
+		return requests_responses.JoinRoomResponse{
+			requestID,
+			roomInfo,
+			false}			
+	}
+	
+	user.JoinRoom(room)
+
+	roomInfo := myplaceutils.CreateRoomInfo(room,latestMsg,username)
+
+	response := requests_responses.JoinRoomResponse{request.RequestID,roomInfo,true}
+	
+	// Vad ska göras med responseChan?
+	room.AddOutgoingChannel(responseChan)
+	return response
 }
 
 func leaveRoom(request requests_responses.LeaveRoomRequest, responseChan chan requests_responses.Response) requests_responses.Response {
+/*
+	// Vill uppdatera ett rum så att en user har lämnat i det
+	requestID := request.RequestID
+	roomID := request.RoomID
+	username := request.UName
+
+	room := myplaceutils.GetRoom(roomID)
+	user := myplaceutils.GetUser(username)
+
+	if user == nil{
+		return requests_responses.ErrorResponse{
+			requestID,
+			requests_responses.JoinRoomIndex,
+			"There is no such user"}
+	}
+	
+	if room == nil {
+		
+		return requests_responses.ErrorResponse{
+			requestID,
+			requests_responses.JoinRoomIndex,
+			"Bad roomID"}			
+	}
+
+	user.LeaveRoom(room)
+
+*/	
 	return nil
+
 }
 
 func createRoom(request requests_responses.CreateRoomRequest, responseChan chan requests_responses.Response) requests_responses.Response {
@@ -180,7 +244,7 @@ func postMsg(request requests_responses.PostMsgRequest, responseChan chan reques
 }
 
 func msgRead(request requests_responses.MsgReadRequest) requests_responses.Response {
-  return nil
+	return nil
 }
 
 func signOut(request requests_responses.SignOutRequest, responseChan chan requests_responses.Response) requests_responses.Response {

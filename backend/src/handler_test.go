@@ -242,3 +242,27 @@ func TestGetRoomUsers(t *testing.T){
 	resp := requests_responses.GetRoomUsersResponse{12345,r1.ID,users}
 	executeAndTestResponse(t, req, resp)
 }
+
+func TestJoinRoom(t *testing.T){
+	myplaceutils.InitDBs()
+	room := myplaceutils.AddNewRoom("213")	
+
+	roomInfo := myplaceutils.CreateRoomInfo(room,nil,"Alex")
+	req := requests_responses.JoinRoomRequest{12345,room.ID,"Alex"}
+	eresp :=  requests_responses.ErrorResponse{12345,requests_responses.JoinRoomIndex,"There is no such user"}
+	executeAndTestResponse(t,req,eresp)
+	
+	user1 := myplaceutils.AddNewUser("Eva", "1337")
+
+	roomInfo = myplaceutils.CreateRoomInfo(room,nil,user1.UName)
+	req = requests_responses.JoinRoomRequest{12345,room.ID,user1.UName}
+	resp :=  requests_responses.JoinRoomResponse{12345,roomInfo,true}
+	executeAndTestResponse(t,req,resp)
+	
+	user1.JoinRoom(room)
+	
+	roomInfo = myplaceutils.CreateRoomInfo(room,nil,user1.UName)
+	req = requests_responses.JoinRoomRequest{12345,room.ID,user1.UName}
+	resp = requests_responses.JoinRoomResponse{12345,roomInfo,true}
+	executeAndTestResponse(t,req,resp)
+}
