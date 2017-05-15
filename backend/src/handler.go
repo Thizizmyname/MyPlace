@@ -17,6 +17,7 @@ func clientHandler(conn net.Conn, clientChannel chan requests_responses.Response
     request ,err := bufio.NewReader(conn).ReadString('\n')
     if err!=nil {
       myplaceutils.Error.Println("User disconnected from the server")
+      //TODO SignOutRequest
       break
     }
     myplaceutils.Info.Printf("New request: %v",request)
