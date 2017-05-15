@@ -15,6 +15,9 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <service android:name=".services.ConnectionService" android:enabled="true" />
+
         <activity
             android:name=".LoginActivity"
             android:exported="true"

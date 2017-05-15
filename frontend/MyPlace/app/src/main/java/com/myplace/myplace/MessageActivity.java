@@ -1,10 +1,19 @@
 package com.myplace.myplace;
 
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.os.IBinder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -13,14 +22,37 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.myplace.myplace.models.Message;
+import com.myplace.myplace.services.ConnectionService;
 
 import java.util.ArrayList;
 
 import static com.myplace.myplace.LoginActivity.LOGIN_PREFS;
 
 public class MessageActivity extends AppCompatActivity {
+
+    MessageAdapter messageAdapter;
     private Toast messageEmptyToast = null;
     RoomDbHelper roomDB = null;
+
+    ConnectionService mService;
+    boolean mBound = false;
+
+
+    // Our handler for received Intents. This will be called whenever an Intent
+    // with an action named "custom-event-name" is broadcasted.
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Get extra data included in the Intent
+            String message = intent.getStringExtra("Result");
+            Message newMessage = new Message("Stefan", message);
+            final String roomName = getIntent().getExtras().getString("RoomName");
+            messageAdapter.add(newMessage);
+
+            roomDB.addMessage(roomName, newMessage);
+            MainActivity.roomAdapter.notifyDataSetChanged();
+        }
+    };
 
     //TEST FOR INCOMING AND OUTGOING
     int a = 0;
@@ -33,6 +65,60 @@ public class MessageActivity extends AppCompatActivity {
         if (result < 0)
             result += y;
         return result;
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // Bind to LocalService
+        Log.e("Main_Activity", "I'm in onStart!");
+        Intent intent = new Intent(this, ConnectionService.class);
+        bindService(intent, mTConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // Unbind from the service
+        if (mBound) {
+            Log.e("MessageActivity", "Stopping event");
+            unbindService(mTConnection);
+            mBound = false;
+        }
+    }
+
+    /** Defines callbacks for service binding, passed to bindService() */
+    private ServiceConnection mTConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            ConnectionService.ConnectionBinder binder = (ConnectionService.ConnectionBinder) service;
+            mService = binder.getService();
+            mBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Register to receive messages.
+        // We are registering an observer (mMessageReceiver) to receive Intents
+        // with actions named "custom-event-name".
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
+                new IntentFilter("com.myplace.NEW_MESSAGE"));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
     }
 
     @Override
@@ -49,7 +135,7 @@ public class MessageActivity extends AppCompatActivity {
         roomDB = new RoomDbHelper(this);
 
         ArrayList<Message> messageList = roomDB.getMessages(roomName);
-        final MessageAdapter messageAdapter = new MessageAdapter(this, messageList);
+        messageAdapter = new MessageAdapter(this, messageList);
 
         // Finds the listview and specifies the adapter to use
         ListView listMessages = (ListView) findViewById(R.id.listMessages);
@@ -89,6 +175,8 @@ public class MessageActivity extends AppCompatActivity {
 
                 roomDB.addMessage(roomName, newMessage);
                 MainActivity.roomAdapter.notifyDataSetChanged();
+
+                mService.sendMessage(newMessage.getText());
 
                 //TEST FOR INCOMING AND OUTGOING
                 ++a; //TEST
