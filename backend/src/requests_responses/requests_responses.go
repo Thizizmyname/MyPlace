@@ -169,7 +169,7 @@ const (
 type RoomInfo struct {
 	ID int
 	Name string
-	LatestMsg *MsgInfo
+	LatestMsg MsgInfo
 	LatestReadMsgID int
 }
 

@@ -109,10 +109,12 @@ func joinRoom(request requests_responses.JoinRoomRequest, responseChan chan requ
 	}
 	
 	if room == nil { // Kan inte skapa en respons utan att skapa en ha ett rum
-		return requests_responses.ErrorResponse{
+		roomInfo := requests_responses.RoomInfo{}
+		
+		return requests_responses.JoinRoomResponse{
 			requestID,
-			requests_responses.JoinRoomIndex,
-			"Bad roomID"}			
+			roomInfo,
+			false}			
 	}
 	
 	user.JoinRoom(room)
@@ -120,11 +122,39 @@ func joinRoom(request requests_responses.JoinRoomRequest, responseChan chan requ
 	roomInfo := myplaceutils.CreateRoomInfo(room,latestMsg,username)
 
 	response := requests_responses.JoinRoomResponse{request.RequestID,roomInfo,true}
+	
 	// Vad ska göras med responseChan?
+	room.AddOutgoingChannel(responseChan)
 	return response
 }
 
 func leaveRoom(request requests_responses.LeaveRoomRequest, responseChan chan requests_responses.Response) requests_responses.Response {
+	// Vill uppdatera ett rum så att en user har lämnat i det
+	requestID := request.RequestID
+	roomID := request.RoomID
+	username := request.UName
+
+	room := myplaceutils.GetRoom(roomID)
+	user := myplaceutils.GetUser(username)
+
+	if user == nil{
+		return requests_responses.ErrorResponse{
+			requestID,
+			requests_responses.JoinRoomIndex,
+			"There is no such user"}
+	}
+	
+	if room == nil {
+		
+		return requests_responses.ErrorResponse{
+			requestID,
+			requests_responses.JoinRoomIndex,
+			"Bad roomID"}			
+	}
+
+	user.LeaveRoom(room)
+
+	
 	return nil
 }
 

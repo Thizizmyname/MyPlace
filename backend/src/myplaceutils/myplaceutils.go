@@ -117,16 +117,12 @@ func (r *Room) RemoveUser(u *User) {
   //   }
   // }
   // r.NoPeople--
-
 }
 
 // Removes the room from the user
-func (u *User) RemoveRoom(r *Room) {
-  // for i, elem := range u.Rooms {
-  //   if reflect.DeepEqual(elem, r) {
-  //     u.Rooms = u.Rooms[:i+copy(u.Rooms[i:], u.Rooms[i+1:])]
-  //   }
-  // }
+func (u *User) LeaveRoom(r *Room) {
+//	u.Rooms.Remove(r.Name)
+
 }
 
 func CreateUser(uname string, pass string) *User {
@@ -308,12 +304,11 @@ func getNewerMessages() {
 // Argument: A room, a message and a username
 // Returns: RoomInfo about a room
 // Tested: No
-
 func CreateRoomInfo(room *Room, msg *Message, username string) requests_responses.RoomInfo{
 	msgInfo := CreateMsgInfo(room,msg,username)
-	_,latestMsgID := GetLatestMsg(room)
+	_,latestReadMsgID := GetLatestMsg(room)
 
-	roomInfo := requests_responses.RoomInfo{room.ID,room.Name,msgInfo,latestMsgID}
+	roomInfo := requests_responses.RoomInfo{room.ID,room.Name,msgInfo,latestReadMsgID}
 	return roomInfo
 }
 
@@ -322,11 +317,11 @@ func CreateRoomInfo(room *Room, msg *Message, username string) requests_response
 // Argument: A room, a message and a username
 // Returns: Info about a the latest message
 // Tested: No
-func CreateMsgInfo(room *Room, msg *Message, username string) *requests_responses.MsgInfo {
+func CreateMsgInfo(room *Room, msg *Message, username string) requests_responses.MsgInfo {
 	latestMsg,latestMsgID := GetLatestMsg(room)
 
 	if len(room.Messages) == 0 {
-		return nil
+		return requests_responses.MsgInfo{-1, -1, "", 0, ""}
 	}
 
 	
@@ -337,7 +332,7 @@ func CreateMsgInfo(room *Room, msg *Message, username string) *requests_response
 		(latestMsg.Time).Unix(),
 		latestMsg.Body }
 
-	return &msgInfo
+	return msgInfo
 
 }
 
