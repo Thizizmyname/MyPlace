@@ -6,19 +6,46 @@ import (
 	"reflect"
 	"myplaceutils"
 	"requests_responses"
+	"io/ioutil"
+	"io"
+	"log"
 )
 
 var handlerChan chan myplaceutils.HandlerArgs
 
 func TestMain(m *testing.M) {
 	myplaceutils.InitDBs()
-
+	initLoggers(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
 	handlerChan = make(chan myplaceutils.HandlerArgs)
-	go handler(handlerChan) //now handler is waiting for requests
+	go responseHandler(handlerChan) //now handler is waiting for requests
 	defer close(handlerChan)
 
 	retCode := m.Run()
 	os.Exit(retCode)
+}
+
+//Initialize loggers
+func initLoggers(
+    traceHandle io.Writer,
+    infoHandle io.Writer,
+    warningHandle io.Writer,
+    errorHandle io.Writer,
+    ) {
+    myplaceutils.Trace = log.New(traceHandle,
+        "TRACE: ",
+        log.Ldate|log.Ltime|log.Lshortfile)
+
+    myplaceutils.Info = log.New(infoHandle,
+        "INFO: ",
+        log.Ldate|log.Ltime|log.Lshortfile)
+
+    myplaceutils.Warning = log.New(warningHandle,
+        "WARNING: ",
+        log.Ldate|log.Ltime|log.Lshortfile)
+
+    myplaceutils.Error = log.New(errorHandle,
+        "ERROR: ",
+        log.Ldate|log.Ltime|log.Lshortfile)
 }
 
 
@@ -358,28 +385,28 @@ func TestSignOut(t *testing.T) {
 
 func TestJoinRoom(t *testing.T){
 	myplaceutils.InitDBs()
-	room := myplaceutils.AddNewRoom("213")	
+	room := myplaceutils.AddNewRoom("213")
 
 	roomInfo := myplaceutils.CreateRoomInfo(room,nil,"Alex")
 	req := requests_responses.JoinRoomRequest{12345,room.ID,"Alex"}
 	eresp :=  requests_responses.ErrorResponse{12345,requests_responses.JoinRoomIndex,"There is no such user"}
 	executeAndTestResponse(t,req,eresp)
-	
+
 	user1 := myplaceutils.AddNewUser("Eva", "1337")
 
 	roomInfo = myplaceutils.CreateRoomInfo(room,nil,user1.UName)
 	req = requests_responses.JoinRoomRequest{12345,room.ID,user1.UName}
 	resp :=  requests_responses.JoinRoomResponse{12345,roomInfo,true}
 	executeAndTestResponse(t,req,resp)
-	
+
 	user1.JoinRoom(room)
-	
+
 	roomInfo = myplaceutils.CreateRoomInfo(room,nil,user1.UName)
 	req = requests_responses.JoinRoomRequest{12345,room.ID,user1.UName}
 	resp = requests_responses.JoinRoomResponse{12345,roomInfo,true}
 	executeAndTestResponse(t,req,resp)
-	
-	
-	
+
+
+
 
 }
