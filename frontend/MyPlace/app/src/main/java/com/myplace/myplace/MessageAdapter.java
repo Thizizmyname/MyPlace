@@ -61,8 +61,8 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         TextView text = (TextView) convertView.findViewById(R.id.textMessage);
         TextView date = (TextView) convertView.findViewById(R.id.textDate);
 
-        date.setText(Message.df.format(message.date));
-        text.setText(message.text);
+        date.setText(Message.df.format(message.getDate()));
+        text.setText(message.getText());
 
         return convertView;
     }
