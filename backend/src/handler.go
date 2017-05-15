@@ -140,7 +140,7 @@ func joinRoom(request requests_responses.JoinRoomRequest, responseChan chan requ
 	response := requests_responses.JoinRoomResponse{request.RequestID,roomInfo,true}
 	
 	// Vad ska göras med responseChan?
-	room.AddOutgoingChannel(responseChan)
+	//room.AddOutgoingChannel(responseChan)
 	return response
 }
 

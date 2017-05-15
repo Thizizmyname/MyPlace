@@ -248,7 +248,7 @@ func GetLatestMsg(room *Room) (*Message,int){
 	}
 
 	latestMsg := room.Messages[maxID]
-	return &latestMsg,maxID
+	return latestMsg,maxID
 
 }
 
