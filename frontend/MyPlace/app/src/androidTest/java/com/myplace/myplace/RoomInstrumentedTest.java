@@ -10,6 +10,7 @@ import com.myplace.myplace.models.Message;
 import com.myplace.myplace.models.Room;
 
 import static android.support.test.InstrumentationRegistry.getContext;
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
 import static android.support.test.InstrumentationRegistry.getTargetContext;
 import static junit.framework.Assert.assertEquals;
 
@@ -27,20 +28,22 @@ import org.junit.runner.RunWith;
  */
 @RunWith(AndroidJUnit4.class)
 public class RoomInstrumentedTest {
-    private static final String TEST_FILE_PREFIX = "test_";
+    private static final String TEST_DATABASE = "test_db";
     private static int    TEST_ROOM_ID   = 123;
     private static String TEST_ROOM_NAME = "TestRoom";
     private static String TEST_NAME         = "Anders";
     private static String TEST_MESSAGE      = "Hej123";
 
     private Context testContext;
-    private RoomDbHelper db;
+
+    private RoomDbHelper db = null;
 
     @Before
     public void setup() {
+        RoomDbHelper.DATABASE_NAME = TEST_DATABASE;
         Message testMessage = new Message(TEST_NAME, TEST_MESSAGE);
 
-        testContext = getTargetContext();
+        testContext = getInstrumentation().getTargetContext();
         db = new RoomDbHelper(testContext);
 
         db.createRoomTable(TEST_ROOM_NAME);
@@ -63,6 +66,7 @@ public class RoomInstrumentedTest {
 
     @After
     public void teardown() {
+        RoomDbHelper.DATABASE_NAME = TEST_DATABASE;
         db.dropAllTables();
     }
 }

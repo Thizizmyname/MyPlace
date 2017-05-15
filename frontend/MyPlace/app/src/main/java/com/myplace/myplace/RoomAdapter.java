@@ -10,6 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.myplace.myplace.models.Room;
+import com.myplace.myplace.models.RoomInfo;
 
 import java.util.ArrayList;
 
@@ -19,11 +20,11 @@ import static com.myplace.myplace.LoginActivity.LOGIN_PREFS;
  * Created by alexis on 2017-04-18.
  */
 
-class RoomAdapter extends ArrayAdapter<Room> {
+class RoomAdapter extends ArrayAdapter<RoomInfo> {
 
-    ArrayList<Room> rooms;
+    ArrayList<RoomInfo> rooms;
 
-    public RoomAdapter(MainActivity context, ArrayList<Room> rooms) {
+    public RoomAdapter(MainActivity context, ArrayList<RoomInfo> rooms) {
         super(context, 0, rooms);
         this.rooms = rooms;
 
@@ -32,8 +33,7 @@ class RoomAdapter extends ArrayAdapter<Room> {
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        Room room = getItem(position);
-
+        RoomInfo room = getItem(position);
 
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.custom_room_list_item, parent, false);
@@ -42,7 +42,6 @@ class RoomAdapter extends ArrayAdapter<Room> {
         TextView text1 =  (TextView) convertView.findViewById(R.id.r_title);
         TextView text2 =  (TextView) convertView.findViewById(R.id.r_name);
         TextView text3 =  (TextView) convertView.findViewById(R.id.r_subtitle);
-
 
         if (room != null) {
             text1.setText(room.getName());
@@ -59,12 +58,8 @@ class RoomAdapter extends ArrayAdapter<Room> {
             } else {
                 text2.setText(sender);
             }
-            text3.setText(room.getLastMessage(getContext()));
+            text3.setText(room.getLastMessageText(getContext()));
         }
-
-
-
-
 
         return convertView;
     }
