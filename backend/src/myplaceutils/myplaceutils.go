@@ -308,7 +308,9 @@ func CreateRoomInfo(room *Room, msg *Message, username string) requests_response
 	msgInfo := CreateMsgInfo(room,msg,username)
 	_,latestReadMsgID := GetLatestMsg(room)
 
-	roomInfo := requests_responses.RoomInfo{room.ID,room.Name,msgInfo,latestReadMsgID}
+	latestReadMsgID = -1 //Notera: ska returnera senast lästa meddelandet som har läst av användaren. För detta ska funka måste user-strukturen uppdateras, Ta bort denna när det har gjorts.
+
+	roomInfo := requests_responses.RoomInfo{room.ID,room.Name,msgInfo,latestReadMsgID} 
 	return roomInfo
 }
 
