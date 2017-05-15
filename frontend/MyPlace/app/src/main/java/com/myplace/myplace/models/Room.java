@@ -15,16 +15,14 @@ public class Room {
     private int roomID;
     private String roomName;
 
-
-
-
-
     public Room(int _roomID, String _roomName) {
         roomID = _roomID;
         roomName = _roomName;
     }
 
-
+    public int getRoomID() {
+        return roomID;
+    }
 
     public String getName() {
         return roomName;
@@ -38,7 +36,7 @@ public class Room {
     public String getLastMessage(Context ctx) {
         RoomDbHelper roomDB = new RoomDbHelper(ctx);
         return roomDB.getLastMessage(this.roomName);
-        //return MainActivity.roomDB.getLastMessage(this.roomName);
     }
+
 
 }

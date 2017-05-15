@@ -9,11 +9,11 @@ import java.util.Date;
 import java.util.Locale;
 
 public class Message {
-    public int id;
-    public int roomID;
-    public String name;
-    public String text;
-    public Date date;
+    private int id;
+    private int roomID;
+    private String name;
+    private String text;
+    private Date date;
     public static DateFormat df = new SimpleDateFormat("HH:mm", Locale.getDefault());
 
     private static final int CROP_LIMIT = 32;
@@ -39,8 +39,24 @@ public class Message {
 
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public int getRoomID() {
+        return roomID;
+    }
+
     public String getName() {
         return name;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public Date getDate() {
+        return date;
     }
 
     public String abbreviateText() {
@@ -49,4 +65,6 @@ public class Message {
         }
         else return text;
     }
+
+
 }
