@@ -26,6 +26,7 @@ import java.util.ArrayList;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
+import com.myplace.myplace.services.TCPService;
 
 
 import static com.myplace.myplace.LoginActivity.LOGIN_PREFS;
@@ -33,7 +34,6 @@ import static com.myplace.myplace.R.id.action_create;
 import static com.myplace.myplace.R.id.action_join;
 
 public class MainActivity extends AppCompatActivity {
-    private TCPClient mTcpClient;
     final Context context = this;
     TCPService mService;
     boolean mBound = false;
@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
             TCPService.TCPBinder binder = (TCPService.TCPBinder) service;
             mService = binder.getService();
             mBound = true;
-            mService.setUpConnection();
+            //mService.setUpConnection();
         }
 
         @Override
@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //startService(new Intent(this, TCPService.class));
+        startService(new Intent(this, TCPService.class));
 
 
         actionMenu = (FloatingActionsMenu) findViewById(R.id.action_menu);
@@ -146,34 +146,12 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public class ConnecttTask extends AsyncTask<String,String,TCPClient> {
-
-        @Override
-        protected TCPClient doInBackground(String... message) {
-
-            //we create a TCPClient object and
-            mTcpClient = new TCPClient(new TCPClient.OnMessageReceived() {
-                @Override
-                //here the messageReceived method is implemented
-                public void messageReceived(String message) {
-                    //this method calls the onProgressUpdate
-                    publishProgress(message);
-                    Log.d("Message", message);
-                }
-            });
-            mTcpClient.run();
-
-            return null;
-        }
-
-        @Override
-        protected void onProgressUpdate(String... values) {
-            super.onProgressUpdate(values);
-            Log.d("values", values[0]);
-
-            // TODO: Handle response from server
-        }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        stopService(new Intent(this, TCPService.class));
     }
+
 
     public void onThreadClick(int position) {
         Intent intent = new Intent(MainActivity.this, MessageActivity.class);
