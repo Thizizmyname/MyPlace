@@ -117,16 +117,12 @@ func (r *Room) RemoveUser(u *User) {
   //   }
   // }
   // r.NoPeople--
-
 }
 
 // Removes the room from the user
-func (u *User) RemoveRoom(r *Room) {
-  // for i, elem := range u.Rooms {
-  //   if reflect.DeepEqual(elem, r) {
-  //     u.Rooms = u.Rooms[:i+copy(u.Rooms[i:], u.Rooms[i+1:])]
-  //   }
-  // }
+func (u *User) LeaveRoom(r *Room) {
+//	u.Rooms.Remove(r.Name)
+
 }
 
 func CreateUser(uname string, pass string) *User {
@@ -233,6 +229,29 @@ func RoomExists(roomID int) bool {
 	return GetRoom(roomID) != nil
 }
 
+// Purpose: Get the latest message from a room
+// Argument: A room, which purpose is to get the latest message
+// Returns a pointer to the latest message and the ID of the latest. If There are no messages in the room, returns nil and -1.
+// Tested: Yes
+func GetLatestMsg(room *Room) (*Message,int){
+	maxID := -1
+
+	if len(room.Messages) == 0 {
+		return nil,maxID
+	}
+
+	
+	for id,_ := range room.Messages{
+		if id > maxID {
+			maxID = id
+		}
+	}
+
+	latestMsg := room.Messages[maxID]
+	return &latestMsg,maxID
+
+}
+
 func UserIsInRoom(uname string, room *Room) bool {
 	unameList := room.Users
 
@@ -278,6 +297,44 @@ func getOlderMessages() {
 }
 
 func getNewerMessages() {
+
+}
+
+// Purpose: Creates RoomInfo
+// Argument: A room, a message and a username
+// Returns: RoomInfo about a room
+// Tested: No
+func CreateRoomInfo(room *Room, msg *Message, username string) requests_responses.RoomInfo{
+	msgInfo := CreateMsgInfo(room,msg,username)
+	_,latestReadMsgID := GetLatestMsg(room)
+
+	latestReadMsgID = -1 //Notera: ska returnera senast lästa meddelandet som har läst av användaren. För detta ska funka måste user-strukturen uppdateras, Ta bort denna när det har gjorts.
+
+	roomInfo := requests_responses.RoomInfo{room.ID,room.Name,msgInfo,latestReadMsgID} 
+	return roomInfo
+}
+
+
+// Purpose: Creates MessageInfo
+// Argument: A room, a message and a username
+// Returns: Info about a the latest message
+// Tested: No
+func CreateMsgInfo(room *Room, msg *Message, username string) requests_responses.MsgInfo {
+	latestMsg,latestMsgID := GetLatestMsg(room)
+
+	if len(room.Messages) == 0 {
+		return requests_responses.MsgInfo{-1, -1, "", 0, ""}
+	}
+
+	
+	msgInfo := requests_responses.MsgInfo{
+		latestMsgID,
+		room.ID,
+		username,
+		(latestMsg.Time).Unix(),
+		latestMsg.Body }
+
+	return msgInfo
 
 }
 
