@@ -1,11 +1,13 @@
 package com.myplace.myplace;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -23,6 +25,7 @@ import java.util.ArrayList;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
+import com.myplace.myplace.services.ConnectionService;
 
 
 import static com.myplace.myplace.LoginActivity.LOGIN_PREFS;
@@ -30,8 +33,9 @@ import static com.myplace.myplace.R.id.action_create;
 import static com.myplace.myplace.R.id.action_join;
 
 public class MainActivity extends AppCompatActivity {
-    private TCPClient mTcpClient;
     final Context context = this;
+    ConnectionService mService;
+    boolean mBound = false;
 
     FloatingActionsMenu actionMenu;
     ListView listView;
@@ -40,6 +44,45 @@ public class MainActivity extends AppCompatActivity {
 
     //Defines the database
     public RoomDbHelper roomDB = null;
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // Bind to LocalService
+        Log.e("Main_Activity", "I'm in onStart!");
+        Intent intent = new Intent(this, ConnectionService.class);
+        bindService(intent, mTConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // Unbind from the service
+        if (mBound) {
+            unbindService(mTConnection);
+            mBound = false;
+        }
+    }
+
+    /** Defines callbacks for service binding, passed to bindService() */
+    private ServiceConnection mTConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            ConnectionService.ConnectionBinder binder = (ConnectionService.ConnectionBinder) service;
+            mService = binder.getService();
+            mBound = true;
+            //mService.setUpConnection();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +118,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        startService(new Intent(this, ConnectionService.class));
+
 
         actionMenu = (FloatingActionsMenu) findViewById(R.id.action_menu);
 
@@ -100,34 +145,12 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public class ConnectTask extends AsyncTask<String,String,TCPClient> {
-
-        @Override
-        protected TCPClient doInBackground(String... message) {
-
-            //we create a TCPClient object and
-            mTcpClient = new TCPClient(new TCPClient.OnMessageReceived() {
-                @Override
-                //here the messageReceived method is implemented
-                public void messageReceived(String message) {
-                    //this method calls the onProgressUpdate
-                    publishProgress(message);
-                    Log.d("Message", message);
-                }
-            });
-            mTcpClient.run();
-
-            return null;
-        }
-
-        @Override
-        protected void onProgressUpdate(String... values) {
-            super.onProgressUpdate(values);
-            Log.d("values", values[0]);
-
-            // TODO: Handle response from server
-        }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        stopService(new Intent(this, ConnectionService.class));
     }
+
 
     public void onThreadClick(int position) {
         Intent intent = new Intent(MainActivity.this, MessageActivity.class);
@@ -149,8 +172,8 @@ public class MainActivity extends AppCompatActivity {
                 roomAdapter.notifyDataSetChanged();
 
                 //TODO: Change below code to JSON-request
-                TCPClient.request = "Leave room "+roomName;
-                new ConnectTask().execute("");
+                //TCPClient.request = "Leave room "+roomName;
+                //new ConnectTask().execute("");
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -184,8 +207,10 @@ public class MainActivity extends AppCompatActivity {
                 roomList.add(new Room(0,roomName));
                 roomAdapter.notifyDataSetChanged();
 
-                TCPClient.request = getResources().getString(createOrJoin)+roomName;
-                new ConnectTask().execute("");
+                //Log.e("MainActivity", "Running sendMessage");
+                mService.sendMessage(roomName);
+                //new ConnectTask().execute("");
+                //TCPClient.request = getResources().getString(createOrJoin)+roomName;
             }
         });
 
