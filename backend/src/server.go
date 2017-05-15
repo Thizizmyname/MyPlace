@@ -7,7 +7,8 @@ import (
     "log"
     "os"
     "myplaceutils"
-    //"requests_responses"
+    "requests_responses"
+    "data"
 )
 
 
@@ -25,8 +26,8 @@ func listenLoop(listener net.Listener) {
     } else { //om inga fel inträffade, kan vi gå vidare
       connections = append(connections, newConnection)
       myplaceutils.Info.Printf("Connection established: %v\n", newConnection)
-      //clientChannel := make(chan requests_responses.Response, 8)
-      //go clientHandler(newConnection, clientChannel)
+      clientChannel := make(chan requests_responses.Response, 8)
+      go clientHandler(newConnection, clientChannel)
     }
   }
 }
@@ -65,15 +66,27 @@ func disconnectAll() {
 func main() {
   //Title
   myplaceutils.PrintTitle()
-  //Initialize loggers
+  //Initializing
+  //Loggers
   log.Println("Initializing loggers")
   InitLoggers(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
+  //Users and Rooms
+  myplaceutils.Info.Println("Loading database..")
+  var loadError error
+  myplaceutils.Users, myplaceutils.Rooms, loadError = data.LoadDBs()
+  if loadError!=nil {
+    myplaceutils.Error.Printf("Error loading database, exiting\nError message: %v\n",loadError)
+  }
+  err := data.StoreDBs(myplaceutils.Users, myplaceutils.Rooms)
+  if err!=nil {
+    myplaceutils.Error.Println(err)
+  }
   log.Println("Initialization complete\n-------------------------")
   //255 känns som en lämplig size så länge MAGIC NUMBER
   myplaceutils.ResponseChannel = make(chan myplaceutils.HandlerArgs, 255)
   //Initialize RequestChannel, TODO döp om skiten till RequestChannel från ResponseChannel
 
-	//go responseHandler(myplaceutils.ResponseChannel)
+	go responseHandler(myplaceutils.ResponseChannel)
   myplaceutils.Info.Println("Creating a listener")
 
   tcpAddress,_ := net.ResolveTCPAddr("tcp","127.0.0.1:1337")
