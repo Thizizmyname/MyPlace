@@ -108,8 +108,8 @@ public class RoomDbHelper extends SQLiteOpenHelper {
 
         ContentValues insertValues = new ContentValues();
         insertValues.put("name", message.getName());
-        insertValues.put("message", message.text);
-        insertValues.put("date", Message.df.format(message.date));
+        insertValues.put("message", message.getText());
+        insertValues.put("date", Message.df.format(message.getDate()));
 
         SQLiteDatabase db = this.getWritableDatabase();
         db.insert(roomName, null, insertValues);
