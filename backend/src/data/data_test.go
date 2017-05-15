@@ -4,45 +4,53 @@ import (
 	"testing"
 	"fmt"
 	"time"
-	//"reflect"
+	"reflect"
 	"container/list"
 	"myplaceutils"
-	"requests_responses"
 )
 
+
+func TestLoad(t *testing.T) {
+	//delete rooms and users
+	us, rs, e := LoadDBs()
+
+	if e == nil {
+		fmt.Println("Remove 'rooms' and 'users'")
+	}else if len(us) != 0 || len(rs) != 0 {
+		t.Error("Wrong size after failed db-read")
+	}
+}
+
 func TestStoreLoad(t *testing.T) {
+	testStoreLoad(t, 100, 100, 100)
+	testStoreLoad(t, 0, 0, 0)
+	testStoreLoad(t, 1, 0, 0)
+	testStoreLoad(t, 1, 100, 100)
+	testStoreLoad(t, 100, 0, 100)
+	testStoreLoad(t, 100, 100, 0)
+}
+
+func testStoreLoad(t *testing.T, no_users int, no_rooms int, no_msgs int) {
 	var userDB myplaceutils.UserDB = make(myplaceutils.UserDB)
 	var roomDB myplaceutils.RoomDB = make(myplaceutils.RoomDB)
 
 	initUsers(userDB, 100, 10)
-	initRooms(roomDB, 100, 100, 10, 10)
-	var err error
+	initRooms(roomDB, 100, 3, 10)
 
+	var err error
 	if err = StoreDBs(userDB, roomDB); err != nil {
 		panic(err)
 	}
 
-	var userDB2 myplaceutils.UserDB
-	var roomDB2 myplaceutils.RoomDB
+	userDB2, roomDB2, _ := LoadDBs()
+	//roomDB2[5].Users.PushBack(100)
 
-	if userDB2, roomDB2, err = LoadDBs(); err != nil {
-		panic(err)
+	if reflect.DeepEqual(userDB, userDB2) != true {
+		t.Errorf("userDB != userDB2")
 	}
 
-	// if equalRoomDBs.DeepEqual(roomDB, roomDB2) != true {
-	// 	t.Errorf("roomDB != roomDB2")
-	// }
-
-	// if equalUserDBs.DeepEqual(userDB, userDB2) != true {
-	// 	t.Errorf("userDB != userDB2")
-	// }
-
-	if len(roomDB) != len(roomDB2) {
-		t.Errorf("len(roomDB) != len(roomDB2)")
-	}
-
-	if len(userDB) != len(userDB2) {
-		t.Errorf("len(userDB) != len(userDB2)")
+	if roomDBsEqual(roomDB, roomDB2) != true {
+		t.Errorf("roomDB != roomDB2")
 	}
 }
 
@@ -57,11 +65,11 @@ func initUsers(users myplaceutils.UserDB, no_users int, no_rooms int) {
 			u.Rooms.PushBack(j)
 		}
 
-		users[u.UName] = u
+		users[u.UName] = &u
 	}
 }
 
-func initRooms(rooms myplaceutils.RoomDB, no_rooms, no_users int, no_msgs int, no_chans int) {
+func initRooms(rooms myplaceutils.RoomDB, no_rooms, no_users int, no_msgs int) {
 	for i := 0; i < no_rooms; i++ {
 		var r myplaceutils.Room
 		r.ID = i
@@ -72,7 +80,7 @@ func initRooms(rooms myplaceutils.RoomDB, no_rooms, no_users int, no_msgs int, n
 			r.Users.PushBack(fmt.Sprintf("user%v", j))
 		}
 
-		r.Messages = make(map[int]myplaceutils.Message)
+		r.Messages = make(map[int]*myplaceutils.Message)
 		for j := 0; j < no_msgs; j++ {
 			msg := myplaceutils.Message{
 				j,
@@ -80,41 +88,64 @@ func initRooms(rooms myplaceutils.RoomDB, no_rooms, no_users int, no_msgs int, n
 				fmt.Sprintf("user%v", j),
 				"msg body" }
 
-			r.Messages[j] = msg
+			r.Messages[j] = &msg
 		}
 
 		r.OutgoingChannels = list.New()
-		for j := 0; j < no_chans; j++ {
-			c := make(chan requests_responses.Response)
-			r.OutgoingChannels.PushBack(c)
-		}
 
-		rooms[i] = r
+		rooms[i] = &r
 	}
 }
 
-// func printRooms(rs []Room) {
-// 	fmt.Println("\nRooms:");
 
-// 	for _, r := range rs {
-// 		fmt.Printf("\nName: %s\n", r.Name)
-// 		fmt.Printf("No people: %v\n", r.NoPeople)
-// 		fmt.Println("Messages:")
+func equalUserList(u1 *list.List, u2 *list.List) bool {
+	if u1.Len() != u2.Len() { return false }
 
-// 		for _, m := range r.Messages {
-// 			fmt.Printf("Time: %v\n", m.Time)
-// 			fmt.Printf("User: %s\n", m.Uname)
-// 			fmt.Printf("Text: %s\n", m.Body)
-// 		}
-// 	}
-// }
+	for e1, e2 := u1.Front(), u2.Front(); e1 != nil; e1, e2 = e1.Next(), e2.Next() {
+		//uname1 := e1.Value.(string)
+		//uname2 := e2.Value.(int)
+		//fmt.Printf("%v, %v\n", uname1, uname2)
 
-// func printUsers(us []User) {
-// 	fmt.Println("\nUsers:")
+		//if uname1 != uname2 { return false }
+	}
 
-// 	for _, u := range us {
-// 		fmt.Printf("\nName: %s\n", u.Uname)
-// 		fmt.Printf("Pass: %s\n", u.Pass)
-// 		fmt.Printf("Rooms: %v\n", u.Rooms)
-// 	}
-// }
+	return true
+}
+
+func roomsEqual(r1 *myplaceutils.Room, r2 *myplaceutils.Room) bool {
+	return r1.ID == r2.ID &&
+		r1.Name == r2.Name &&
+		equalUserList(r1.Users, r2.Users) &&
+		reflect.DeepEqual(r1.Messages, r2.Messages)
+}
+
+func roomDBsEqual(rs1 myplaceutils.RoomDB, rs2 myplaceutils.RoomDB) bool {
+	if len(rs1) != len(rs2) { return false }
+
+	for id, r1 := range rs1 {
+		r2, ok := rs2[id]
+
+		if !ok || !roomsEqual(r1, r2) { return false }
+	}
+	return true
+}
+
+func PrintList(l *list.List) {
+	for e := l.Front(); e != nil; e = e.Next() {
+		fmt.Println(e.Value)
+	}
+}
+
+func printUser(u *myplaceutils.User) {
+	fmt.Println(u.UName)
+	fmt.Println(u.Pass)
+	PrintList(u.Rooms)
+}
+
+func printUsers(us myplaceutils.UserDB) {
+	fmt.Println("userdb:")
+	for _, u := range us {
+		printUser(u)
+	}
+	fmt.Println("")
+}

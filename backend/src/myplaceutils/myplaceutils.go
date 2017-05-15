@@ -36,7 +36,7 @@ type Room struct {
   ID int
   Name     string
   Users *list.List //list of strings:UName
-  Messages map[int]Message //ID is key
+  Messages map[int]*Message //ID is key
   OutgoingChannels *list.List //[]chan requests_responses.Response
 }
 
@@ -56,8 +56,13 @@ type UserDB map[string]*User //UName is key
 type RoomDB map[int]*Room //ID is key
 
 func InitDBs() {
+<<<<<<< HEAD
   Users = make(map[string]*User)
   Rooms = make(map[int]*Room)
+=======
+  Users = make(UserDB)
+  Rooms = make(RoomDB)
+>>>>>>> backend
 }
 
 /*
@@ -208,7 +213,11 @@ func AddNewUser(uname string, pass string) *User {
 //Purpose: Create a new room and add it to db, and return it.
 func AddNewRoom(name string) *Room {
 	newRoomID := findFreeRoomID()
+<<<<<<< HEAD
 	newRoom := Room{newRoomID, name, list.New(), make(map[int]Message), list.New()}
+=======
+	newRoom := Room{newRoomID, name, list.New(), make(map[int]*Message), list.New()}
+>>>>>>> backend
 	Rooms[newRoomID] = &newRoom
 	return &newRoom
 }
@@ -221,7 +230,7 @@ func AddNewMessage(uname string, room *Room, body string) *Message {
 
 	newMsgID := findFreeMsgID(room)
 	newMsg := Message{newMsgID, time.Now(), uname, body}
-	room.Messages[newMsg.ID] = newMsg
+	room.Messages[newMsg.ID] = &newMsg
 	return &newMsg
 }
 

@@ -125,7 +125,56 @@ func TestSignUp(t *testing.T) {
 	}
 }
 
+func TestSignIn(t *testing.T) {
+	myplaceutils.InitDBs()
+	u1 := myplaceutils.AddNewUser("ask", "embla")
+	u2 := myplaceutils.AddNewUser("adam", "eva")
+	r1 := myplaceutils.AddNewRoom("livingroom")
+	r2 := myplaceutils.AddNewRoom("bedroom")
+	u1.JoinRoom(r1)
+	u1.JoinRoom(r2)
+	u2.JoinRoom(r1)
 
+	if r1.OutgoingChannels.Len() != 0 || r2.OutgoingChannels.Len() != 0 {
+		t.Error("Bad channels from start...?")
+	}
+
+	//test1
+	req := requests_responses.SignInRequest{1234, u1.UName, u1.Pass}
+	resp := requests_responses.SignInResponse{1234, true, ""}
+	executeAndTestResponse(t, req, resp)
+
+	if r1.OutgoingChannels.Len() != 1 || r2.OutgoingChannels.Len() != 1 {
+		t.Error("Bad outgoing channels after signin")
+	}
+
+	//test2
+	req = requests_responses.SignInRequest{1234, u2.UName, u2.Pass}
+	resp = requests_responses.SignInResponse{1234, true, ""}
+	executeAndTestResponse(t, req, resp)
+
+	if r1.OutgoingChannels.Len() != 2 || r2.OutgoingChannels.Len() != 1 {
+		t.Error("Bad outgoing channels after signin")
+	}
+
+	//test3 - wrong pass
+	req = requests_responses.SignInRequest{1234, u1.UName, u2.Pass}
+	resp = requests_responses.SignInResponse{1234, false, "pass"}
+	executeAndTestResponse(t, req, resp)
+
+	if r1.OutgoingChannels.Len() != 2 || r2.OutgoingChannels.Len() != 1 {
+		t.Error("Bad outgoing channels after signin")
+	}
+
+	//test4 - nonexistent uname
+	req = requests_responses.SignInRequest{1234, "krusmynta", u2.Pass}
+	resp = requests_responses.SignInResponse{1234, false, "uname"}
+	executeAndTestResponse(t, req, resp)
+
+	if r1.OutgoingChannels.Len() != 2 || r2.OutgoingChannels.Len() != 1 {
+		t.Error("Bad outgoing channels after signin")
+	}
+}
 
 func TestPostMsg(t *testing.T) {
 	myplaceutils.InitDBs()
