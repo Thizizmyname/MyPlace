@@ -44,8 +44,8 @@ type GetRoomsResponse struct {
 }
 
 type GetRoomUsersRequest struct {
-RequestID int
-RoomID int
+	RequestID int
+	RoomID int
 }
 
 type GetRoomUsersResponse struct {

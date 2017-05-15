@@ -52,12 +52,12 @@ type HandlerArgs struct {
   ResponseChannel chan requests_responses.Response
 }
 
-type UserDB map[string]User //UName is key
-type RoomDB map[int]Room //ID is key
+type UserDB map[string]*User //UName is key
+type RoomDB map[int]*Room //ID is key
 
 func InitDBs() {
-  Users = make(map[string]User)
-  Rooms = make(map[int]Room)
+  Users = make(map[string]*User)
+  Rooms = make(map[int]*Room)
 }
 
 /*
@@ -105,7 +105,7 @@ func (r *Room) AddUser(u *User) {
 func (user *User) JoinRoom(room *Room) {
 	if UserIsInRoom(user.UName, room) { return }
 
-	user.Rooms.PushBack(room.Name)
+	user.Rooms.PushBack(room.ID)
 	room.Users.PushBack(user.UName)
 }
 
@@ -139,12 +139,19 @@ func CreateUser(uname string, pass string) *User {
 //Use:    When the client software wants to list rooms, passing a name as an argument for joining a room, etc.
 //Tested: NO
 func (u *User) ShowRooms() []string {
-  // var roomNames []string
-  // for _, r := range u.Rooms {
-  //   roomNames = append(roomNames, r.Name)
-  // }
-  // return roomNames
-  return nil
+
+	var rooms []string
+	var room *Room
+	id := u.Rooms
+	
+	if UserExists(u.UName){
+		for e := id.Front(); e != nil; e = e.Next() {
+			room = GetRoom(e.Value.(int))
+			rooms = append(rooms, room.Name)
+		}
+		return rooms
+	}
+	return nil
 }
 
 //Purpose: Creating a new room
@@ -158,14 +165,13 @@ func CreateRoom(name string, id int) *Room {
 	r.Messages = make(map[int]Message)
 	r.OutgoingChannels = list.New()
 	
-	Rooms[id] = r
 	return &r
 }
 
 func CreateMessage(Uname string, text string, id int) *Message{
 	m := Message{}
 	m.Time = time.Now()
-	m.Uname = Uname
+	m.UName = Uname
 	m.Body = text
 	m.ID = id
 
@@ -178,14 +184,14 @@ func CreateMessage(Uname string, text string, id int) *Message{
 func ShowUsers(r *Room) []string {
 	var names []string
 	users := r.Users
-
-	if r != nil{
+	
+	if RoomExists(r.ID){
 		for e := users.Front(); e != nil; e = e.Next() {
 			names = append(names, e.Value.(string))
 		}
 		return names
 	}
-	panic("invalid room")
+	return nil
 }
 
 //Purpose: Create a new user and add it to db, and return it.
@@ -194,7 +200,7 @@ func AddNewUser(uname string, pass string) *User {
 		return nil
 	} else {
 		newUser := User{uname, pass, list.New()}
-		Users[uname] = newUser
+		Users[uname] = &newUser
 		return &newUser
 	}
 }
@@ -203,7 +209,7 @@ func AddNewUser(uname string, pass string) *User {
 func AddNewRoom(name string) *Room {
 	newRoomID := findFreeRoomID()
 	newRoom := Room{newRoomID, name, list.New(), make(map[int]Message), list.New()}
-	Rooms[newRoomID] = newRoom
+	Rooms[newRoomID] = &newRoom
 	return &newRoom
 }
 
@@ -223,7 +229,7 @@ func GetUser(uname string) *User{
   user, exists := Users[uname]
 
   if exists {
-    return &user
+    return user
   } else {
     return nil
   }
@@ -237,7 +243,7 @@ func GetRoom(id int) *Room {
 	room, exists := Rooms[id]
 
   if exists {
-    return &room
+    return room
   } else {
     return nil
   }

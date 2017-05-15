@@ -177,3 +177,19 @@ func TestPostMsg(t *testing.T) {
 	eresp = requests_responses.ErrorResponse{12345, requests_responses.PostMsgIndex, "user not in room"}
 	executeAndTestResponse(t, req, eresp)
 }
+
+func TestGetRoomUsers(t *testing.T){
+	myplaceutils.InitDBs()
+	u1 := myplaceutils.AddNewUser("ask", "embla")
+	u2 := myplaceutils.AddNewUser("adam", "eva")
+	r1 := myplaceutils.AddNewRoom("livingroom")
+	//r2 := myplaceutils.AddNewRoom("bedroom")
+	u1.JoinRoom(r1)
+	//u1.JoinRoom(r2)
+	u2.JoinRoom(r1)
+
+	req := requests_responses.GetRoomUsersRequest{12345,r1.ID}
+	users := myplaceutils.ShowUsers(r1)
+	resp := requests_responses.GetRoomUsersResponse{12345,r1.ID,users}
+	executeAndTestResponse(t, req, resp)
+}
