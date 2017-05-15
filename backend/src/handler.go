@@ -46,30 +46,46 @@ func handler(incomingChannel chan myplaceutils.HandlerArgs) {
 }
 
 func signUp(request requests_responses.SignUpRequest) requests_responses.Response {
-	//Example:
-	//create a new user and update the db
-	user := myplaceutils.User{
-		request.UName,
-		request.Pass,
-		list.New()}
+  //Example:
+  //create a new user and update the db
+  user := myplaceutils.User{
+    request.UName,
+    request.Pass,
+    list.New()}
 
-	//update the db:
-	myplaceutils.Users[user.UName] = user
+  //update the db:
+  myplaceutils.Users[user.UName] = &user
 
-	//create and return a response to the request
-	response := requests_responses.SignUpResponse{request.RequestID, true, ""}
+  //create and return a response to the request
+  response := requests_responses.SignUpResponse{request.RequestID, true, ""}
 
-	return response
+  return response
 
-	//note: The request needs to be checked.. if UName is in use,
-	//if pass ok etc. If error, the last string in the
-	//SignUpResponse is set to error cause "user" or "pass" and
-	//the bool is set to false, and the db isn't updated.
-	//This stuff is defined in the request-response-interface.
+  //note: The request needs to be checked.. if UName is in use,
+  //if pass ok etc. If error, the last string in the
+  //SignUpResponse is set to error cause "user" or "pass" and
+  //the bool is set to false, and the db isn't updated.
+  //This stuff is defined in the request-response-interface.
 }
 
 func signIn(request requests_responses.SignInRequest, responseChan chan requests_responses.Response) requests_responses.Response {
-	return nil
+	requestID := request.RequestID
+	user := myplaceutils.GetUser(request.UName)
+	pass := request.Pass
+
+	if user == nil {
+		return requests_responses.SignInResponse{requestID, false, "uname"}
+	} else if pass != user.Pass {
+		return requests_responses.SignInResponse{requestID, false, "pass"}
+	}
+
+	for e := user.Rooms.Front(); e != nil; e = e.Next() {
+		roomID := e.Value.(int)
+		room := myplaceutils.GetRoom(roomID)
+		room.OutgoingChannels.PushBack(responseChan)
+	}
+
+	return requests_responses.SignInResponse{requestID, true, ""}
 }
 
 func getRooms(request requests_responses.GetRoomsRequest) requests_responses.Response {
