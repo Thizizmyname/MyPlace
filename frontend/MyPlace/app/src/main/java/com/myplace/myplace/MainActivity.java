@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AlertDialog;
@@ -26,7 +25,7 @@ import java.util.ArrayList;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
-import com.myplace.myplace.services.TCPService;
+import com.myplace.myplace.services.ConnectionService;
 
 
 import static com.myplace.myplace.LoginActivity.LOGIN_PREFS;
@@ -35,7 +34,7 @@ import static com.myplace.myplace.R.id.action_join;
 
 public class MainActivity extends AppCompatActivity {
     final Context context = this;
-    TCPService mService;
+    ConnectionService mService;
     boolean mBound = false;
 
     FloatingActionsMenu actionMenu;
@@ -52,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
         // Bind to LocalService
         Log.e("Main_Activity", "I'm in onStart!");
-        Intent intent = new Intent(this, TCPService.class);
+        Intent intent = new Intent(this, ConnectionService.class);
         bindService(intent, mTConnection, Context.BIND_AUTO_CREATE);
     }
 
@@ -73,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
         public void onServiceConnected(ComponentName className,
                                        IBinder service) {
             // We've bound to LocalService, cast the IBinder and get LocalService instance
-            TCPService.TCPBinder binder = (TCPService.TCPBinder) service;
+            ConnectionService.ConnectionBinder binder = (ConnectionService.ConnectionBinder) service;
             mService = binder.getService();
             mBound = true;
             //mService.setUpConnection();
@@ -119,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        startService(new Intent(this, TCPService.class));
+        startService(new Intent(this, ConnectionService.class));
 
 
         actionMenu = (FloatingActionsMenu) findViewById(R.id.action_menu);
@@ -149,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        stopService(new Intent(this, TCPService.class));
+        stopService(new Intent(this, ConnectionService.class));
     }
 
 

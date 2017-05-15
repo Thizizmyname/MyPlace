@@ -22,7 +22,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.myplace.myplace.models.Message;
-import com.myplace.myplace.services.TCPService;
+import com.myplace.myplace.services.ConnectionService;
 
 import java.util.ArrayList;
 
@@ -34,7 +34,7 @@ public class MessageActivity extends AppCompatActivity {
     private Toast messageEmptyToast = null;
     RoomDbHelper roomDB = null;
 
-    TCPService mService;
+    ConnectionService mService;
     boolean mBound = false;
 
 
@@ -72,7 +72,7 @@ public class MessageActivity extends AppCompatActivity {
         super.onStart();
         // Bind to LocalService
         Log.e("Main_Activity", "I'm in onStart!");
-        Intent intent = new Intent(this, TCPService.class);
+        Intent intent = new Intent(this, ConnectionService.class);
         bindService(intent, mTConnection, Context.BIND_AUTO_CREATE);
     }
 
@@ -94,7 +94,7 @@ public class MessageActivity extends AppCompatActivity {
         public void onServiceConnected(ComponentName className,
                                        IBinder service) {
             // We've bound to LocalService, cast the IBinder and get LocalService instance
-            TCPService.TCPBinder binder = (TCPService.TCPBinder) service;
+            ConnectionService.ConnectionBinder binder = (ConnectionService.ConnectionBinder) service;
             mService = binder.getService();
             mBound = true;
         }

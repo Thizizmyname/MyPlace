@@ -15,7 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <service android:name=".services.TCPService" android:enabled="true" />
+        <service android:name=".services.ConnectionService" android:enabled="true" />
 
         <activity
             android:name=".LoginActivity"

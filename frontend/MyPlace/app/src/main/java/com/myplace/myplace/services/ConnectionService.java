@@ -1,17 +1,12 @@
 package com.myplace.myplace.services;
 
-import android.app.Activity;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.IBinder;
-import android.support.annotation.IntDef;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-
-import com.myplace.myplace.LoginActivity;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -22,19 +17,16 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Objects;
-import java.util.Random;
 import java.util.concurrent.Future;
 
 /**
  * Created by alexis on 2017-05-10.
  */
 
-public class TCPService extends Service {
+public class ConnectionService extends Service {
     // Binder given to clients
-    private final IBinder mBinder = new TCPBinder();
-    // Random number generator
-    private final Random mGenerator = new Random();
+    private final IBinder mBinder = new ConnectionBinder();
+
 
     private String serverMessage;
 
@@ -53,11 +45,11 @@ public class TCPService extends Service {
      * Class used for the client Binder.  Because we know this service always
      * runs in the same process as its clients, we don't need to deal with IPC.
      */
-    public class TCPBinder extends Binder {
-        public TCPService getService() {
+    public class ConnectionBinder extends Binder {
+        public ConnectionService getService() {
             // Return this instance of LocalService so clients can call public methods
             Log.e("TCP Service", "Started Service");
-            return TCPService.this;
+            return ConnectionService.this;
         }
     }
 
@@ -67,11 +59,7 @@ public class TCPService extends Service {
         return mBinder;
     }
 
-    /** method for clients */
-    public int giveRandomNumber() {
-        return mGenerator.nextInt(100);
-    }
-
+    // Work in progress, do not use as of now
     public Future<String> sendWithExpectedResult(final String message) {
         AsyncTask<Void, Void, Boolean> sendThread = new AsyncTask<Void, Void, Boolean>() {
             @Override
@@ -111,6 +99,8 @@ public class TCPService extends Service {
         return null;
     }
 
+    // For the moment it sends to all active activities that subscribe
+    // to NEW_MESSAGE broadcasts, should be implementing a dynamic broadcast-system
     public void sendToActivity (final String str) {
         Intent intent  = new Intent("com.myplace.NEW_MESSAGE");
         intent.putExtra("Result", str);
