@@ -34,8 +34,8 @@ ErrorCause string
 }
 
 type GetRoomsRequest struct {
-RequestID int
-UName string
+	RequestID int
+	UName string
 }
 
 type GetRoomsResponse struct {

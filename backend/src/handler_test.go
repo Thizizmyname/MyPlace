@@ -238,7 +238,7 @@ func TestGetRoomUsers(t *testing.T){
 	u2.JoinRoom(r1)
 
 	req := requests_responses.GetRoomUsersRequest{12345,r1.ID}
-	users := myplaceutils.ShowUsers(r1)
+	users := []string{"adam","ask"}
 	resp := requests_responses.GetRoomUsersResponse{12345,r1.ID,users}
 	executeAndTestResponse(t, req, resp)
 }

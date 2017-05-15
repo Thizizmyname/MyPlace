@@ -56,13 +56,8 @@ type UserDB map[string]*User //UName is key
 type RoomDB map[int]*Room //ID is key
 
 func InitDBs() {
-<<<<<<< HEAD
   Users = make(map[string]*User)
   Rooms = make(map[int]*Room)
-=======
-  Users = make(UserDB)
-  Rooms = make(RoomDB)
->>>>>>> backend
 }
 
 /*
@@ -144,7 +139,6 @@ func CreateUser(uname string, pass string) *User {
 //Use:    When the client software wants to list rooms, passing a name as an argument for joining a room, etc.
 //Tested: NO
 func (u *User) ShowRooms() []string {
-
 	var rooms []string
 	var room *Room
 	id := u.Rooms
@@ -159,6 +153,22 @@ func (u *User) ShowRooms() []string {
 	return nil
 }
 
+//purpose: returns an array of the id of the rooms the user is in
+//Use:
+//Tested: NO
+func (u *User) ShowRoomIDs() []int {
+	var rooms []int
+	id := u.Rooms
+	
+	if UserExists(u.UName){
+		for e := id.Front(); e != nil; e = e.Next() {
+			rooms = append(rooms, e.Value.(int))
+		}
+		return rooms
+	}
+	return nil
+}
+
 //Purpose: Creating a new room
 //Use: To create a new chat room
 //Tested: No
@@ -167,7 +177,7 @@ func CreateRoom(name string, id int) *Room {
 	r.ID = id
 	r.Name = name
 	r.Users = list.New()
-	r.Messages = make(map[int]Message)
+	r.Messages = make(map[int]*Message)
 	r.OutgoingChannels = list.New()
 	
 	return &r
@@ -213,11 +223,7 @@ func AddNewUser(uname string, pass string) *User {
 //Purpose: Create a new room and add it to db, and return it.
 func AddNewRoom(name string) *Room {
 	newRoomID := findFreeRoomID()
-<<<<<<< HEAD
-	newRoom := Room{newRoomID, name, list.New(), make(map[int]Message), list.New()}
-=======
 	newRoom := Room{newRoomID, name, list.New(), make(map[int]*Message), list.New()}
->>>>>>> backend
 	Rooms[newRoomID] = &newRoom
 	return &newRoom
 }

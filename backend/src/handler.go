@@ -89,14 +89,19 @@ func signIn(request requests_responses.SignInRequest, responseChan chan requests
 }
 
 func getRooms(request requests_responses.GetRoomsRequest) requests_responses.Response {
-	//id := request.RequestID
-	//name := request.UName
-
-	//usr := myplaceutils.GetUser(name)
-	//rooms := usr.Rooms
-
+	id := request.RequestID
+	name := request.UName
+	user := myplaceutils.GetUser(name)
+	rids := user.ShowRoomIDs()
+	var RoomInfos []requests_responses.RoomInfo
 	
-	
+	for _,x := range rids{
+		room := myplaceutils.GetRoom(x)
+		msg := getlatestmsg(room)
+		roominfo := myplaceutils.CreateRoomInfo(room, msg, name) 
+		RoomInfos = append(RoomInfos, roominfo)
+		
+	} 
 	return nil
 }
 
