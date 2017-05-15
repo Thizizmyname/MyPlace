@@ -176,7 +176,7 @@ public class MessageActivity extends AppCompatActivity {
                 roomDB.addMessage(roomName, newMessage);
                 MainActivity.roomAdapter.notifyDataSetChanged();
 
-                mService.sendMessage(newMessage.text);
+                mService.sendMessage(newMessage.getText());
 
                 //TEST FOR INCOMING AND OUTGOING
                 ++a; //TEST
