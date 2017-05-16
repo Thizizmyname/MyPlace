@@ -298,6 +298,41 @@ func UserIsInRoom(uname string, room *Room) bool {
 	return false
 }
 
+func RemoveUsersOutgoingChannels(uname string, uOutChan chan requests_responses.Response) {
+	user := GetUser(uname)
+
+	if user == nil { return }
+
+	for eR := user.Rooms.Front(); eR != nil; eR = eR.Next() {
+		roomID := eR.Value.(int)
+		room := GetRoom(roomID)
+
+		for eOC := room.OutgoingChannels.Front(); eOC != nil; eOC = eOC.Next() {
+			outChan := eOC.Value.(chan requests_responses.Response)
+			if outChan == uOutChan {
+				room.OutgoingChannels.Remove(eOC)
+			}
+		}
+	}
+}
+
+//Adds an outgoing channel to the rooms list. If channel is already
+//in the list, does nothing.
+func (r *Room) AddOutgoingChannel(c chan requests_responses.Response) {
+	if !outChanInUse(c, r.OutgoingChannels) {
+		r.OutgoingChannels.PushBack(c)
+	}
+}
+
+func outChanInUse(c chan requests_responses.Response, outChans *list.List) bool {
+	for e := outChans.Front(); e != nil; e = e.Next() {
+		outChan := e.Value.(chan requests_responses.Response)
+		if c == outChan { return true }
+	}
+
+	return false
+}
+
 func findFreeRoomID() int {
 	maxID := -1
 

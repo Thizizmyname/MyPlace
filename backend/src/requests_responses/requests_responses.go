@@ -185,62 +185,66 @@ type Request interface {}
 type Response interface {}
 
 func FromRequestString(requestString string) (Request, error) {
-  reqType, err := strconv.Atoi(requestString[:2])
+	reqType, err := strconv.Atoi(requestString[:2])
 
-  if (err != nil) {
-    return nil, err
-  }
+	if (err != nil) {
+		return nil, err
+	}
 
-  jsonRequest := requestString[2:]
+	jsonRequest := requestString[2 : len(requestString) - 1]
 
-  switch reqType {
-  case 0:
-    var r SignUpRequest
-    err := json.Unmarshal([]byte(jsonRequest), &r)
-    return r, err
-  case 1:
-    var r SignInRequest
-    err := json.Unmarshal([]byte(jsonRequest), &r)
-    return r, err
-  case 2:
-    var r GetRoomsRequest
-    err := json.Unmarshal([]byte(jsonRequest), &r)
-    return r, err
-  case 3:
-    var r GetRoomUsersRequest
-    err := json.Unmarshal([]byte(jsonRequest), &r)
-    return r, err
-  case 4:
-    var r GetOlderMsgsRequest
-    err := json.Unmarshal([]byte(jsonRequest), &r)
-    return r, err
-  case 5:
-    var r GetNewerMsgsRequest
-    err := json.Unmarshal([]byte(jsonRequest), &r)
-    return r, err
-  case 6:
-    var r JoinRoomRequest
-    err := json.Unmarshal([]byte(jsonRequest), &r)
-    return r, err
-  case 7:
-    var r LeaveRoomRequest
-    err := json.Unmarshal([]byte(jsonRequest), &r)
-    return r, err
-  case 8:
-    var r CreateRoomRequest
-    err := json.Unmarshal([]byte(jsonRequest), &r)
-    return r, err
-  case 9:
-    var r PostMsgRequest
-    err := json.Unmarshal([]byte(jsonRequest), &r)
-    return r, err
-  case 10:
-    var r MsgReadRequest
-    err := json.Unmarshal([]byte(jsonRequest), &r)
-    return r, err
-  default:
-    return nil, errors.New("illegal reqType")
-  }
+	switch reqType {
+	case 0:
+		var r SignUpRequest
+		err := json.Unmarshal([]byte(jsonRequest), &r)
+		return r, err
+	case 1:
+		var r SignInRequest
+		err := json.Unmarshal([]byte(jsonRequest), &r)
+		return r, err
+	case 2:
+		var r GetRoomsRequest
+		err := json.Unmarshal([]byte(jsonRequest), &r)
+		return r, err
+	case 3:
+		var r GetRoomUsersRequest
+		err := json.Unmarshal([]byte(jsonRequest), &r)
+		return r, err
+	case 4:
+		var r GetOlderMsgsRequest
+		err := json.Unmarshal([]byte(jsonRequest), &r)
+		return r, err
+	case 5:
+		var r GetNewerMsgsRequest
+		err := json.Unmarshal([]byte(jsonRequest), &r)
+		return r, err
+	case 6:
+		var r JoinRoomRequest
+		err := json.Unmarshal([]byte(jsonRequest), &r)
+		return r, err
+	case 7:
+		var r LeaveRoomRequest
+		err := json.Unmarshal([]byte(jsonRequest), &r)
+		return r, err
+	case 8:
+		var r CreateRoomRequest
+		err := json.Unmarshal([]byte(jsonRequest), &r)
+		return r, err
+	case 9:
+		var r PostMsgRequest
+		err := json.Unmarshal([]byte(jsonRequest), &r)
+		return r, err
+	case 10:
+		var r MsgReadRequest
+		err := json.Unmarshal([]byte(jsonRequest), &r)
+		return r, err
+	case 11:
+		var r SignOutRequest
+		err := json.Unmarshal([]byte(jsonRequest), &r)
+		return r, err
+	default:
+		return nil, errors.New("illegal reqType")
+	}
 }
 
 func ToResponseString(response Response) (string, error) {
@@ -252,29 +256,31 @@ func ToResponseString(response Response) (string, error) {
 
   switch response.(type) {
   case SignUpResponse:
-    return fmt.Sprintf("00%s", jsonResponse), nil
+    return fmt.Sprintf("00%s\n", jsonResponse), nil
   case SignInResponse:
-    return fmt.Sprintf("01%s", jsonResponse), nil
+    return fmt.Sprintf("01%s\n", jsonResponse), nil
   case GetRoomsResponse:
-    return fmt.Sprintf("02%s", jsonResponse), nil
+    return fmt.Sprintf("02%s\n", jsonResponse), nil
   case GetRoomUsersResponse:
-    return fmt.Sprintf("03%s", jsonResponse), nil
+    return fmt.Sprintf("03%s\n", jsonResponse), nil
   case GetOlderMsgsResponse:
-    return fmt.Sprintf("04%s", jsonResponse), nil
+    return fmt.Sprintf("04%s\n", jsonResponse), nil
   case GetNewerMsgsResponse:
-    return fmt.Sprintf("05%s", jsonResponse), nil
+    return fmt.Sprintf("05%s\n", jsonResponse), nil
   case JoinRoomResponse:
-    return fmt.Sprintf("06%s", jsonResponse), nil
+    return fmt.Sprintf("06%s\n", jsonResponse), nil
   case LeaveRoomResponse:
-    return fmt.Sprintf("07%s", jsonResponse), nil
+    return fmt.Sprintf("07%s\n", jsonResponse), nil
   case CreateRoomResponse:
-    return fmt.Sprintf("08%s", jsonResponse), nil
+    return fmt.Sprintf("08%s\n", jsonResponse), nil
   case PostMsgResponse:
-    return fmt.Sprintf("09%s", jsonResponse), nil
-  case MsgReadRequest:
-    return fmt.Sprintf("10%s", jsonResponse), nil
+    return fmt.Sprintf("09%s\n", jsonResponse), nil
+  case MsgReadResponse:
+    return fmt.Sprintf("10%s\n", jsonResponse), nil
+  case SignOutResponse:
+    return fmt.Sprintf("11%s\n", jsonResponse), nil
   case ErrorResponse:
-    return fmt.Sprintf("-1%s", jsonResponse), nil
+    return fmt.Sprintf("-1%s\n", jsonResponse), nil
   default:
     return "", errors.New("illegal response type")
   }

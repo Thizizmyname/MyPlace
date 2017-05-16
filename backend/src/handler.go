@@ -1,7 +1,6 @@
 package main
 
 import (
-  "container/list"
   "myplaceutils"
   "requests_responses"
   "net"
@@ -100,46 +99,42 @@ func responseHandler(incomingChannel chan myplaceutils.HandlerArgs) {
 }
 
 func signUp(request requests_responses.SignUpRequest) requests_responses.Response {
-  //Example:
-  //create a new user and update the db
-  user := myplaceutils.User{
-    request.UName,
-    request.Pass,
-    list.New()}
+	requestID := request.RequestID
+	uname := request.UName
+	pass := request.Pass
 
-  //update the db:
-  myplaceutils.Users[user.UName] = &user
+	if myplaceutils.UserExists(uname) {
+		return requests_responses.SignUpResponse{requestID, false, "uname"}
+	}
 
-  //create and return a response to the request
-  response := requests_responses.SignUpResponse{request.RequestID, true, ""}
+	if len(pass) < 3 {
+		return requests_responses.SignUpResponse{requestID, false, "pass"}
+	}
 
-  return response
+	myplaceutils.AddNewUser(uname, pass)
+	response := requests_responses.SignUpResponse{request.RequestID, true, ""}
 
-  //note: The request needs to be checked.. if UName is in use,
-  //if pass ok etc. If error, the last string in the
-  //SignUpResponse is set to error cause "user" or "pass" and
-  //the bool is set to false, and the db isn't updated.
-  //This stuff is defined in the request-response-interface.
+	return response
 }
 
 func signIn(request requests_responses.SignInRequest, responseChan chan requests_responses.Response) requests_responses.Response {
-  requestID := request.RequestID
-  user := myplaceutils.GetUser(request.UName)
-  pass := request.Pass
+	requestID := request.RequestID
+	user := myplaceutils.GetUser(request.UName)
+	pass := request.Pass
 
-  if user == nil {
-    return requests_responses.SignInResponse{requestID, false, "uname"}
-  } else if pass != user.Pass {
-    return requests_responses.SignInResponse{requestID, false, "pass"}
-  }
+	if user == nil {
+		return requests_responses.SignInResponse{requestID, false, "uname"}
+	} else if pass != user.Pass {
+		return requests_responses.SignInResponse{requestID, false, "pass"}
+	}
 
-  for e := user.Rooms.Front(); e != nil; e = e.Next() {
-    roomID := e.Value.(int)
-    room := myplaceutils.GetRoom(roomID)
-    room.OutgoingChannels.PushBack(responseChan)
-  }
+	for e := user.Rooms.Front(); e != nil; e = e.Next() {
+		roomID := e.Value.(int)
+		room := myplaceutils.GetRoom(roomID)
+		room.AddOutgoingChannel(responseChan)
+	}
 
-  return requests_responses.SignInResponse{requestID, true, ""}
+	return requests_responses.SignInResponse{requestID, true, ""}
 }
 
 func getRooms(request requests_responses.GetRoomsRequest) requests_responses.Response {
@@ -201,7 +196,7 @@ func getOlderMsgs(request requests_responses.GetOlderMsgsRequest) requests_respo
 }
 
 func getNewerMsgs(request requests_responses.GetNewerMsgsRequest) requests_responses.Response {
-  return nil
+	return requests_responses.ErrorResponse{request.RequestID, requests_responses.GetNewerMsgsIndex, "not implemented yet"}
 }
 
 func joinRoom(request requests_responses.JoinRoomRequest, responseChan chan requests_responses.Response) requests_responses.Response {
@@ -272,60 +267,80 @@ func leaveRoom(request requests_responses.LeaveRoomRequest, responseChan chan re
   user.LeaveRoom(room)
 
 */  
-  return nil
+  return requests_responses.ErrorResponse{request.RequestID, requests_responses.LeaveRoomIndex, "not implemented yet"}
 
 }
 
 func createRoom(request requests_responses.CreateRoomRequest, responseChan chan requests_responses.Response) requests_responses.Response {
-  return nil
+	requestID := request.RequestID
+	roomName := request.RoomName
+	user := myplaceutils.GetUser(request.UName)
+
+	if user == nil {
+		return requests_responses.ErrorResponse{
+			requestID,
+			requests_responses.CreateRoomIndex,
+			"no such user"}
+	}
+
+	newRoom := myplaceutils.AddNewRoom(roomName)
+	user.JoinRoom(newRoom)
+	newRoom.AddOutgoingChannel(responseChan)
+
+	response := requests_responses.CreateRoomResponse{requestID, newRoom.ID, newRoom.Name}
+
+	return response
 }
 
 func postMsg(request requests_responses.PostMsgRequest, responseChan chan requests_responses.Response) requests_responses.Response {
-  requestID := request.RequestID
-  uname := request.UName
-  roomID := request.RoomID
-  body := request.Body
-  room := myplaceutils.GetRoom(roomID)
+	requestID := request.RequestID
+	uname := request.UName
+	roomID := request.RoomID
+	body := request.Body
+	room := myplaceutils.GetRoom(roomID)
 
-  if room == nil {
-    return requests_responses.ErrorResponse{
-      requestID,
-      requests_responses.PostMsgIndex,
-      "bad roomID"}
-  } else if myplaceutils.UserIsInRoom(uname, room) == false {
-    return requests_responses.ErrorResponse{
-      requestID,
-      requests_responses.PostMsgIndex,
-      "user not in room"}
-  } else if len(body) == 0 || len(body) > myplaceutils.MsgMaxLength {
-    return requests_responses.ErrorResponse{
-      requestID,
-      requests_responses.PostMsgIndex,
-      "bad msg length"}
-  }
+	if room == nil {
+		return requests_responses.ErrorResponse{
+			requestID,
+			requests_responses.PostMsgIndex,
+			"bad roomID"}
+	} else if myplaceutils.UserIsInRoom(uname, room) == false {
+		return requests_responses.ErrorResponse{
+			requestID,
+			requests_responses.PostMsgIndex,
+			"user not in room"}
+	} else if len(body) == 0 || len(body) > myplaceutils.MsgMaxLength {
+		return requests_responses.ErrorResponse{
+			requestID,
+			requests_responses.PostMsgIndex,
+			"bad msg length"}
+	}
 
-  msg := myplaceutils.AddNewMessage(uname, room, body)
-  msgResp := requests_responses.MsgInfo{msg.ID, roomID, msg.UName, msg.Time.Unix(), msg.Body}
 
-  requestIDToAllButSender := -1
-  response := requests_responses.PostMsgResponse{requestIDToAllButSender, msgResp}
+	msg := myplaceutils.AddNewMessage(uname, room, body)
+	msgResp := requests_responses.MsgInfo{msg.ID, roomID, msg.UName, msg.Time.Unix(), msg.Body}
 
-  for e := room.OutgoingChannels.Front(); e != nil; e.Next() {
-    roomChan := e.Value.(chan requests_responses.Response)
-    if roomChan != responseChan {
-      roomChan <- response
-    }
-  }
+	requestIDToAllButSender := -1
+	response := requests_responses.PostMsgResponse{requestIDToAllButSender, msgResp}
 
-  response.RequestID = requestID
+	for e := room.OutgoingChannels.Front(); e != nil; e = e.Next() {
+		roomChan := e.Value.(chan requests_responses.Response)
 
-  return response
+		if roomChan != responseChan {
+			roomChan <- response
+		}
+	}
+
+	response.RequestID = requestID
+
+	return response
 }
 
 func msgRead(request requests_responses.MsgReadRequest) requests_responses.Response {
-  return nil
+	return requests_responses.ErrorResponse{request.RequestID, requests_responses.MsgReadIndex, "not implemented yet"}
 }
 
 func signOut(request requests_responses.SignOutRequest, responseChan chan requests_responses.Response) requests_responses.Response {
-  return nil
+	myplaceutils.RemoveUsersOutgoingChannels(request.UName, responseChan)
+	return requests_responses.SignOutResponse{request.RequestID}
 }
