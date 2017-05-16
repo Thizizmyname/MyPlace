@@ -30,7 +30,7 @@ func initLoggers(
     infoHandle io.Writer,
     warningHandle io.Writer,
     errorHandle io.Writer,
-    ) {
+) {
     myplaceutils.Trace = log.New(traceHandle,
         "TRACE: ",
         log.Ldate|log.Ltime|log.Lshortfile)
@@ -414,7 +414,7 @@ func TestLeaveRoom(t *testing.T){
 	responseChan := make(chan requests_responses.Response)
 
 	req := requests_responses.LeaveRoomRequest{12345,room.ID,"Alex"}	
-	  eresp := requests_responses.ErrorResponse{12345,requests_responses.LeaveRoomIndex,"There is no such user"}
+	eresp := requests_responses.ErrorResponse{12345,requests_responses.LeaveRoomIndex,"There is no such user"}
 	executeAndTestResponse(t,req,eresp)
 	
 	u0 := myplaceutils.AddNewUser("Alex","qwerty")
