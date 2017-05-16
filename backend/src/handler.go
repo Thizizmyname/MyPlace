@@ -206,7 +206,7 @@ func leaveRoom(request requests_responses.LeaveRoomRequest, responseChan chan re
 	if user == nil{
 		return requests_responses.ErrorResponse{
 			requestID,
-			requests_responses.JoinRoomIndex,
+			requests_responses.LeaveRoomIndex,
 			"There is no such user"}
 	}
 	
@@ -218,9 +218,13 @@ func leaveRoom(request requests_responses.LeaveRoomRequest, responseChan chan re
 			"Bad roomID"}      
 	}
 
+	// Kollar om användaren finns med i rummet om inte skicka tillbaka ett error response
+
+	
+
 	user.LeaveRoom(room)
 
-	return nil
+	return requests_responses.LeaveRoomResponse{requestID}
 }
 
 func createRoom(request requests_responses.CreateRoomRequest, responseChan chan requests_responses.Response) requests_responses.Response {

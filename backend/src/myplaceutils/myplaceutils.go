@@ -120,9 +120,16 @@ func (r *Room) RemoveUser(u *User) {
 }
 
 // Removes the room from the user
-func (u *User) LeaveRoom(r *Room) {
-//	u.Rooms.Remove(r.Name)
+func (u *User) LeaveRoom(r *Room)bool {
+	for e := u.Rooms.Front(); e != nil; e = e.Next() {
+		// do something with e.Value
+		if e.Value.(int) == r.ID {
+			u.Rooms.Remove(e)
+		}	
+	}
 
+	
+return true
 }
 
 func CreateUser(uname string, pass string) *User {
