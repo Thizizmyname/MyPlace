@@ -226,8 +226,6 @@ func leaveRoom(request requests_responses.LeaveRoomRequest, responseChan chan re
 			"There is no such user in the room"}
 	}
 
-	
-
 	user.LeaveRoom(room)
 
 	return requests_responses.LeaveRoomResponse{requestID}

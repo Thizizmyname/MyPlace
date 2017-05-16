@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"io"
 	"log"
-	"fmt"
 )
 
 var handlerChan chan myplaceutils.HandlerArgs
@@ -367,7 +366,7 @@ func TestSignOut(t *testing.T) {
 	resp = requests_responses.SignOutResponse{12345}
 	executeAndTestResponse_chan(t, u2_responseChan, req, resp)
 	if r1.OutgoingChannels.Len() != 0 || r2.OutgoingChannels.Len() != 0 {
-		t.Errorf("Bad channel count, r1=%v, r2=%v",
+	  	t.Errorf("Bad channel count, r1=%v, r2=%v",
 			r1.OutgoingChannels.Len(),
 			r2.OutgoingChannels.Len())
 	}
@@ -387,8 +386,8 @@ func TestSignOut(t *testing.T) {
 func TestJoinRoom(t *testing.T){
 	myplaceutils.InitDBs()
 	room := myplaceutils.AddNewRoom("213")
-
 	roomInfo := myplaceutils.CreateRoomInfo(room,nil,"Alex")
+	
 	req := requests_responses.JoinRoomRequest{12345,room.ID,"Alex"}
 	eresp :=  requests_responses.ErrorResponse{12345,requests_responses.JoinRoomIndex,"There is no such user"}
 	executeAndTestResponse(t,req,eresp)
@@ -412,8 +411,8 @@ func TestJoinRoom(t *testing.T){
 func TestLeaveRoom(t *testing.T){
 	myplaceutils.InitDBs()
 	room := myplaceutils.AddNewRoom("213")	
-	responseChan := make(chan requests_responses.Response)
 
+	// Test 1 Error -The user doesn't exist
 	req := requests_responses.LeaveRoomRequest{12345,room.ID,"Alex"}	
 	eresp := requests_responses.ErrorResponse{12345,requests_responses.LeaveRoomIndex,"There is no such user"}
 	executeAndTestResponse(t,req,eresp)
@@ -421,20 +420,18 @@ func TestLeaveRoom(t *testing.T){
 	u0 := myplaceutils.AddNewUser("Alex","qwerty")
 	u1 := myplaceutils.AddNewUser("Erik", "1337")
 
+	// Test 2 Error - The user isn't in the room
 	req = requests_responses.LeaveRoomRequest{12345,room.ID,u0.UName}
 	eresp = requests_responses.ErrorResponse{12345, requests_responses.LeaveRoomIndex,"There is no such user in the room"}
 	executeAndTestResponse(t,req,eresp)
 
-
 	u0.JoinRoom(room)
 	u1.JoinRoom(room)
 	
-	fmt.Printf("%v\n", room.Users)
-	req = requests_responses.LeaveRoomRequest{12345,room.ID,u0.UName}	
-	leaveRoom(req,responseChan)
-	resp := requests_responses.LeaveRoomResponse{12345}
-	
+	// Test 3 - Checks if it can remove the user
+	req = requests_responses.LeaveRoomRequest{12345,room.ID,u0.UName}
+	resp := requests_responses.LeaveRoomResponse{12345}	
 	executeAndTestResponse(t,req,resp)
-
+	
 }
 

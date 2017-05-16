@@ -110,15 +110,6 @@ func (user *User) JoinRoom(room *Room) {
 	room.Users.PushBack(user.UName)
 }
 
-// Removes the user from the room
-func (r *Room) RemoveUser(u *User) {
-  // for i, elem := range r.Users {
-  //   if reflect.DeepEqual(elem, u) {
-  //     r.Users = r.Users[:i+copy(r.Users[i:], r.Users[i+1:])]
-  //   }
-  // }
-  // r.NoPeople--
-}
 
 // Removes the room from the user
 func (u *User) LeaveRoom(r *Room) bool{
@@ -131,13 +122,14 @@ func (u *User) LeaveRoom(r *Room) bool{
 			return false
 		}
 	}
-	
+
+	// Updates the user
 	for e := u.Rooms.Front(); e != nil; e = e.Next() {
 		if e.Value.(int) == r.ID {
 			u.Rooms.Remove(e)
 		}
 	}
-	
+	// Updates the room
 	for e := r.Users.Front(); e != nil; e = e.Next() {
 		if strings.Compare(e.Value.(string),u.UName) == 0 {
 			r.Users.Remove(e)
