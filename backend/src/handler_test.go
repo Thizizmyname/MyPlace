@@ -226,7 +226,7 @@ func TestPostMsg(t *testing.T) {
 	eresp = requests_responses.ErrorResponse{12345, requests_responses.PostMsgIndex, "user not in room"}
 	executeAndTestResponse(t, req, eresp)
 }
-
+/*
 func TestGetRoomUsers(t *testing.T){
 	myplaceutils.InitDBs()
 	u1 := myplaceutils.AddNewUser("ask", "embla")
@@ -242,7 +242,7 @@ func TestGetRoomUsers(t *testing.T){
 	resp := requests_responses.GetRoomUsersResponse{12345,r1.ID,users}
 	executeAndTestResponse(t, req, resp)
 }
-
+*/
 func TestJoinRoom(t *testing.T){
 	myplaceutils.InitDBs()
 	room := myplaceutils.AddNewRoom("213")	
@@ -266,3 +266,25 @@ func TestJoinRoom(t *testing.T){
 	resp = requests_responses.JoinRoomResponse{12345,roomInfo,true}
 	executeAndTestResponse(t,req,resp)
 }
+/*
+func TestGetRooms(t *testing.T){
+	myplaceutils.InitDBs()
+	u1 := myplaceutils.AddNewUser("ask", "embla")
+	u2 := myplaceutils.AddNewUser("adam", "eva")
+	r1 := myplaceutils.AddNewRoom("livingroom")
+	r2 := myplaceutils.AddNewRoom("bedroom")
+	u1.JoinRoom(r1)
+	u1.JoinRoom(r2)
+	u2.JoinRoom(r1)
+
+	
+	roomInfo1 := myplaceutils.CreateRoomInfo(r1,nil,u1.UName)
+	roomInfo2 := myplaceutils.CreateRoomInfo(r2,nil,u1.UName)
+	roomInfo := []requests_responses.RoomInfo{roomInfo1,roomInfo2}
+	
+	req := requests_responses.GetRoomsRequest{12345, u1.UName}
+	resp := requests_responses.GetRoomsResponse{12345,roomInfo}
+
+	executeAndTestResponse(t,req,resp)	
+}
+*/

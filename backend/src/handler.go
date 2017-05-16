@@ -96,13 +96,16 @@ func getRooms(request requests_responses.GetRoomsRequest) requests_responses.Res
 	var RoomInfos []requests_responses.RoomInfo
 	
 	for _,x := range rids{
+		
 		room := myplaceutils.GetRoom(x)
-		msg := getlatestmsg(room)
+		msg,_ := myplaceutils.GetLatestMsg(room)
 		roominfo := myplaceutils.CreateRoomInfo(room, msg, name) 
 		RoomInfos = append(RoomInfos, roominfo)
 		
-	} 
-	return nil
+	}
+
+	response := requests_responses.GetRoomsResponse{id,RoomInfos}
+	return response
 }
 
 func getRoomUsers(request requests_responses.GetRoomUsersRequest) requests_responses.Response {
@@ -118,6 +121,14 @@ func getRoomUsers(request requests_responses.GetRoomUsersRequest) requests_respo
 }
 
 func getOlderMsgs(request requests_responses.GetOlderMsgsRequest) requests_responses.Response {
+	id := request.RequestID
+	roomID := reguest.RoomID
+	msgID := request.MsgId
+	NoMsgs := 10
+	
+	room := myplaceutils.GetRoom(roomid)
+	 
+	
 	return nil
 }
 
@@ -161,7 +172,7 @@ func joinRoom(request requests_responses.JoinRoomRequest, responseChan chan requ
 	response := requests_responses.JoinRoomResponse{request.RequestID,roomInfo,true}
 	
 	// Vad ska göras med responseChan?
-	room.AddOutgoingChannel(responseChan)
+	//room.AddOutgoingChannel(responseChan)
 	return response
 }
 

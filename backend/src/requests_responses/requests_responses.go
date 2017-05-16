@@ -77,9 +77,9 @@ type GetNewerMsgsResponse struct {
 }
 
 type JoinRoomRequest struct {
-  RequestID int
-  RoomID int
-  UName string
+	RequestID int
+	RoomID int
+	UName string
 }
 
 type JoinRoomResponse struct {
@@ -89,13 +89,13 @@ type JoinRoomResponse struct {
 }
 
 type LeaveRoomRequest struct {
-  RequestID int
-  RoomID int
-  UName string
+	RequestID int
+	RoomID int
+	UName string
 }
 
 type LeaveRoomResponse struct {
-  RequestID int
+	RequestID int
 }
 
 type CreateRoomRequest struct {
