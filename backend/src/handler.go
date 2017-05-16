@@ -1,7 +1,7 @@
 package main
 
 import (
-	"container/list"
+
 	"myplaceutils"
 	"requests_responses"
 	"net"
@@ -100,26 +100,22 @@ func responseHandler(incomingChannel chan myplaceutils.HandlerArgs) {
 }
 
 func signUp(request requests_responses.SignUpRequest) requests_responses.Response {
-	//Example:
-	//create a new user and update the db
-	user := myplaceutils.User{
-		request.UName,
-		request.Pass,
-		list.New()}
+	requestID := request.RequestID
+	uname := request.UName
+	pass := request.Pass
 
-	//update the db:
-	myplaceutils.Users[user.UName] = &user
+	if myplaceutils.UserExists(uname) {
+		return requests_responses.SignUpResponse{requestID, false, "uname"}
+	}
 
-	//create and return a response to the request
+	if len(pass) < 3 {
+		return requests_responses.SignUpResponse{requestID, false, "pass"}
+	}
+
+	myplaceutils.AddNewUser(uname, pass)
 	response := requests_responses.SignUpResponse{request.RequestID, true, ""}
 
 	return response
-
-	//note: The request needs to be checked.. if UName is in use,
-	//if pass ok etc. If error, the last string in the
-	//SignUpResponse is set to error cause "user" or "pass" and
-	//the bool is set to false, and the db isn't updated.
-	//This stuff is defined in the request-response-interface.
 }
 
 func signIn(request requests_responses.SignInRequest, responseChan chan requests_responses.Response) requests_responses.Response {
@@ -136,26 +132,26 @@ func signIn(request requests_responses.SignInRequest, responseChan chan requests
 	for e := user.Rooms.Front(); e != nil; e = e.Next() {
 		roomID := e.Value.(int)
 		room := myplaceutils.GetRoom(roomID)
-		room.OutgoingChannels.PushBack(responseChan)
+		room.AddOutgoingChannel(responseChan)
 	}
 
 	return requests_responses.SignInResponse{requestID, true, ""}
 }
 
 func getRooms(request requests_responses.GetRoomsRequest) requests_responses.Response {
-	return nil
+	return requests_responses.ErrorResponse{request.RequestID, requests_responses.GetRoomsIndex, "not implemented yet"}
 }
 
 func getRoomUsers(request requests_responses.GetRoomUsersRequest) requests_responses.Response {
-	return nil
+	return requests_responses.ErrorResponse{request.RequestID, requests_responses.GetRoomUsersIndex, "not implemented yet"}
 }
 
 func getOlderMsgs(request requests_responses.GetOlderMsgsRequest) requests_responses.Response {
-	return nil
+	return requests_responses.ErrorResponse{request.RequestID, requests_responses.GetOlderMsgsIndex, "not implemented yet"}
 }
 
 func getNewerMsgs(request requests_responses.GetNewerMsgsRequest) requests_responses.Response {
-	return nil
+	return requests_responses.ErrorResponse{request.RequestID, requests_responses.GetNewerMsgsIndex, "not implemented yet"}
 }
 
 func joinRoom(request requests_responses.JoinRoomRequest, responseChan chan requests_responses.Response) requests_responses.Response {
@@ -199,37 +195,53 @@ func joinRoom(request requests_responses.JoinRoomRequest, responseChan chan requ
 }
 
 func leaveRoom(request requests_responses.LeaveRoomRequest, responseChan chan requests_responses.Response) requests_responses.Response {
-  // Vill uppdatera ett rum så att en user har lämnat i det
-  requestID := request.RequestID
-  roomID := request.RoomID
-  username := request.UName
+	// Vill uppdatera ett rum så att en user har lämnat i det
+	requestID := request.RequestID
+	roomID := request.RoomID
+	username := request.UName
 
-  room := myplaceutils.GetRoom(roomID)
-  user := myplaceutils.GetUser(username)
+	room := myplaceutils.GetRoom(roomID)
+	user := myplaceutils.GetUser(username)
 
-  if user == nil{
-    return requests_responses.ErrorResponse{
-      requestID,
-      requests_responses.JoinRoomIndex,
-      "There is no such user"}
-  }
-  
-  if room == nil {
-    
-    return requests_responses.ErrorResponse{
-      requestID,
-      requests_responses.JoinRoomIndex,
-      "Bad roomID"}      
-  }
+	if user == nil{
+		return requests_responses.ErrorResponse{
+			requestID,
+			requests_responses.JoinRoomIndex,
+			"There is no such user"}
+	}
+	
+	if room == nil {
+		
+		return requests_responses.ErrorResponse{
+			requestID,
+			requests_responses.JoinRoomIndex,
+			"Bad roomID"}      
+	}
 
-  user.LeaveRoom(room)
+	user.LeaveRoom(room)
 
 	return nil
-
 }
 
 func createRoom(request requests_responses.CreateRoomRequest, responseChan chan requests_responses.Response) requests_responses.Response {
-	return nil
+	requestID := request.RequestID
+	roomName := request.RoomName
+	user := myplaceutils.GetUser(request.UName)
+
+	if user == nil {
+		return requests_responses.ErrorResponse{
+			requestID,
+			requests_responses.CreateRoomIndex,
+			"no such user"}
+	}
+
+	newRoom := myplaceutils.AddNewRoom(roomName)
+	user.JoinRoom(newRoom)
+	newRoom.AddOutgoingChannel(responseChan)
+
+	response := requests_responses.CreateRoomResponse{requestID, newRoom.ID, newRoom.Name}
+
+	return response
 }
 
 func postMsg(request requests_responses.PostMsgRequest, responseChan chan requests_responses.Response) requests_responses.Response {
@@ -262,8 +274,9 @@ func postMsg(request requests_responses.PostMsgRequest, responseChan chan reques
 	requestIDToAllButSender := -1
 	response := requests_responses.PostMsgResponse{requestIDToAllButSender, msgResp}
 
-	for e := room.OutgoingChannels.Front(); e != nil; e.Next() {
+	for e := room.OutgoingChannels.Front(); e != nil; e = e.Next() {
 		roomChan := e.Value.(chan requests_responses.Response)
+
 		if roomChan != responseChan {
 			roomChan <- response
 		}
@@ -275,9 +288,10 @@ func postMsg(request requests_responses.PostMsgRequest, responseChan chan reques
 }
 
 func msgRead(request requests_responses.MsgReadRequest) requests_responses.Response {
-	return nil
+		return requests_responses.ErrorResponse{request.RequestID, requests_responses.MsgReadIndex, "not implemented yet"}
 }
 
 func signOut(request requests_responses.SignOutRequest, responseChan chan requests_responses.Response) requests_responses.Response {
-	return nil
+	myplaceutils.RemoveUsersOutgoingChannels(request.UName, responseChan)
+	return requests_responses.SignOutResponse{request.RequestID}
 }
