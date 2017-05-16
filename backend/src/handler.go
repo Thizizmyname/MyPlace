@@ -199,7 +199,6 @@ func joinRoom(request requests_responses.JoinRoomRequest, responseChan chan requ
 }
 
 func leaveRoom(request requests_responses.LeaveRoomRequest, responseChan chan requests_responses.Response) requests_responses.Response {
-	/*
   // Vill uppdatera ett rum så att en user har lämnat i det
   requestID := request.RequestID
   roomID := request.RoomID
@@ -225,7 +224,6 @@ func leaveRoom(request requests_responses.LeaveRoomRequest, responseChan chan re
 
   user.LeaveRoom(room)
 
-*/  
 	return nil
 
 }
