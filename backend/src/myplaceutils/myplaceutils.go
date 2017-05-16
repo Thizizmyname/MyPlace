@@ -10,8 +10,8 @@ import (
   "requests_responses"
 )
 
-//Dessa loggers är till för att kunna anropas från alla programfiler.
 var (
+  //Dessa loggers är till för att kunna anropas från alla programfiler.
   Trace   *log.Logger
   Info    *log.Logger
   Warning *log.Logger
@@ -257,7 +257,7 @@ func GetLatestMsg(room *Room) (*Message,int){
 	}
 
 	latestMsg := room.Messages[maxID]
-	return &latestMsg,maxID
+	return latestMsg,maxID
 
 }
 
