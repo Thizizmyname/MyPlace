@@ -48,54 +48,57 @@ func clientHandler(conn net.Conn, clientChannel chan requests_responses.Response
 
 
 func responseHandler(incomingChannel chan myplaceutils.HandlerArgs) {
-  myplaceutils.Info.Println("Reached responseHandler")
-  for args := range incomingChannel {
-    request := args.IncomingRequest
-    responseChan := args.ResponseChannel
-    myplaceutils.Info.Printf("Handling request: %v\n", request)
-    var response requests_responses.Response
+	myplaceutils.Info.Println("Reached responseHandler")
+	for args := range incomingChannel {
+		request := args.IncomingRequest
+		responseChan := args.ResponseChannel
+		myplaceutils.Info.Printf("Handling request: %v\n", request)
+		var response requests_responses.Response
 
-    switch request.(type) {
-    case requests_responses.SignUpRequest:
-      myplaceutils.Info.Println("Matched request to signUp")
-      response = signUp(request.(requests_responses.SignUpRequest))
-    case requests_responses.SignInRequest:
-      myplaceutils.Info.Println("Matched request to signIn")
-      response = signIn(request.(requests_responses.SignInRequest), responseChan)
-    case requests_responses.GetRoomsRequest:
-      myplaceutils.Info.Println("Matched request to getRooms")
-      response = getRooms(request.(requests_responses.GetRoomsRequest))
-    case requests_responses.GetRoomUsersRequest:
-      myplaceutils.Info.Println("Matched request to getRoomUsers")
-      response = getRoomUsers(request.(requests_responses.GetRoomUsersRequest))
-    case requests_responses.GetOlderMsgsRequest:
-      myplaceutils.Info.Println("Matched request to GetOlderMsgs")
-      response = getOlderMsgs(request.(requests_responses.GetOlderMsgsRequest))
-    case requests_responses.GetNewerMsgsRequest:
-      myplaceutils.Info.Println("Matched request to GetNewerMsgs")
-      response = getNewerMsgs(request.(requests_responses.GetNewerMsgsRequest))
-    case requests_responses.JoinRoomRequest:
-      myplaceutils.Info.Println("Matched request to JoinRoom")
-      response = joinRoom(request.(requests_responses.JoinRoomRequest), responseChan)
-    case requests_responses.LeaveRoomRequest:
-      myplaceutils.Info.Println("Matched request to LeaveRoom")
-      response = leaveRoom(request.(requests_responses.LeaveRoomRequest), responseChan)
-    case requests_responses.CreateRoomRequest:
-      myplaceutils.Info.Println("Matched request to CreateRoom")
-      response = createRoom(request.(requests_responses.CreateRoomRequest), responseChan)
-    case requests_responses.PostMsgRequest:
-      myplaceutils.Info.Println("Matched request to PostMsg")
-      response = postMsg(request.(requests_responses.PostMsgRequest), responseChan)
-    case requests_responses.SignOutRequest:
-      myplaceutils.Info.Println("Matched request to SignOut")
-      response = signOut(request.(requests_responses.SignOutRequest), responseChan)
-    default:
-      myplaceutils.Info.Println("Bad request type")
-      panic("Nonexistent request type")
-    }
+		switch request.(type) {
+		case requests_responses.SignUpRequest:
+			myplaceutils.Info.Println("Matched request to signUp")
+			response = signUp(request.(requests_responses.SignUpRequest))
+		case requests_responses.SignInRequest:
+			myplaceutils.Info.Println("Matched request to signIn")
+			response = signIn(request.(requests_responses.SignInRequest), responseChan)
+		case requests_responses.GetRoomsRequest:
+			myplaceutils.Info.Println("Matched request to getRooms")
+			response = getRooms(request.(requests_responses.GetRoomsRequest))
+		case requests_responses.GetRoomUsersRequest:
+			myplaceutils.Info.Println("Matched request to getRoomUsers")
+			response = getRoomUsers(request.(requests_responses.GetRoomUsersRequest))
+		case requests_responses.GetOlderMsgsRequest:
+			myplaceutils.Info.Println("Matched request to GetOlderMsgs")
+			response = getOlderMsgs(request.(requests_responses.GetOlderMsgsRequest))
+		case requests_responses.GetNewerMsgsRequest:
+			myplaceutils.Info.Println("Matched request to GetNewerMsgs")
+			response = getNewerMsgs(request.(requests_responses.GetNewerMsgsRequest))
+		case requests_responses.JoinRoomRequest:
+			myplaceutils.Info.Println("Matched request to JoinRoom")
+			response = joinRoom(request.(requests_responses.JoinRoomRequest), responseChan)
+		case requests_responses.LeaveRoomRequest:
+			myplaceutils.Info.Println("Matched request to LeaveRoom")
+			response = leaveRoom(request.(requests_responses.LeaveRoomRequest), responseChan)
+		case requests_responses.CreateRoomRequest:
+			myplaceutils.Info.Println("Matched request to CreateRoom")
+			response = createRoom(request.(requests_responses.CreateRoomRequest), responseChan)
+		case requests_responses.PostMsgRequest:
+			myplaceutils.Info.Println("Matched request to PostMsg")
+			response = postMsg(request.(requests_responses.PostMsgRequest), responseChan)
+	        case requests_responses.MsgReadRequest:
+			myplaceutils.Info.Println("Matched request to SignOut")
+			response = msgRead(request.(requests_responses.MsgReadRequest))
+		case requests_responses.SignOutRequest:
+			myplaceutils.Info.Println("Matched request to SignOut")
+			response = signOut(request.(requests_responses.SignOutRequest), responseChan)
+		default:
+			myplaceutils.Info.Println("Bad request type")
+			panic("Nonexistent request type")
+		}
 
-    responseChan <- response
-  }
+		responseChan <- response
+	}
 }
 
 func signUp(request requests_responses.SignUpRequest) requests_responses.Response {
@@ -129,8 +132,8 @@ func signIn(request requests_responses.SignInRequest, responseChan chan requests
 	}
 
 	for e := user.Rooms.Front(); e != nil; e = e.Next() {
-		roomID := e.Value.(int)
-		room := myplaceutils.GetRoom(roomID)
+		room_ := e.Value.(myplaceutils.RoomIDAndLatestReadMsgID)
+		room := myplaceutils.GetRoom(room_.RoomID)
 		room.AddOutgoingChannel(responseChan)
 	}
 
@@ -155,41 +158,36 @@ func getNewerMsgs(request requests_responses.GetNewerMsgsRequest) requests_respo
 
 func joinRoom(request requests_responses.JoinRoomRequest, responseChan chan requests_responses.Response) requests_responses.Response {
   // Vill uppdatera ett rum så att en user är medlem i det
-  
+
   requestID := request.RequestID
   roomID := request.RoomID
   username := request.UName
 
-
   room := myplaceutils.GetRoom(roomID)
   user := myplaceutils.GetUser(username)
-  latestMsg,_ := myplaceutils.GetLatestMsg(room)
 
   if user == nil{
     return requests_responses.ErrorResponse{
       requestID,
       requests_responses.JoinRoomIndex,
       "There is no such user"}
-
   }
-  
+
   if room == nil { // Kan inte skapa en respons utan att skapa en ha ett rum
     roomInfo := requests_responses.RoomInfo{}
-    
+
     return requests_responses.JoinRoomResponse{
       requestID,
       roomInfo,
-      false}      
+      false}
   }
-  
+
   user.JoinRoom(room)
+  room.AddOutgoingChannel(responseChan)
 
-  roomInfo := myplaceutils.CreateRoomInfo(room,latestMsg,username)
-
+  roomInfo := myplaceutils.CreateRoomInfo(room,user)
   response := requests_responses.JoinRoomResponse{request.RequestID,roomInfo,true}
-  
-  // Vad ska göras med responseChan?
-  //room.AddOutgoingChannel(responseChan)
+
   return response
 }
 
@@ -209,18 +207,18 @@ func leaveRoom(request requests_responses.LeaveRoomRequest, responseChan chan re
       requests_responses.JoinRoomIndex,
       "There is no such user"}
   }
-  
+
   if room == nil {
-    
+
     return requests_responses.ErrorResponse{
       requestID,
       requests_responses.JoinRoomIndex,
-      "Bad roomID"}      
+      "Bad roomID"}
   }
 
   user.LeaveRoom(room)
 
-*/  
+*/
   return requests_responses.ErrorResponse{request.RequestID, requests_responses.LeaveRoomIndex, "not implemented yet"}
 
 }
@@ -291,7 +289,34 @@ func postMsg(request requests_responses.PostMsgRequest, responseChan chan reques
 }
 
 func msgRead(request requests_responses.MsgReadRequest) requests_responses.Response {
-	return requests_responses.ErrorResponse{request.RequestID, requests_responses.MsgReadIndex, "not implemented yet"}
+	requestID := request.RequestID
+	msgID := request.MsgID
+	room := myplaceutils.GetRoom(request.RoomID)
+	user := myplaceutils.GetUser(request.UName)
+
+	if room == nil {
+		return requests_responses.ErrorResponse{
+			requestID,
+			requests_responses.MsgReadIndex,
+			"bad roomID"}
+	}
+	if user == nil {
+		return requests_responses.ErrorResponse{
+			requestID,
+			requests_responses.MsgReadIndex,
+			"bad userID"}
+	}
+
+	ok := user.SetLatestReadMsg(room, msgID)
+
+	if ok == false {
+		return requests_responses.ErrorResponse{
+			requestID,
+			requests_responses.MsgReadIndex,
+			"bad msgID or user not in room"}
+	}
+
+	return requests_responses.MsgReadResponse{requestID}
 }
 
 func signOut(request requests_responses.SignOutRequest, responseChan chan requests_responses.Response) requests_responses.Response {
