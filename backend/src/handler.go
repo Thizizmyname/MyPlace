@@ -194,6 +194,11 @@ func joinRoom(request requests_responses.JoinRoomRequest, responseChan chan requ
 	return response
 }
 
+
+// Purpose: The user leaves a room
+// Argument: a request, response channel
+// Returns: a response
+// Tested: Yes
 func leaveRoom(request requests_responses.LeaveRoomRequest, responseChan chan requests_responses.Response) requests_responses.Response {
 	// Vill uppdatera ett rum så att en user har lämnat i det
 	requestID := request.RequestID
@@ -218,7 +223,6 @@ func leaveRoom(request requests_responses.LeaveRoomRequest, responseChan chan re
 			"Bad roomID"}      
 	}
 	
-	// Kollar om användaren finns med i rummet om inte skicka tillbaka ett error response
 	if !myplaceutils.UserIsInRoom(username,room) {
 		return requests_responses.ErrorResponse{
 			requestID,
@@ -227,7 +231,6 @@ func leaveRoom(request requests_responses.LeaveRoomRequest, responseChan chan re
 	}
 
 	user.LeaveRoom(room)
-
 	return requests_responses.LeaveRoomResponse{requestID}
 }
 

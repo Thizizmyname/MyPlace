@@ -111,9 +111,14 @@ func (user *User) JoinRoom(room *Room) {
 }
 
 
-// Removes the room from the user
-func (u *User) LeaveRoom(r *Room) bool{
 
+// Purpose: A method so the user leaves the room. Also updates the room so the user istn't a member of the room
+// Argument: A room.
+// Returns: True if the user succeeded to leave the room, false if not
+// Tested: Yes
+func (u *User) LeaveRoom(r *Room) bool{
+	
+	
 	// Checks if an user is a member of the room
 	for e := r.Users.Front(); e != nil; e = e.Next() {
 		if strings.Compare(e.Value.(string),u.UName) == 0 {
@@ -122,7 +127,6 @@ func (u *User) LeaveRoom(r *Room) bool{
 			return false
 		}
 	}
-
 	// Updates the user
 	for e := u.Rooms.Front(); e != nil; e = e.Next() {
 		if e.Value.(int) == r.ID {
@@ -133,9 +137,10 @@ func (u *User) LeaveRoom(r *Room) bool{
 	for e := r.Users.Front(); e != nil; e = e.Next() {
 		if strings.Compare(e.Value.(string),u.UName) == 0 {
 			r.Users.Remove(e)
+			// Jag måste uppdatera outgoingChannels? Förstår inte vad den innehåller dock.
 		}
 	}
-
+	
 	return true
 }
 
