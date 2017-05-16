@@ -15,7 +15,7 @@ func TestLoad(t *testing.T) {
 	us, rs, e := LoadDBs()
 
 	if e == nil {
-		fmt.Println("Remove 'rooms' and 'users'")
+		fmt.Println("Remove 'rooms' and 'users' for complete test")
 	}else if len(us) != 0 || len(rs) != 0 {
 		t.Error("Wrong size after failed db-read")
 	}
