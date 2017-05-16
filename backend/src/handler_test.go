@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"io"
 	"log"
+	"fmt"
 )
 
 var handlerChan chan myplaceutils.HandlerArgs
@@ -411,28 +412,29 @@ func TestJoinRoom(t *testing.T){
 func TestLeaveRoom(t *testing.T){
 	myplaceutils.InitDBs()
 	room := myplaceutils.AddNewRoom("213")	
-//	responseChan := make(chan requests_responses.Response)
+	responseChan := make(chan requests_responses.Response)
 
 	req := requests_responses.LeaveRoomRequest{12345,room.ID,"Alex"}	
 	eresp := requests_responses.ErrorResponse{12345,requests_responses.LeaveRoomIndex,"There is no such user"}
 	executeAndTestResponse(t,req,eresp)
 	
 	u0 := myplaceutils.AddNewUser("Alex","qwerty")
-	//u1 := myplaceutils.AddNewUser("Erik", "1337")
+	u1 := myplaceutils.AddNewUser("Erik", "1337")
 
 	req = requests_responses.LeaveRoomRequest{12345,room.ID,u0.UName}
-	resp := requests_responses.LeaveRoomResponse{12345} // Ska inte passera, ska fångas upp i LeaveRoom eftersom användaren inte finns med i rummet
-	executeAndTestResponse(t,req,resp)
-/*	
+	eresp = requests_responses.ErrorResponse{12345, requests_responses.LeaveRoomIndex,"There is no such user in the room"}
+	executeAndTestResponse(t,req,eresp)
+
+
 	u0.JoinRoom(room)
 	u1.JoinRoom(room)
 	
-
+	fmt.Printf("%v\n", room.Users)
 	req = requests_responses.LeaveRoomRequest{12345,room.ID,u0.UName}	
 	leaveRoom(req,responseChan)
-	resp = requests_responses.LeaveRoomResponse{12345}
+	resp := requests_responses.LeaveRoomResponse{12345}
 	
 	executeAndTestResponse(t,req,resp)
-*/
+
 }
 

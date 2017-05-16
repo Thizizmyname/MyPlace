@@ -52,9 +52,11 @@ func TestGetLatestMsg(t *testing.T){
 		t.Error("Didn't get the latest message")
 
 	}
-
 	
 }
+
+
+
 
 /*
 func createStuff(conn *net.TCPConn) (*User, *Room) {

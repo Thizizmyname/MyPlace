@@ -7,7 +7,8 @@ import (
   //"reflect"
   "log"
   "container/list"
-  "requests_responses"
+	"requests_responses"
+	"strings"
 )
 
 var (
@@ -120,16 +121,30 @@ func (r *Room) RemoveUser(u *User) {
 }
 
 // Removes the room from the user
-func (u *User) LeaveRoom(r *Room)bool {
+func (u *User) LeaveRoom(r *Room) bool{
+
+	// Checks if an user is a member of the room
+	for e := r.Users.Front(); e != nil; e = e.Next() {
+		if strings.Compare(e.Value.(string),u.UName) == 0 {
+			break
+		}else if(e == nil){
+			return false
+		}
+	}
+	
 	for e := u.Rooms.Front(); e != nil; e = e.Next() {
-		// do something with e.Value
 		if e.Value.(int) == r.ID {
 			u.Rooms.Remove(e)
-		}	
+		}
+	}
+	
+	for e := r.Users.Front(); e != nil; e = e.Next() {
+		if strings.Compare(e.Value.(string),u.UName) == 0 {
+			r.Users.Remove(e)
+		}
 	}
 
-	
-return true
+	return true
 }
 
 func CreateUser(uname string, pass string) *User {
@@ -259,11 +274,12 @@ func GetLatestMsg(room *Room) (*Message,int){
 
 }
 
+// Returns true if the user is in the room
 func UserIsInRoom(uname string, room *Room) bool {
 	unameList := room.Users
 
 	for e := unameList.Front(); e != nil; e = e.Next() {
-		if e.Value.(string) == uname {
+		if strings.Compare (e.Value.(string), uname) == 0 {
 			return true
 		}
 	}

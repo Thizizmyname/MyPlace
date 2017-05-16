@@ -189,8 +189,8 @@ func joinRoom(request requests_responses.JoinRoomRequest, responseChan chan requ
 
 	response := requests_responses.JoinRoomResponse{request.RequestID,roomInfo,true}
 	
-	// Vad ska göras med responseChan?
-	//room.AddOutgoingChannel(responseChan)
+	
+	room.AddOutgoingChannel(responseChan)
 	return response
 }
 
@@ -217,8 +217,14 @@ func leaveRoom(request requests_responses.LeaveRoomRequest, responseChan chan re
 			requests_responses.JoinRoomIndex,
 			"Bad roomID"}      
 	}
-
+	
 	// Kollar om användaren finns med i rummet om inte skicka tillbaka ett error response
+	if !myplaceutils.UserIsInRoom(username,room) {
+		return requests_responses.ErrorResponse{
+			requestID,
+			requests_responses.LeaveRoomIndex,
+			"There is no such user in the room"}
+	}
 
 	
 
