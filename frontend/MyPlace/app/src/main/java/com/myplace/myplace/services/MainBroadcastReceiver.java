@@ -18,16 +18,16 @@ import org.json.JSONException;
 
 public abstract class MainBroadcastReceiver extends BroadcastReceiver {
 
-    Context context;
+
     RoomDbHelper roomDB;
 
-    public MainBroadcastReceiver(Context context) {
-        this.context = context;
-        this.roomDB = new RoomDbHelper(context);
-    }
 
     @Override
     public void onReceive(Context context, Intent intent) {
+
+        if (roomDB == null) {
+            roomDB = new RoomDbHelper(context);
+        }
         // Get extra data included in the Intent
         String serverMessage = intent.getStringExtra(ConnectionService.REPLY_PACKAGE);
 

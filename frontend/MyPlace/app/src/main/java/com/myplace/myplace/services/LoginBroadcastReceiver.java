@@ -3,6 +3,7 @@ package com.myplace.myplace.services;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 import com.myplace.myplace.JSONParser;
 import com.myplace.myplace.models.RequestTypes;
@@ -19,6 +20,7 @@ public abstract class LoginBroadcastReceiver extends BroadcastReceiver {
         // Get extra data included in the Intent
         String serverMessage = intent.getStringExtra(ConnectionService.REPLY_PACKAGE);
 
+        Log.e("LoginBroadcastReceiver", "Received: " + serverMessage);
         int i = JSONParser.determineJSONType(serverMessage);
 
         try {

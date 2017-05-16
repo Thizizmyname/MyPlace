@@ -41,7 +41,7 @@ public class MessageActivity extends AppCompatActivity {
 
     // Our handler for received Intents. This will be called whenever an Intent
     // with an action named "custom-event-name" is broadcasted.
-    private MainBroadcastReceiver mMessageReceiverr = new MainBroadcastReceiver(getApplicationContext()) {
+    private MainBroadcastReceiver mMessageReceiverr = new MainBroadcastReceiver() {
         @Override
         public void handleNewMessageInActivity(Message msg) {
             messageAdapter.add(msg);
@@ -119,7 +119,7 @@ public class MessageActivity extends AppCompatActivity {
         // We are registering an observer (mMessageReceiver) to receive Intents
         // with actions named "custom-event-name".
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
-                new IntentFilter(ConnectionService.BROADCAST_NEW_MESSAGE));
+                new IntentFilter(ConnectionService.BROADCAST_TAG));
     }
 
     @Override

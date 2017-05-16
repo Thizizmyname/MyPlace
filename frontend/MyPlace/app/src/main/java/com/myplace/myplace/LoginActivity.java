@@ -187,7 +187,7 @@ public class LoginActivity extends AppCompatActivity {
         // We are registering an observer (mMessageReceiver) to receive Intents
         // with actions named "custom-event-name".
         LocalBroadcastManager.getInstance(this).registerReceiver(loginBroadcastReceiver,
-                new IntentFilter(ConnectionService.REPLY_PACKAGE));
+                new IntentFilter(ConnectionService.BROADCAST_TAG));
     }
 
     @Override

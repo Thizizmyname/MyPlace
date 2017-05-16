@@ -26,8 +26,8 @@ public final class JSONParser {
     private static int number;
 
     private static final String KEY_REQUEST_ID = "RequestID";
-    private static final String KEY_USERNAME = "Username";
-    private static final String KEY_PASSWORD = "Password";
+    private static final String KEY_USERNAME = "UName";
+    private static final String KEY_PASSWORD = "Pass";
     private static final String KEY_SIGN_ACCEPTANCE = "Result";
     private static final String KEY_ROOM_ID = "RoomID";
     private static final String KEY_ROOM_NAME = "RoomName";
@@ -41,7 +41,7 @@ public final class JSONParser {
     private static final String KEY_MSG_LIST = "Messages";
     private static final String KEY_ERROR_CAUSE = "ErrorCause";
 
-    private static final String TWO_CHAR_FORMAT = "%03d";
+    private static final String TWO_CHAR_FORMAT = "%02d";
     private static final int NO_ID_FOUND = 0;
 
 
