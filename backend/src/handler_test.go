@@ -16,7 +16,7 @@ func TestMain(m *testing.M) {
 
 func executeAndTestResponse(t *testing.T, request requests_responses.Request, expectedResponse requests_responses.Response) {
 	handlerChan := make(chan myplaceutils.HandlerArgs)
-	go handler(handlerChan) //now handler is waiting for requests
+	go responseHandler(handlerChan) //now handler is waiting for requests
 	defer close(handlerChan)
 
 	responseChan := make(chan requests_responses.Response)
@@ -252,7 +252,38 @@ func TestJoinRoom(t *testing.T){
 	resp = requests_responses.JoinRoomResponse{12345,roomInfo,true}
 	executeAndTestResponse(t,req,resp)
 	
+}
+
+func TestLeaveRoom(t *testing.T){
+	myplaceutils.InitDBs()
+	room := myplaceutils.AddNewRoom("213")	
+	responseChan := make(chan requests_responses.Response)
+
+	req := requests_responses.LeaveRoomRequest{12345,room.ID,"Alex"}	
+	  eresp := requests_responses.ErrorResponse{12345,requests_responses.LeaveRoomIndex,"There is no such use"}
+	executeAndTestResponse(t,req,eresp)
 	
+	u0 := myplaceutils.AddNewUser("Alex","qwerty")
+	u1 := myplaceutils.AddNewUser("Erik", "1337")
+
+	req = requests_responses.LeaveRoomRequest{12345,room.ID,u0.UName}
+	resp := requests_responses.LeaveRoomResponse{12345} // Ska inte passera, ska fångas upp i LeaveRoom eftersom användaren inte finns med i rummet
+	executeAndTestResponse(t,req,resp)
+	
+	u0.JoinRoom(room)
+	u1.JoinRoom(room)
 	
 
+	req = requests_responses.LeaveRoomRequest{12345,room.ID,u0.UName}	
+	leaveRoom(req,responseChan)
+	resp = requests_responses.LeaveRoomResponse{12345}
+	
+	executeAndTestResponse(t,req,resp)
+
+	
+
+	
+
+	
 }
+
