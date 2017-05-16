@@ -1,19 +1,19 @@
 SignUp
-00{"RequestID":12345,"UName":"user","Pass":"pass"}
-00{"RequestID":12345,"Result":true,"ErrorCause":""}
+request:    00{"RequestID":12345,"UName":"user","Pass":"pass"}
+response:   00{"RequestID":12345,"Result":true,"ErrorCause":""}
 
 SignIn
-01{"RequestID":12345,"UName":"user","Pass":"pass"}
-01{"RequestID":12345,"Result":false,"ErrorCause":"user"}
+request:    01{"RequestID":12345,"UName":"user","Pass":"pass"}
+response:   01{"RequestID":12345,"Result":false,"ErrorCause":"user"}
 
 GetRooms
-02{"RequestID":12345,"UName":"user"}
-02{"RequestID":12345,"Rooms":[{"ID":0,"Name":"room1","LatestMsg":{"MsgID":0,"RoomID":0,"UName":"user0","Time":123456789,"Body":"msg body"},"LatestReadMsgID":0},{"ID":1,"Name":"room1","LatestMsg":{"MsgID":1,"RoomID":1,"UName":"user1","Time":123456789,"Body":"msg body"},"LatestReadMsgID":0},{"ID":2,"Name":"room2","LatestMsg":{"MsgID":2,"RoomID":2,"UName":"user2","Time":123456789,"Body":"msg body"},"LatestReadMsgID":0}]}
+request:    02{"RequestID":12345,"UName":"user"}
+response:   02{"RequestID":12345,"Rooms":[{"ID":0,"Name":"room1","LatestMsg":{"MsgID":0,"RoomID":0,"UName":"user0","Time":123456789,"Body":"msg body"},"LatestReadMsgID":0},{"ID":1,"Name":"room1","LatestMsg":{"MsgID":1,"RoomID":1,"UName":"user1","Time":123456789,"Body":"msg body"},"LatestReadMsgID":0},{"ID":2,"Name":"room2","LatestMsg":{"MsgID":2,"RoomID":2,"UName":"user2","Time":123456789,"Body":"msg body"},"LatestReadMsgID":0}]}
 
 GetRoomUsers
-03{"RequestID":12345,"RoomID":54321}
-03{"RequestID":12345,"RoomID":54321,"UNames":["user0","user1","user2"]}
+request:    03{"RequestID":12345,"RoomID":54321}
+response:   03{"RequestID":12345,"RoomID":54321,"UNames":["user0","user1","user2"]}
 
 GetOlderMsgsRequest
-04{"RequestID":12345,"RoomID":54321,"MsgID":987654}
-04{"RequestID":12345,"Messages":[{"MsgID":0,"RoomID":0,"UName":"user0","Time":123456789,"Body":"msg body"},{"MsgID":1,"RoomID":1,"UName":"user1","Time":123456789,"Body":"msg body"},{"MsgID":2,"RoomID":2,"UName":"user2","Time":123456789,"Body":"msg body"}]}
+request:    04{"RequestID":12345,"RoomID":54321,"MsgID":987654}
+response:   04{"RequestID":12345,"Messages":[{"MsgID":0,"RoomID":0,"UName":"user0","Time":123456789,"Body":"msg body"},{"MsgID":1,"RoomID":1,"UName":"user1","Time":123456789,"Body":"msg body"},{"MsgID":2,"RoomID":2,"UName":"user2","Time":123456789,"Body":"msg body"}]}
