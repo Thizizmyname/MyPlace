@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.myplace.myplace.services.ConnectionService;
-import com.myplace.myplace.services.MyBroadcastReceiver;
+import com.myplace.myplace.services.MainBroadcastReceiver;
 
 
 import static com.myplace.myplace.LoginActivity.LOGIN_PREFS;
@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Our handler for received Intents. This will be called whenever an Intent
     // with an action named "custom-event-name" is broadcasted.
-    private MyBroadcastReceiver mbre = new MyBroadcastReceiver(getApplicationContext()) {
+    private MainBroadcastReceiver mbre = new MainBroadcastReceiver(getApplicationContext()) {
         @Override
         public void handleNewMessageInActivity(Message msg) {
             roomAdapter.notifyDataSetChanged();
@@ -163,7 +163,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        startService(new Intent(this, ConnectionService.class));
+
 
 
         actionMenu = (FloatingActionsMenu) findViewById(R.id.action_menu);
@@ -190,11 +190,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        stopService(new Intent(this, ConnectionService.class));
-    }
 
 
     public void onThreadClick(int position) {

@@ -3,6 +3,7 @@ package com.myplace.myplace.services;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 import com.myplace.myplace.JSONParser;
 import com.myplace.myplace.RoomDbHelper;
@@ -15,12 +16,12 @@ import org.json.JSONException;
  * Created by alexis on 2017-05-15.
  */
 
-public abstract class MyBroadcastReceiver extends BroadcastReceiver {
+public abstract class MainBroadcastReceiver extends BroadcastReceiver {
 
     Context context;
     RoomDbHelper roomDB;
 
-    public MyBroadcastReceiver(Context context) {
+    public MainBroadcastReceiver(Context context) {
         this.context = context;
         this.roomDB = new RoomDbHelper(context);
     }
@@ -36,11 +37,8 @@ public abstract class MyBroadcastReceiver extends BroadcastReceiver {
 
             switch (i) {
                 case RequestTypes.SIGN_UP:
-                    final Boolean signupResponse = JSONParser.signupResponse(serverMessage);
-
-                    break;
                 case RequestTypes.SIGN_IN:
-                    final Boolean signinResponse = JSONParser.signinResponse(serverMessage);
+                    Log.e("MainBroadcastReceiver", "Signup/Signin responses in Main/MessageActivity");
                     break;
                 case RequestTypes.GET_ROOMS:
 

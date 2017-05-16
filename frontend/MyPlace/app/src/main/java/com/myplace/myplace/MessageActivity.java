@@ -23,7 +23,7 @@ import android.widget.Toast;
 
 import com.myplace.myplace.models.Message;
 import com.myplace.myplace.services.ConnectionService;
-import com.myplace.myplace.services.MyBroadcastReceiver;
+import com.myplace.myplace.services.MainBroadcastReceiver;
 
 import java.util.ArrayList;
 
@@ -41,7 +41,7 @@ public class MessageActivity extends AppCompatActivity {
 
     // Our handler for received Intents. This will be called whenever an Intent
     // with an action named "custom-event-name" is broadcasted.
-    private MyBroadcastReceiver mMessageReceiverr = new MyBroadcastReceiver(getApplicationContext()) {
+    private MainBroadcastReceiver mMessageReceiverr = new MainBroadcastReceiver(getApplicationContext()) {
         @Override
         public void handleNewMessageInActivity(Message msg) {
             messageAdapter.add(msg);
