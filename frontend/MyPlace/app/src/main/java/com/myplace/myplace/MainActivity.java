@@ -28,7 +28,6 @@ import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.myplace.myplace.models.RoomInfo;
 import com.myplace.myplace.services.ConnectionService;
 
-
 import static com.myplace.myplace.LoginActivity.LOGIN_PREFS;
 import static com.myplace.myplace.R.id.action_create;
 import static com.myplace.myplace.R.id.action_join;
@@ -205,9 +204,10 @@ public class MainActivity extends AppCompatActivity {
                 String roomName = inputRoom.getText().toString();
 
                 //TODO: Change below string to JSON-request
+                int roomID = (int) System.currentTimeMillis()/1000;
 
-                roomDB.createRoomTable(0, roomName);
-                roomList.add(new RoomInfo(new Room(0, roomName), null, 0));
+                roomDB.createRoomTable(roomID, roomName);
+                roomList.add(new RoomInfo(new Room(roomID, roomName), null, 0));
                 roomAdapter.notifyDataSetChanged();
 
                 //Log.e("MainActivity", "Running sendMessage");

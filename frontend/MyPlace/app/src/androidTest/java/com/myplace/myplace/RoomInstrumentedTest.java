@@ -46,14 +46,14 @@ public class RoomInstrumentedTest {
         testContext = getInstrumentation().getTargetContext();
         db = new RoomDbHelper(testContext);
 
-        db.createRoomTable(TEST_ROOM_NAME);
-        db.addMessage(TEST_ROOM_NAME, testMessage);
+        db.createRoomTable(TEST_ROOM_ID, TEST_ROOM_NAME);
+        db.addMessage(TEST_ROOM_ID, testMessage);
     }
 
     @Test
     public void getLastMessageTest() {
         Room room = new Room(TEST_ROOM_ID, TEST_ROOM_NAME);
-        String lastMessage = room.getLastMessage(testContext);
+        String lastMessage = room.getLastMessageText(testContext);
         assertEquals(lastMessage, TEST_MESSAGE);
     }
 

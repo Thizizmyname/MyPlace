@@ -18,30 +18,27 @@ public class MessageTest {
     private static String TEST_LONG_MESSAGE = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas porta.";
     private static int    TEST_ID           = 1;
     private static int    TEST_ROOM_ID      = 123;
-
+    private static long   TEST_TIMESTAMP    = System.currentTimeMillis();
 
     @Test
     public void getIdTest() {
-        Date date = new Date();
-        Message message = new Message(TEST_ID, TEST_ROOM_ID, TEST_NAME, TEST_MESSAGE, date);
+        Message message = new Message(TEST_ID, TEST_ROOM_ID, TEST_NAME, TEST_MESSAGE, TEST_TIMESTAMP);
 
         assertEquals(message.getId(), TEST_ID);
     }
 
     @Test
     public void getRoomIdTest() {
-        Date date = new Date();
-        Message message = new Message(TEST_ID, TEST_ROOM_ID, TEST_NAME, TEST_MESSAGE, date);
+        Message message = new Message(TEST_ID, TEST_ROOM_ID, TEST_NAME, TEST_MESSAGE, TEST_TIMESTAMP);
 
         assertEquals(message.getRoomID(), TEST_ROOM_ID);
     }
 
     @Test
-    public void getDateTest() {
-        Date date = new Date();
-        Message message = new Message(TEST_NAME, TEST_MESSAGE, date);
+    public void getTimestampTest() {
+        Message message = new Message(TEST_NAME, TEST_MESSAGE, TEST_TIMESTAMP);
 
-        assertEquals(message.getDate(), date);
+        assertEquals(message.getTimestamp(), TEST_TIMESTAMP);
     }
 
     @Test

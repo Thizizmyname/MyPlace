@@ -2,7 +2,6 @@ package com.myplace.myplace;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +11,6 @@ import android.widget.TextView;
 import com.myplace.myplace.models.Message;
 
 import java.util.ArrayList;
-import java.util.TreeSet;
 
 import static com.myplace.myplace.LoginActivity.LOGIN_PREFS;
 
@@ -61,7 +59,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         TextView text = (TextView) convertView.findViewById(R.id.textMessage);
         TextView date = (TextView) convertView.findViewById(R.id.textDate);
 
-        date.setText(Message.df.format(message.getDate()));
+        date.setText(message.getShortTime());
         text.setText(message.getText());
 
         return convertView;
