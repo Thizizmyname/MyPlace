@@ -176,14 +176,28 @@ func getRoomUsers(request requests_responses.GetRoomUsersRequest) requests_respo
 
 func getOlderMsgs(request requests_responses.GetOlderMsgsRequest) requests_responses.Response {
 	id := request.RequestID
-	roomID := reguest.RoomID
-	msgID := request.MsgId
-	NoMsgs := 10
+	roomID := request.RoomID
+	msgID := request.MsgID
+	NoMsgs := 10  // Anger hur många meddelande som ska hämtas
+	room := myplaceutils.GetRoom(roomID)
+	var messages []requests_responses.MsgInfo
 	
-	room := myplaceutils.GetRoom(roomid)
-	 
+	if (len(room.Messages) == 0){
+		response := requests_responses.ErrorResponse{
+			id,
+			requests_responses.GetOlderMsgsIndex,
+			"No messages in room"}
+		return response
+	}
 	
-	return nil
+	for x := msgID; x > (msgID - NoMsgs); x-- {
+		msg := room.Messages[x]
+		uname := msg.UName
+		msginfo := myplaceutils.CreateMsgInfo(room, msg, uname)
+		messages = append(messages,msginfo)
+	}
+	response := requests_responses.GetOlderMsgsResponse{id,messages}
+	return response
 }
 
 func getNewerMsgs(request requests_responses.GetNewerMsgsRequest) requests_responses.Response {

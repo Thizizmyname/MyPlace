@@ -55,9 +55,9 @@ type GetRoomUsersResponse struct {
 }
 
 type GetOlderMsgsRequest struct {
-  RequestID int
-  RoomID int
-  MsgID int
+	RequestID int
+	RoomID int
+	MsgID int
 }
 
 type GetOlderMsgsResponse struct {

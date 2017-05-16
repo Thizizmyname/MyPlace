@@ -16,7 +16,7 @@ func TestMain(m *testing.M) {
 
 func executeAndTestResponse(t *testing.T, request requests_responses.Request, expectedResponse requests_responses.Response) {
 	handlerChan := make(chan myplaceutils.HandlerArgs)
-	go handler(handlerChan) //now handler is waiting for requests
+	go responseHandler(handlerChan) //now handler is waiting for requests
 	defer close(handlerChan)
 
 	responseChan := make(chan requests_responses.Response)
@@ -288,3 +288,15 @@ func TestGetRooms(t *testing.T){
 	executeAndTestResponse(t,req,resp)	
 }
 */
+
+func TestGetOlderMsgs(t *testing.T){
+	myplaceutils.InitDBs()
+	u1 := myplaceutils.AddNewUser("ask", "embla")
+	u2 := myplaceutils.AddNewUser("adam", "eva")
+	r1 := myplaceutils.AddNewRoom("livingroom")
+	u1.JoinRoom(r1)
+	u2.JoinRoom(r1)
+
+	
+
+}
