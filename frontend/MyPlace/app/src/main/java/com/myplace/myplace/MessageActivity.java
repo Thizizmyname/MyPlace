@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import com.myplace.myplace.models.Message;
 import com.myplace.myplace.services.ConnectionService;
+import com.myplace.myplace.services.MyBroadcastReceiver;
 
 import java.util.ArrayList;
 
@@ -40,6 +41,12 @@ public class MessageActivity extends AppCompatActivity {
 
     // Our handler for received Intents. This will be called whenever an Intent
     // with an action named "custom-event-name" is broadcasted.
+    private MyBroadcastReceiver mMessageReceiverr = new MyBroadcastReceiver(getApplicationContext()) {
+        @Override
+        public void handleNewMessageInActivity(Message msg) {
+            messageAdapter.add(msg);
+        }
+    };
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -50,7 +57,7 @@ public class MessageActivity extends AppCompatActivity {
             messageAdapter.add(newMessage);
 
             roomDB.addMessage(roomName, newMessage);
-            MainActivity.roomAdapter.notifyDataSetChanged();
+            //MainActivity.roomAdapter.notifyDataSetChanged();
         }
     };
 
@@ -71,7 +78,7 @@ public class MessageActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         // Bind to LocalService
-        Log.e("Main_Activity", "I'm in onStart!");
+        Log.d("MessageActivity", "I'm in onStart!");
         Intent intent = new Intent(this, ConnectionService.class);
         bindService(intent, mTConnection, Context.BIND_AUTO_CREATE);
     }
@@ -81,7 +88,7 @@ public class MessageActivity extends AppCompatActivity {
         super.onStop();
         // Unbind from the service
         if (mBound) {
-            Log.e("MessageActivity", "Stopping event");
+            Log.d("MessageActivity", "Stopping event");
             unbindService(mTConnection);
             mBound = false;
         }
@@ -112,7 +119,7 @@ public class MessageActivity extends AppCompatActivity {
         // We are registering an observer (mMessageReceiver) to receive Intents
         // with actions named "custom-event-name".
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
-                new IntentFilter("com.myplace.NEW_MESSAGE"));
+                new IntentFilter(ConnectionService.BROADCAST_NEW_MESSAGE));
     }
 
     @Override
@@ -162,24 +169,25 @@ public class MessageActivity extends AppCompatActivity {
                 }
 
                 //TEST FOR INCOMING AND OUTGOING
-                if(mod(a, 2) == 0) {
+//                if(mod(a, 2) == 0) {
                     String username = "N/A";
                     SharedPreferences loginInfo = getSharedPreferences(LOGIN_PREFS, 0);
                     name = loginInfo.getString("username", username);
-                } else {
-                    name = "Joel";
-                }
+//                } else {
+//                    name = "Joel";
+//                }
+
 
                 Message newMessage = new Message(name, message.getText().toString());
-                messageAdapter.add(newMessage);
-
-                roomDB.addMessage(roomName, newMessage);
-                MainActivity.roomAdapter.notifyDataSetChanged();
+//                messageAdapter.add(newMessage);
+//
+//                roomDB.addMessage(roomName, newMessage);
+//                MainActivity.roomAdapter.notifyDataSetChanged();
 
                 mService.sendMessage(newMessage.getText());
 
                 //TEST FOR INCOMING AND OUTGOING
-                ++a; //TEST
+                //++a; //TEST
 
                 message.setText(null); // Reset input field
             }

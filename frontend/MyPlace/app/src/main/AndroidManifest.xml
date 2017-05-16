@@ -43,6 +43,8 @@
             android:name=".MessageActivity"
             android:exported="true"
             android:parentActivityName=".MainActivity"/>
+
+        <receiver android:name=".services.MyBroadcastReceiver" />
     </application>
 
 </manifest>

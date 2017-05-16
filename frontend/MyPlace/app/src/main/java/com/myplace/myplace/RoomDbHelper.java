@@ -103,7 +103,7 @@ public class RoomDbHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-    void addMessage(String roomName, Message message) {
+    public void addMessage(String roomName, Message message) {
         roomName = roomName.replace(" ", "_");
 
         ContentValues insertValues = new ContentValues();

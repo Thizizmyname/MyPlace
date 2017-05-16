@@ -24,6 +24,10 @@ import java.util.concurrent.Future;
  */
 
 public class ConnectionService extends Service {
+
+    public static final String REPLY_PACKAGE = "com.myplace.CONNECTION_RESPONSE_PACKAGE";
+    public static final String BROADCAST_NEW_MESSAGE = "com.myplace.NEW_MESSAGE";
+
     // Binder given to clients
     private final IBinder mBinder = new ConnectionBinder();
 
@@ -103,7 +107,7 @@ public class ConnectionService extends Service {
     // to NEW_MESSAGE broadcasts, should be implementing a dynamic broadcast-system
     public void sendToActivity (final String str) {
         Intent intent  = new Intent("com.myplace.NEW_MESSAGE");
-        intent.putExtra("Result", str);
+        intent.putExtra(REPLY_PACKAGE, str);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 

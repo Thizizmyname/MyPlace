@@ -48,7 +48,7 @@ public final class JSONParser {
 
     public static int determineJSONType(String rawString) {
         int result = Integer.parseInt(rawString.substring(0, 1));
-        if (result == ERROR_TYPE) readErrorResponse(rawString);
+        if (result == ERROR_TYPE) throwErrorResponse(rawString);
 
         return result;
     }
@@ -212,9 +212,9 @@ public final class JSONParser {
         return new Room(_id, _name);
     }
 
-    public static String postMsgRequest(String username, Message msg) throws JSONException {
+    public static String postMsgRequest(Message msg) throws JSONException {
         JSONObject json = constructJSONRequest();
-        json.put(KEY_USERNAME, username);
+        json.put(KEY_USERNAME, msg.getName());
 
         if (msg.getRoomID() == 0) throw new AssertionError();
         json.put(KEY_ROOM_ID, msg.getRoomID());
@@ -253,7 +253,7 @@ public final class JSONParser {
 
 
 
-    public static void readErrorResponse(String rawString) {
+    public static void throwErrorResponse(String rawString) {
         try {
             JSONObject json = makeProperJsonObject(rawString);
             String error = json.getString(KEY_ERROR_CAUSE);

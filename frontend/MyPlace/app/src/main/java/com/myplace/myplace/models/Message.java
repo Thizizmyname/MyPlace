@@ -32,8 +32,8 @@ public class Message {
         this.date = date;
     }
 
-    public Message(String name, String message) {
-        this.name = name;
+    public Message(String username, String message) {
+        this.name = username;
         this.text = message;
         this.date = new Date();
 

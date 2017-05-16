@@ -1,13 +1,16 @@
 package com.myplace.myplace;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -20,12 +23,15 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
+
+import com.myplace.myplace.models.Message;
 import com.myplace.myplace.models.Room;
 import java.util.ArrayList;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.myplace.myplace.services.ConnectionService;
+import com.myplace.myplace.services.MyBroadcastReceiver;
 
 
 import static com.myplace.myplace.LoginActivity.LOGIN_PREFS;
@@ -45,14 +51,53 @@ public class MainActivity extends AppCompatActivity {
     //Defines the database
     public RoomDbHelper roomDB = null;
 
+    // Our handler for received Intents. This will be called whenever an Intent
+    // with an action named "custom-event-name" is broadcasted.
+    private MyBroadcastReceiver mbre = new MyBroadcastReceiver(getApplicationContext()) {
+        @Override
+        public void handleNewMessageInActivity(Message msg) {
+            roomAdapter.notifyDataSetChanged();
+        }
+    };
+
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Get extra data included in the Intent
+            String message = intent.getStringExtra("Result");
+            Message newMessage = new Message("Stefan", message);
+            final String roomName = getIntent().getExtras().getString("RoomName");
+
+            roomDB.addMessage(roomName, newMessage);
+            MainActivity.roomAdapter.notifyDataSetChanged();
+        }
+    };
+
 
     @Override
     protected void onStart() {
         super.onStart();
         // Bind to LocalService
-        Log.e("Main_Activity", "I'm in onStart!");
+        Log.d("Main_Activity", "I'm in onStart!");
         Intent intent = new Intent(this, ConnectionService.class);
         bindService(intent, mTConnection, Context.BIND_AUTO_CREATE);
+        roomAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Register to receive messages.
+        // We are registering an observer (mMessageReceiver) to receive Intents
+        // with actions named "custom-event-name".
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
+                new IntentFilter(ConnectionService.BROADCAST_NEW_MESSAGE));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
     }
 
     @Override
