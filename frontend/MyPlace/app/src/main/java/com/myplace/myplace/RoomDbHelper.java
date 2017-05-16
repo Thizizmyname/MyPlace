@@ -140,7 +140,6 @@ public class RoomDbHelper extends SQLiteOpenHelper {
         insertValues.put(ROOM_TEXT, message.getText());
         long timestamp = message.getTimestamp();
         insertValues.put(ROOM_TIMESTAMP, timestamp);
-        Log.d("addMessage timestamp", Long.toString(message.getTimestamp()));
 
         String roomIDString = getRoomIdString(roomID);
         SQLiteDatabase db = this.getWritableDatabase();
@@ -163,8 +162,6 @@ public class RoomDbHelper extends SQLiteOpenHelper {
         String name = c.getString(c.getColumnIndex(ROOM_SENDER));
         String text = c.getString(c.getColumnIndex(ROOM_TEXT));
         long timestamp = c.getLong(c.getColumnIndex(ROOM_TIMESTAMP));
-
-        Log.d("getLast timestamp:", Long.toString(timestamp));
 
         Message message = new Message(messageID, roomID, name, text, timestamp);
         c.close();

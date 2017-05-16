@@ -45,26 +45,6 @@ public class MainActivity extends AppCompatActivity {
     //Defines the database
     public RoomDbHelper roomDB = null;
 
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        // Bind to LocalService
-        Log.e("Main_Activity", "I'm in onStart!");
-        Intent intent = new Intent(this, ConnectionService.class);
-        bindService(intent, mTConnection, Context.BIND_AUTO_CREATE);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        // Unbind from the service
-        if (mBound) {
-            unbindService(mTConnection);
-            mBound = false;
-        }
-    }
-
     /** Defines callbacks for service binding, passed to bindService() */
     private ServiceConnection mTConnection = new ServiceConnection() {
 
@@ -96,30 +76,8 @@ public class MainActivity extends AppCompatActivity {
 
         //Open database
         roomDB = new RoomDbHelper(this);
-        roomList = roomDB.getRoomList();
-        listView = (ListView) findViewById(R.id.roomList);
-
-        roomAdapter = new RoomAdapter(this, roomList);
-        listView.setAdapter(roomAdapter);
-
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                onThreadClick(position);
-            }
-        });
-
-        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
-                onThreadLongClick(position);
-                return true;
-            }
-        });
 
         startService(new Intent(this, ConnectionService.class));
-
 
         actionMenu = (FloatingActionsMenu) findViewById(R.id.action_menu);
 
@@ -143,6 +101,52 @@ public class MainActivity extends AppCompatActivity {
                 onAddRoomClick(R.string.join_room);
             }
         });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // Bind to LocalService
+        Log.e("Main_Activity", "I'm in onStart!");
+        Intent intent = new Intent(this, ConnectionService.class);
+        bindService(intent, mTConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        roomList = roomDB.getRoomList();
+        listView = (ListView) findViewById(R.id.roomList);
+
+        roomAdapter = new RoomAdapter(this, roomList);
+        listView.setAdapter(roomAdapter);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                onThreadClick(position);
+            }
+        });
+
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+                onThreadLongClick(position);
+                return true;
+            }
+        });
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // Unbind from the service
+        if (mBound) {
+            unbindService(mTConnection);
+            mBound = false;
+        }
     }
 
     @Override
