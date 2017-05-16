@@ -268,7 +268,7 @@ func TestCreateRoom(t *testing.T) {
 	executeAndTestResponse(t, req, resp)
 }
 
-func TestPostMsg(t *testing.T) {
+func TestPostMsgAndMsgRead(t *testing.T) {
 	myplaceutils.InitDBs()
 	u1 := myplaceutils.AddNewUser("ask", "embla")
 	u1_responseChan := make(chan requests_responses.Response, 1)
@@ -288,6 +288,7 @@ func TestPostMsg(t *testing.T) {
 	lrp = requests_responses.SignInResponse{1234, true, ""}
 	executeAndTestResponse_chan(t, u2_responseChan, lrq, lrp)
 
+	//post msgs
 	str := "hello? who are you?"
 	req := requests_responses.PostMsgRequest{12345, u1.UName, r1.ID, str}
 	msgI := requests_responses.MsgInfo{0, r1.ID, u1.UName, -1, str}
@@ -327,6 +328,72 @@ func TestPostMsg(t *testing.T) {
 	req = requests_responses.PostMsgRequest{12345, u2.UName, r2.ID, str}
 	eresp = requests_responses.ErrorResponse{12345, requests_responses.PostMsgIndex, "user not in room"}
 	executeAndTestResponse_chan(t, u2_responseChan, req, eresp)
+
+
+
+
+	//test msgRead
+	//r1 has 4 msgs, r2 has 1
+	//u1 in r1&r2, u2 in r1
+	//u1,r1: latestRead=3
+	mrreq := requests_responses.MsgReadRequest{1, 3, r1.ID, u1.UName}
+	mrresp := requests_responses.MsgReadResponse{1}
+	executeAndTestResponse(t, mrreq, mrresp)
+	if u1.GetLatestReadMsg(r1.ID) != 3 {
+		t.Error("bad latestReadMsg")
+	}
+
+	//same
+	mrreq = requests_responses.MsgReadRequest{2, 3, r1.ID, u1.UName}
+	mrresp = requests_responses.MsgReadResponse{2}
+	executeAndTestResponse(t, mrreq, mrresp)
+	if u1.GetLatestReadMsg(r1.ID) != 3 {
+		t.Error("bad latestReadMsg")
+	}
+
+	//u1,r1: latestRead=0
+	mrreq = requests_responses.MsgReadRequest{3, 0, r1.ID, u1.UName}
+	mrresp = requests_responses.MsgReadResponse{3}
+	executeAndTestResponse(t, mrreq, mrresp)
+	if u1.GetLatestReadMsg(r1.ID) != 0 {
+		t.Error("bad latestReadMsg")
+	}
+
+	//u1,r1: latestRead=4
+	mrreq = requests_responses.MsgReadRequest{4, 4, r1.ID, u1.UName}
+	eresp = requests_responses.ErrorResponse{4, requests_responses.MsgReadIndex, "bad msgID or user not in room"}
+	executeAndTestResponse(t, mrreq, eresp)
+	if u1.GetLatestReadMsg(r1.ID) != 0 {
+		t.Error("bad latestReadMsg")
+	}
+
+	//u2,r1: latestRead=10
+	mrreq = requests_responses.MsgReadRequest{5, 10, r1.ID, u2.UName}
+	eresp = requests_responses.ErrorResponse{5, requests_responses.MsgReadIndex, "bad msgID or user not in room"}
+	executeAndTestResponse(t, mrreq, eresp)
+	if u2.GetLatestReadMsg(r1.ID) != -1 {
+		t.Error("bad latestReadMsg")
+	}
+
+	//u2,r2: latestRead=0
+	mrreq = requests_responses.MsgReadRequest{6, 0, r2.ID, u2.UName}
+	eresp = requests_responses.ErrorResponse{6, requests_responses.MsgReadIndex, "bad msgID or user not in room"}
+	executeAndTestResponse(t, mrreq, eresp)
+	if u2.GetLatestReadMsg(r1.ID) != -1 {
+		t.Error("bad latestReadMsg")
+	}
+
+	//u2,r2: latestRead=10
+	mrreq = requests_responses.MsgReadRequest{12345, 10, r2.ID, u2.UName}
+	eresp = requests_responses.ErrorResponse{12345, requests_responses.MsgReadIndex, "bad msgID or user not in room"}
+	executeAndTestResponse(t, mrreq, eresp)
+	if u2.GetLatestReadMsg(r1.ID) != -1 {
+		t.Error("bad latestReadMsg")
+	}
+}
+
+func TestMsgRead(t *testing.T) {
+
 }
 
 func TestSignOut(t *testing.T) {
@@ -387,26 +454,21 @@ func TestJoinRoom(t *testing.T){
 	myplaceutils.InitDBs()
 	room := myplaceutils.AddNewRoom("213")
 
-	roomInfo := myplaceutils.CreateRoomInfo(room,nil,"Alex")
 	req := requests_responses.JoinRoomRequest{12345,room.ID,"Alex"}
 	eresp :=  requests_responses.ErrorResponse{12345,requests_responses.JoinRoomIndex,"There is no such user"}
 	executeAndTestResponse(t,req,eresp)
 
 	user1 := myplaceutils.AddNewUser("Eva", "1337")
 
-	roomInfo = myplaceutils.CreateRoomInfo(room,nil,user1.UName)
+	roomInfo := myplaceutils.CreateRoomInfo(room,user1)
 	req = requests_responses.JoinRoomRequest{12345,room.ID,user1.UName}
 	resp :=  requests_responses.JoinRoomResponse{12345,roomInfo,true}
 	executeAndTestResponse(t,req,resp)
 
 	user1.JoinRoom(room)
 
-	roomInfo = myplaceutils.CreateRoomInfo(room,nil,user1.UName)
+	roomInfo = myplaceutils.CreateRoomInfo(room,user1)
 	req = requests_responses.JoinRoomRequest{12345,room.ID,user1.UName}
 	resp = requests_responses.JoinRoomResponse{12345,roomInfo,true}
 	executeAndTestResponse(t,req,resp)
-
-
-
-
 }
