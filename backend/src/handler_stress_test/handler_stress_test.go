@@ -4,61 +4,125 @@ import (
 	"io/ioutil"
 	"io"
 	"log"
-	"os"
 	"fmt"
+	"math/rand"
 	"myplaceutils"
 	"handler"
 	"requests_responses"
 )
 
-var no_users int = 0
-var no_rooms int = 0
+var noUsers int = 0
+var noRooms int = 0
 
 func main() {
 	myplaceutils.InitDBs()
-	initLoggers(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
+	initLoggers(ioutil.Discard, ioutil.Discard, ioutil.Discard, ioutil.Discard)
 	handlerChan := make(chan myplaceutils.HandlerArgs)
 	go handler.ResponseHandler(handlerChan)
 	defer close(handlerChan)
 	responseChan := make(chan requests_responses.Response)
 
-
 	for i := 0; ; i++ {
-		request := generateRequest()
+		request := generateRequest(noUsers, noRooms)
 		handlerArgs := myplaceutils.HandlerArgs{request, responseChan}
 		handlerChan <- handlerArgs
 		response := <-responseChan
 
 		fmt.Printf("%v.\nRequest:  %v\nResponse: %v\n\n",
 			i, request, response)
+
+		if r, ok := response.(requests_responses.SignUpResponse); ok {
+			if r.Result {
+				noUsers++
+			} else {
+				panic("SignUp failed")
+			}
+		} else if _, ok := response.(requests_responses.CreateRoomResponse); ok {
+			noRooms++
+		}
 	}
 }
 
-func generateRequest() {
+func generateRequest(noUsers int, noRooms int) requests_responses.Request {
+	reqIndex := rand.Intn(12)
 
+	switch reqIndex {
+	case 0:
+		return requests_responses.SignUpRequest{
+			0, getNewUName(), "pass"}
+	case 1:
+		return requests_responses.SignInRequest{
+			0, getExistingUName(), "pass"}
+	case 2:
+		return requests_responses.GetRoomsRequest{
+			0, getExistingUName()}
+	case 3:
+		return requests_responses.GetRoomUsersRequest{
+			0, getExistingRoomID()}
+	case 4:
+		return requests_responses.GetOlderMsgsRequest{
+			0, getExistingRoomID(), 0}
+	case 5:
+		return requests_responses.GetNewerMsgsRequest{
+			0, getExistingRoomID(), 0}
+	case 6:
+		return requests_responses.JoinRoomRequest{
+			0, getExistingRoomID(), getExistingUName()}
+	case 7:
+		return requests_responses.LeaveRoomRequest{
+			0, getExistingRoomID(), getExistingUName()}
+	case 8:
+		return requests_responses.CreateRoomRequest{
+			0, "room", getExistingUName()}
+	case 9:
+		return requests_responses.PostMsgRequest{
+			0, getExistingUName(), getExistingRoomID(), getRandomText()}
+	case 10:
+		return requests_responses.MsgReadRequest{
+			0, 0, getExistingRoomID(), getExistingUName()}
+	case 11:
+		return requests_responses.SignOutRequest{
+			0, getExistingUName()}
+	default:
+		panic("Bad reqIndex")
+	}
 }
 
+func getNewUName() string {
+	return ""
+}
 
+func getExistingUName() string {
+	return ""
+}
+
+func getExistingRoomID() int {
+	return 0
+}
+
+func getRandomText() string {
+	return ""
+}
 
 func initLoggers(
-    traceHandle io.Writer,
-    infoHandle io.Writer,
-    warningHandle io.Writer,
-    errorHandle io.Writer,
-    ) {
-    myplaceutils.Trace = log.New(traceHandle,
-        "TRACE: ",
-        log.Ldate|log.Ltime|log.Lshortfile)
+	traceHandle io.Writer,
+	infoHandle io.Writer,
+	warningHandle io.Writer,
+	errorHandle io.Writer,
+) {
+	myplaceutils.Trace = log.New(traceHandle,
+		"TRACE: ",
+		log.Ldate|log.Ltime|log.Lshortfile)
 
-    myplaceutils.Info = log.New(infoHandle,
-        "INFO: ",
-        log.Ldate|log.Ltime|log.Lshortfile)
+	myplaceutils.Info = log.New(infoHandle,
+		"INFO: ",
+		log.Ldate|log.Ltime|log.Lshortfile)
 
-    myplaceutils.Warning = log.New(warningHandle,
-        "WARNING: ",
-        log.Ldate|log.Ltime|log.Lshortfile)
+	myplaceutils.Warning = log.New(warningHandle,
+		"WARNING: ",
+		log.Ldate|log.Ltime|log.Lshortfile)
 
-    myplaceutils.Error = log.New(errorHandle,
-        "ERROR: ",
-        log.Ldate|log.Ltime|log.Lshortfile)
+	myplaceutils.Error = log.New(errorHandle,
+		"ERROR: ",
+		log.Ldate|log.Ltime|log.Lshortfile)
 }
