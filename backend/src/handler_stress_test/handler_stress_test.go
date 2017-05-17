@@ -13,6 +13,7 @@ import (
 
 var noUsers int = 0
 var noRooms int = 0
+var msgLengthIndicator int = 20
 
 func main() {
 	myplaceutils.InitDBs()
@@ -89,19 +90,34 @@ func generateRequest(noUsers int, noRooms int) requests_responses.Request {
 }
 
 func getNewUName() string {
-	return ""
+	return fmt.Sprintf("user%v", noUsers)
 }
 
+//note: if 0 users, returns user100 (an non-existing user)
 func getExistingUName() string {
-	return ""
+	if noUsers == 0 {
+		return "user100"
+	} else {
+		i := rand.Intn(noUsers)
+		return fmt.Sprintf("user%v", i)
+	}
 }
 
+//note: if 0 rooms, returns 100 (a non-existing roomID)
 func getExistingRoomID() int {
-	return 0
+	if noRooms == 0 {
+		return 100
+	} else {
+		return rand.Intn(noRooms)
+	}
 }
 
 func getRandomText() string {
-	return ""
+        str := ""
+        for i := 0; i < rand.Intn(msgLengthIndicator); i++ {
+                str = fmt.Sprintf("%s %s", str, "hello")
+        }
+        return str
 }
 
 func initLoggers(
