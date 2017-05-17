@@ -53,25 +53,13 @@ public class MainActivity extends AppCompatActivity {
 
     // Our handler for received Intents. This will be called whenever an Intent
     // with an action named "custom-event-name" is broadcasted.
-    private MainBroadcastReceiver mbre = new MainBroadcastReceiver() {
+    private MainBroadcastReceiver mMessageReceiver = new MainBroadcastReceiver() {
         @Override
         public void handleNewMessageInActivity(Message msg) {
             roomAdapter.notifyDataSetChanged();
         }
     };
 
-    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // Get extra data included in the Intent
-            String message = intent.getStringExtra("Result");
-            Message newMessage = new Message("Stefan", message);
-            final String roomName = getIntent().getExtras().getString("RoomName");
-
-            roomDB.addMessage(roomName, newMessage);
-            MainActivity.roomAdapter.notifyDataSetChanged();
-        }
-    };
 
 
     @Override

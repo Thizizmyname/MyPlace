@@ -9,8 +9,11 @@ import com.myplace.myplace.JSONParser;
 import com.myplace.myplace.RoomDbHelper;
 import com.myplace.myplace.models.Message;
 import com.myplace.myplace.models.RequestTypes;
+import com.myplace.myplace.models.RoomInfo;
 
 import org.json.JSONException;
+
+import java.util.ArrayList;
 
 /**
  * Created by alexis on 2017-05-15.
@@ -31,6 +34,7 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
         // Get extra data included in the Intent
         String serverMessage = intent.getStringExtra(ConnectionService.REPLY_PACKAGE);
 
+        Log.d("MainBroadcastReceiver", "Received: " + serverMessage);
         int i = JSONParser.determineJSONType(serverMessage);
 
         try {
@@ -41,7 +45,8 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
                     Log.e("MainBroadcastReceiver", "Signup/Signin responses in Main/MessageActivity");
                     break;
                 case RequestTypes.GET_ROOMS:
-
+                    final ArrayList<RoomInfo> roomResponse = JSONParser.getRoomResponse(serverMessage);
+                    handleRoomList(roomResponse);
                     break;
                 case RequestTypes.GET_USERS:
 
@@ -82,6 +87,10 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    protected void handleRoomList(ArrayList<RoomInfo> roomResponse) {
+        throw new RuntimeException("No implementation");
     }
 
     private void newMessageReceived(final Message message) {

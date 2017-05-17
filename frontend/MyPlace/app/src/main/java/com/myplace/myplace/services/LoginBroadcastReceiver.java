@@ -20,7 +20,7 @@ public abstract class LoginBroadcastReceiver extends BroadcastReceiver {
         // Get extra data included in the Intent
         String serverMessage = intent.getStringExtra(ConnectionService.REPLY_PACKAGE);
 
-        Log.e("LoginBroadcastReceiver", "Received: " + serverMessage);
+        Log.d("LoginBroadcastReceiver", "Received: " + serverMessage);
         int i = JSONParser.determineJSONType(serverMessage);
 
         try {
