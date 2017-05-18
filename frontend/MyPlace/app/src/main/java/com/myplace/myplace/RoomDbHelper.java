@@ -133,7 +133,7 @@ public class RoomDbHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-    void addMessage(int roomID, Message message) {
+    public void addMessage(int roomID, Message message) {
         ContentValues insertValues = new ContentValues();
         insertValues.put(ROOM_MESSAGEID, message.getId());
         insertValues.put(ROOM_SENDER, message.getName());
