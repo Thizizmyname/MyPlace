@@ -25,8 +25,8 @@ import java.util.ArrayList;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
+import com.myplace.myplace.models.RoomInfo;
 import com.myplace.myplace.services.ConnectionService;
-
 
 import static com.myplace.myplace.LoginActivity.LOGIN_PREFS;
 import static com.myplace.myplace.R.id.action_create;
@@ -39,31 +39,11 @@ public class MainActivity extends AppCompatActivity {
 
     FloatingActionsMenu actionMenu;
     ListView listView;
-    ArrayList<Room> roomList = null;
+    ArrayList<RoomInfo> roomList = null;
     public static RoomAdapter roomAdapter = null;
 
     //Defines the database
     public RoomDbHelper roomDB = null;
-
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        // Bind to LocalService
-        Log.e("Main_Activity", "I'm in onStart!");
-        Intent intent = new Intent(this, ConnectionService.class);
-        bindService(intent, mTConnection, Context.BIND_AUTO_CREATE);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        // Unbind from the service
-        if (mBound) {
-            unbindService(mTConnection);
-            mBound = false;
-        }
-    }
 
     /** Defines callbacks for service binding, passed to bindService() */
     private ServiceConnection mTConnection = new ServiceConnection() {
@@ -120,7 +100,6 @@ public class MainActivity extends AppCompatActivity {
 
         startService(new Intent(this, ConnectionService.class));
 
-
         actionMenu = (FloatingActionsMenu) findViewById(R.id.action_menu);
 
         //OnClick for createRoom
@@ -146,6 +125,34 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        // Bind to LocalService
+        Log.e("Main_Activity", "I'm in onStart!");
+        Intent intent = new Intent(this, ConnectionService.class);
+        bindService(intent, mTConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        ArrayList<RoomInfo> updatedRoomList = roomDB.getRoomList();
+        roomAdapter.updateData(updatedRoomList);
+        roomAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // Unbind from the service
+        if (mBound) {
+            unbindService(mTConnection);
+            mBound = false;
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         stopService(new Intent(this, ConnectionService.class));
@@ -155,11 +162,13 @@ public class MainActivity extends AppCompatActivity {
     public void onThreadClick(int position) {
         Intent intent = new Intent(MainActivity.this, MessageActivity.class);
         intent.putExtra("RoomName", roomList.get(position).getName());
+        intent.putExtra("roomID", roomList.get(position).getRoomID());
         startActivity(intent);
         overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
     }
 
     public void onThreadLongClick(final int position) {
+        final int roomID = roomList.get(position).getRoomID();
         final String roomName = roomList.get(position).getName();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
@@ -167,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
         builder.setPositiveButton(R.string.leave_room, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                roomDB.deleteRoom(roomName);
+                roomDB.deleteRoom(roomID);
                 roomList.remove(position);
                 roomAdapter.notifyDataSetChanged();
 
@@ -202,9 +211,10 @@ public class MainActivity extends AppCompatActivity {
                 String roomName = inputRoom.getText().toString();
 
                 //TODO: Change below string to JSON-request
+                int roomID = (int) System.currentTimeMillis()/1000;
 
-                roomDB.createRoomTable(roomName);
-                roomList.add(new Room(0,roomName));
+                roomDB.createRoomTable(roomID, roomName);
+                roomList.add(new RoomInfo(new Room(roomID, roomName), null, 0));
                 roomAdapter.notifyDataSetChanged();
 
                 //Log.e("MainActivity", "Running sendMessage");

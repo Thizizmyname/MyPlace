@@ -1,7 +1,9 @@
 package com.myplace.myplace.models;
 
 import android.content.Context;
+import android.database.CursorIndexOutOfBoundsException;
 
+import com.myplace.myplace.R;
 import com.myplace.myplace.RoomDbHelper;
 
 import org.json.JSONException;
@@ -29,13 +31,24 @@ public class Room {
     }
 
     public String getLastSender(Context ctx) {
-        RoomDbHelper roomDB = new RoomDbHelper(ctx);
-        return roomDB.getLastSender(this.roomName);
+        try {
+            return getLastMessage(ctx).getName();
+        } catch (Exception e) {
+            return "";
+        }
     }
 
-    public String getLastMessage(Context ctx) {
+    public String getLastMessageText(Context ctx) {
+        try {
+            return getLastMessage(ctx).getText();
+        } catch (Exception e) {
+            return ctx.getResources().getString(R.string.room_empty);
+        }
+    }
+
+    public Message getLastMessage(Context ctx) throws Exception {
         RoomDbHelper roomDB = new RoomDbHelper(ctx);
-        return roomDB.getLastMessage(this.roomName);
+        return roomDB.getLastMessage(this.roomID);
     }
 
 
