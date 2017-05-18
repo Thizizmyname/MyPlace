@@ -94,9 +94,8 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
     }
 
     private void newMessageReceived(final Message message) {
-        final int roomID = message.getRoomID();
 
-        roomDB.addMessage(Integer.toString(roomID), message);
+        roomDB.addMessage(message.getRoomID(), message);
         handleNewMessageInActivity(message);
 
     }

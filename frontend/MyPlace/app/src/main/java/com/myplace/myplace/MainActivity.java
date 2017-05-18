@@ -78,11 +78,7 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, ConnectionService.class);
         bindService(intent, mTConnection, Context.BIND_AUTO_CREATE);
         roomAdapter.notifyDataSetChanged();
-        try {
-            mService.sendMessage(JSONParser.getRoomRequest(username));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+
     }
 
     @Override
