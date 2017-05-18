@@ -63,4 +63,9 @@ class RoomAdapter extends ArrayAdapter<RoomInfo> {
 
         return convertView;
     }
+
+    public void updateData(ArrayList<RoomInfo> list) {
+        this.rooms.clear();
+        rooms.addAll(list);
+    }
 }

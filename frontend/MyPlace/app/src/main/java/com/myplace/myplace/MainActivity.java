@@ -76,6 +76,27 @@ public class MainActivity extends AppCompatActivity {
 
         //Open database
         roomDB = new RoomDbHelper(this);
+        roomList = roomDB.getRoomList();
+        listView = (ListView) findViewById(R.id.roomList);
+
+        roomAdapter = new RoomAdapter(this, roomList);
+        listView.setAdapter(roomAdapter);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                onThreadClick(position);
+            }
+        });
+
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+                onThreadLongClick(position);
+                return true;
+            }
+        });
 
         startService(new Intent(this, ConnectionService.class));
 
@@ -116,27 +137,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        roomList = roomDB.getRoomList();
-        listView = (ListView) findViewById(R.id.roomList);
-
-        roomAdapter = new RoomAdapter(this, roomList);
-        listView.setAdapter(roomAdapter);
-
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                onThreadClick(position);
-            }
-        });
-
-        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
-                onThreadLongClick(position);
-                return true;
-            }
-        });
+        ArrayList<RoomInfo> updatedRoomList = roomDB.getRoomList();
+        roomAdapter.updateData(updatedRoomList);
+        roomAdapter.notifyDataSetChanged();
     }
 
     @Override

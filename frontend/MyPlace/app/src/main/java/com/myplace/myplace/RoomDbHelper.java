@@ -182,7 +182,6 @@ public class RoomDbHelper extends SQLiteOpenHelper {
                 int roomID      = c.getInt(c.getColumnIndex(ROOMLIST_ROOMID));
                 String roomName = c.getString(c.getColumnIndex(ROOMLIST_ROOMNAME));
 
-                // TODO Replace ID to proper information
                 Room room = new Room(roomID, roomName);
 
                 Message lastMessage;
