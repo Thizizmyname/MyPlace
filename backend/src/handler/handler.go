@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
   "myplaceutils"
@@ -9,7 +9,7 @@ import (
 )
 
 
-func clientResponseHandler(conn net.Conn, clientResponseChannel chan requests_responses.Response) {
+func ClientResponseHandler(conn net.Conn, clientResponseChannel chan requests_responses.Response) {
   myplaceutils.Info.Printf("Split client communication to clientResponseHandler\nConn: %v\n", conn)
   for args := range clientResponseChannel {
     responseString, err := requests_responses.ToResponseString(args)
@@ -21,9 +21,9 @@ func clientResponseHandler(conn net.Conn, clientResponseChannel chan requests_re
   }
 }
 
-func clientHandler(conn net.Conn, clientChannel chan requests_responses.Response) {
+func ClientHandler(conn net.Conn, clientChannel chan requests_responses.Response) {
   myplaceutils.Info.Println("Connection sent to clientHandler in go routine")
-  go clientResponseHandler(conn, clientChannel)
+  go ClientResponseHandler(conn, clientChannel)
   var requestParsed myplaceutils.HandlerArgs
   var parseError error
   for {
@@ -47,7 +47,7 @@ func clientHandler(conn net.Conn, clientChannel chan requests_responses.Response
 
 
 
-func responseHandler(incomingChannel chan myplaceutils.HandlerArgs) {
+func ResponseHandler(incomingChannel chan myplaceutils.HandlerArgs) {
 	myplaceutils.Info.Println("Reached responseHandler")
 	for args := range incomingChannel {
 		request := args.IncomingRequest

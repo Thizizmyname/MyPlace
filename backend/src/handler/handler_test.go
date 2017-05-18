@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"testing"
@@ -17,7 +17,7 @@ func TestMain(m *testing.M) {
 	myplaceutils.InitDBs()
 	initLoggers(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
 	handlerChan = make(chan myplaceutils.HandlerArgs)
-	go responseHandler(handlerChan) //now handler is waiting for requests
+	go ResponseHandler(handlerChan) //now handler is waiting for requests
 	defer close(handlerChan)
 
 	retCode := m.Run()
