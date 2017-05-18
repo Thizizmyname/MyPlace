@@ -29,7 +29,7 @@ const (
 type User struct {
   UName string
   Pass string
-  Rooms *list.List //list of ints:roomID
+  Rooms *list.List //list of RoomIDAndLatestReadMsgID
 }
 
 type Room struct {
@@ -45,6 +45,11 @@ type Message struct {
 	Time  time.Time
 	UName string
 	Body  string
+}
+
+type RoomIDAndLatestReadMsgID struct {
+	RoomID int
+	LatestReadMsgID int
 }
 
 type HandlerArgs struct {
@@ -105,7 +110,7 @@ func (r *Room) AddUser(u *User) {
 func (user *User) JoinRoom(room *Room) {
 	if UserIsInRoom(user.UName, room) { return }
 
-	user.Rooms.PushBack(room.ID)
+	user.Rooms.PushBack(RoomIDAndLatestReadMsgID{room.ID, -1})
 	room.Users.PushBack(user.UName)
 }
 
@@ -249,7 +254,7 @@ func GetLatestMsg(room *Room) (*Message,int){
 		return nil,maxID
 	}
 
-	
+
 	for id,_ := range room.Messages{
 		if id > maxID {
 			maxID = id
@@ -279,8 +284,8 @@ func RemoveUsersOutgoingChannels(uname string, uOutChan chan requests_responses.
 	if user == nil { return }
 
 	for eR := user.Rooms.Front(); eR != nil; eR = eR.Next() {
-		roomID := eR.Value.(int)
-		room := GetRoom(roomID)
+		room_ := eR.Value.(RoomIDAndLatestReadMsgID)
+		room := GetRoom(room_.RoomID)
 
 		for eOC := room.OutgoingChannels.Front(); eOC != nil; eOC = eOC.Next() {
 			outChan := eOC.Value.(chan requests_responses.Response)
@@ -364,17 +369,55 @@ func getNewerMessages() {
 
 }
 
+func (user *User) GetLatestReadMsg(roomID int) int {
+	for e := user.Rooms.Front(); e != nil; e = e.Next() {
+		room := e.Value.(RoomIDAndLatestReadMsgID)
+
+		if room.RoomID == roomID {
+			return room.LatestReadMsgID
+		}
+	}
+
+	return -1
+}
+
+//Updates database and returns true. Fails if user not in room,
+//if no messages in room or msgID is larger than id of latest msg.
+func (user *User) SetLatestReadMsg(room *Room, msgID int) bool {
+	latestMsg, _ := GetLatestMsg(room)
+	if latestMsg == nil || latestMsg.ID < msgID {
+		return false
+	}
+
+	for e := user.Rooms.Front(); e != nil; e = e.Next() {
+		r := e.Value.(RoomIDAndLatestReadMsgID)
+
+		if r.RoomID == room.ID {
+			user.Rooms.InsertAfter(RoomIDAndLatestReadMsgID{r.RoomID, msgID}, e)
+			user.Rooms.Remove(e)
+			return true
+		}
+	}
+	return false
+}
+
 // Purpose: Creates RoomInfo
 // Argument: A room, a message and a username
 // Returns: RoomInfo about a room
 // Tested: No
-func CreateRoomInfo(room *Room, msg *Message, username string) requests_responses.RoomInfo{
-	msgInfo := CreateMsgInfo(room,msg,username)
-	_,latestReadMsgID := GetLatestMsg(room)
+func CreateRoomInfo(room *Room, user *User) requests_responses.RoomInfo{
+	latestMsg,_ := GetLatestMsg(room)
+	var latestMsgInfo requests_responses.MsgInfo
 
-	latestReadMsgID = -1 //Notera: ska returnera senast lästa meddelandet som har läst av användaren. För detta ska funka måste user-strukturen uppdateras, Ta bort denna när det har gjorts.
+	if latestMsg == nil {
+		latestMsgInfo = requests_responses.MsgInfo{-1,-1,"",0,""}
+	} else {
+		latestMsgInfo = CreateMsgInfo(latestMsg, room.ID)
+	}
 
-	roomInfo := requests_responses.RoomInfo{room.ID,room.Name,msgInfo,latestReadMsgID} 
+	latestReadMsgID := user.GetLatestReadMsg(room.ID)
+
+	roomInfo := requests_responses.RoomInfo{room.ID, room.Name, latestMsgInfo, latestReadMsgID}
 	return roomInfo
 }
 
@@ -383,23 +426,15 @@ func CreateRoomInfo(room *Room, msg *Message, username string) requests_response
 // Argument: A room, a message and a username
 // Returns: Info about a the latest message
 // Tested: No
-func CreateMsgInfo(room *Room, msg *Message, username string) requests_responses.MsgInfo {
-	latestMsg,latestMsgID := GetLatestMsg(room)
-
-	if len(room.Messages) == 0 {
-		return requests_responses.MsgInfo{-1, -1, "", 0, ""}
-	}
-
-	
+func CreateMsgInfo(msg *Message, roomID int) requests_responses.MsgInfo {
 	msgInfo := requests_responses.MsgInfo{
-		latestMsgID,
-		room.ID,
-		username,
-		(latestMsg.Time).Unix(),
-		latestMsg.Body }
+		msg.ID,
+		roomID,
+		msg.UName,
+		(msg.Time).Unix(),
+		msg.Body }
 
 	return msgInfo
-
 }
 
 //Jävligt snyggt

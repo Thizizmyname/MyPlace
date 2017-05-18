@@ -11,7 +11,7 @@ import (
 type UserStore struct {
   UName string
   Pass string
-  Rooms []int
+  Rooms []myplaceutils.RoomIDAndLatestReadMsgID
 }
 
 type RoomStore struct {
@@ -140,10 +140,11 @@ func fromStoreFormat(usStore UserDBStore, rsStore RoomDBStore) (myplaceutils.Use
 	return us, rs
 }
 
-func toRoomSlice(rList *list.List) []int {
-	var rSlice []int
+func toRoomSlice(rList *list.List) []myplaceutils.RoomIDAndLatestReadMsgID {
+	var rSlice []myplaceutils.RoomIDAndLatestReadMsgID
 	for e := rList.Front(); e != nil; e = e.Next() {
-		rSlice = append(rSlice, e.Value.(int))
+		room_ := e.Value.(myplaceutils.RoomIDAndLatestReadMsgID)
+		rSlice = append(rSlice, myplaceutils.RoomIDAndLatestReadMsgID{room_.RoomID, room_.LatestReadMsgID})
 	}
 	return rSlice
 }
@@ -156,10 +157,10 @@ func toUserSlice(uList *list.List) []string {
 	return uSlice
 }
 
-func fromRoomSlice(rSlice []int) *list.List {
+func fromRoomSlice(rSlice []myplaceutils.RoomIDAndLatestReadMsgID) *list.List {
 	rList := list.New()
-	for id := range rSlice {
-		rList.PushBack(id)
+	for _, r := range rSlice {
+		rList.PushBack(myplaceutils.RoomIDAndLatestReadMsgID{r.RoomID, r.LatestReadMsgID})
 	}
 	return rList
 }
