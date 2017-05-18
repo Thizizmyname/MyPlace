@@ -33,8 +33,7 @@ public class SignupActivity extends AppCompatActivity {
     ConnectionService mService;
     boolean mBound = false;
     private String username;
-    private volatile Boolean signupAccepted;
-    private ProgressDialog progressDialog; // = new ProgressDialog(SignupActivity.this);
+    private ProgressDialog progressDialog;
 
     @Bind(R.id.sign_retype) EditText _passRetype;
     @Bind(R.id.sign_username) EditText _userSign;
@@ -48,7 +47,6 @@ public class SignupActivity extends AppCompatActivity {
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         setContentView(R.layout.activity_signup);
         ButterKnife.bind(this);
-        signupAccepted = null;
         progressDialog = new ProgressDialog(SignupActivity.this);
 
         _btnSign.setOnClickListener(new View.OnClickListener() {
@@ -206,8 +204,7 @@ public class SignupActivity extends AppCompatActivity {
     private LoginBroadcastReceiver loginBroadcastReceiver = new LoginBroadcastReceiver() {
         @Override
         public void handleBooleanResponse(boolean serverResponse) {
-            Log.e("Signup Activity", "Response Received: " + serverResponse);
-            //signupAccepted = serverResponse;
+            Log.d("Signup Activity", "Response Received: " + serverResponse);
             progressDialog.dismiss();
             if (serverResponse) {
                 onSignUpSuccess(username);

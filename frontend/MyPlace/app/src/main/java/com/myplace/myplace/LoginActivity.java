@@ -23,6 +23,8 @@ import android.widget.Toast;
 import com.myplace.myplace.services.ConnectionService;
 import com.myplace.myplace.services.LoginBroadcastReceiver;
 
+import org.json.JSONException;
+
 import butterknife.ButterKnife;
 import butterknife.Bind;
 
@@ -32,7 +34,8 @@ public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
     private static final int REQUEST_SIGNUP = 0;
     public static final String LOGIN_PREFS = "login_prefs";
-    private Boolean loginAccepted;
+    private ProgressDialog progressDialog;
+    private String username;
 
     @Bind(R.id.input_username) EditText _username;
     @Bind(R.id.input_password) EditText _password;
@@ -46,7 +49,6 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
         getSupportActionBar().hide();
-        loginAccepted = null;
 
         startService(new Intent(this, ConnectionService.class));
 
@@ -86,24 +88,30 @@ public class LoginActivity extends AppCompatActivity {
 
         _login.setEnabled(false);
 
-        final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this);
+        progressDialog = new ProgressDialog(LoginActivity.this);
         progressDialog.setIndeterminate(true);
         progressDialog.setMessage("Authenticating");
         progressDialog.show();
 
-        final String username = _username.getText().toString();
-        String password = _password.getText().toString();
+        username = _username.getText().toString();
+        final String password = _password.getText().toString();
 
-        new android.os.Handler().postDelayed(
-                new Runnable() {
-                    public void run() {
-                        while (loginAccepted == null) {}
-                        if (loginAccepted) {
-                            onLoginSuccess(username);
-                        }
-                        progressDialog.dismiss();
-                    }
-                }, 3000);
+        try {
+            mService.sendMessage(JSONParser.signupRequest(username, password));
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+//        new android.os.Handler().postDelayed(
+//                new Runnable() {
+//                    public void run() {
+//                        while (loginAccepted == null) {}
+//                        if (loginAccepted) {
+//                            onLoginSuccess(username);
+//                        }
+//                        progressDialog.dismiss();
+//                    }
+//                }, 3000);
     }
 
     @Override
@@ -197,9 +205,14 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private LoginBroadcastReceiver loginBroadcastReceiver = new LoginBroadcastReceiver() {
-        @Override
         public void handleBooleanResponse(boolean serverResponse) {
-            loginAccepted = serverResponse;
+            Log.d("Signup Activity", "Response Received: " + serverResponse);
+            progressDialog.dismiss();
+            if (serverResponse) {
+                onLoginSuccess(username);
+            } else {
+                onLoginFailed();
+            }
         }
     };
 

@@ -31,6 +31,8 @@ import static com.myplace.myplace.LoginActivity.LOGIN_PREFS;
 
 public class MessageActivity extends AppCompatActivity {
 
+    private static final String EMPTY_STRING = "";
+
     MessageAdapter messageAdapter;
     private Toast messageEmptyToast = null;
     RoomDbHelper roomDB = null;
@@ -49,18 +51,9 @@ public class MessageActivity extends AppCompatActivity {
     };
 
 
-    //TEST FOR INCOMING AND OUTGOING
-    int a = 0;
-    String name = "Joel";
 
-    //TEST FOR INCOMING AND OUTGOING
-    private int mod(int x, int y)
-    {
-        int result = x % y;
-        if (result < 0)
-            result += y;
-        return result;
-    }
+
+
 
     @Override
     protected void onStart() {
@@ -121,7 +114,7 @@ public class MessageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_message);
 
-        final String roomName = getIntent().getExtras().getString("RoomName");
+        final String roomName = getIntent().getExtras().getString(MainActivity.ROOM_NAME);
 
         //noinspection ConstantConditions
         getSupportActionBar().setTitle(roomName);
@@ -149,24 +142,19 @@ public class MessageActivity extends AppCompatActivity {
 
                 // Check if message is empty
                 String messageString = message.getText().toString();
-                if (messageString.matches("")) {
+                if (messageString.matches(EMPTY_STRING)) {
                     if (messageEmptyToast != null) messageEmptyToast.cancel();
                     messageEmptyToast = Toast.makeText(MessageActivity.this, R.string.message_empty, Toast.LENGTH_SHORT);
                     messageEmptyToast.show();
                     return;
                 }
 
-                //TEST FOR INCOMING AND OUTGOING
-//                if(mod(a, 2) == 0) {
-                    String username = "N/A";
-                    SharedPreferences loginInfo = getSharedPreferences(LOGIN_PREFS, 0);
-                    name = loginInfo.getString("username", username);
-//                } else {
-//                    name = "Joel";
-//                }
+                SharedPreferences loginInfo = getSharedPreferences(LOGIN_PREFS, 0);
+                final String username = loginInfo.getString("username", MainActivity.NO_USERNAME_FOUND);
 
 
-                Message newMessage = new Message(name, message.getText().toString());
+
+                Message newMessage = new Message(username, message.getText().toString());
 //                messageAdapter.add(newMessage);
 //
 //                roomDB.addMessage(roomName, newMessage);
@@ -174,8 +162,6 @@ public class MessageActivity extends AppCompatActivity {
 
                 mService.sendMessage(newMessage.getText());
 
-                //TEST FOR INCOMING AND OUTGOING
-                //++a; //TEST
 
                 message.setText(null); // Reset input field
             }

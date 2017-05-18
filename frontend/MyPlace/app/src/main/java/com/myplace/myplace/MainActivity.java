@@ -34,15 +34,22 @@ import com.myplace.myplace.services.ConnectionService;
 import com.myplace.myplace.services.MainBroadcastReceiver;
 
 
+import org.json.JSONException;
+
 import static com.myplace.myplace.LoginActivity.LOGIN_PREFS;
 import static com.myplace.myplace.R.id.action_create;
 import static com.myplace.myplace.R.id.action_join;
 
 public class MainActivity extends AppCompatActivity {
+
+    protected static final String ROOM_NAME = "RoomName";
+    protected static final String NO_USERNAME_FOUND = "N/A";
+
     final Context context = this;
     ConnectionService mService;
     boolean mBound = false;
 
+    private static String username;
     FloatingActionsMenu actionMenu;
     ListView listView;
     ArrayList<Room> roomList = null;
@@ -70,6 +77,11 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, ConnectionService.class);
         bindService(intent, mTConnection, Context.BIND_AUTO_CREATE);
         roomAdapter.notifyDataSetChanged();
+        try {
+            mService.sendMessage(JSONParser.getRoomRequest(username));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -152,7 +164,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-
+        SharedPreferences loginInfo = getSharedPreferences(LOGIN_PREFS, 0);
+        username = loginInfo.getString("username", NO_USERNAME_FOUND);
 
         actionMenu = (FloatingActionsMenu) findViewById(R.id.action_menu);
 
@@ -182,7 +195,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void onThreadClick(int position) {
         Intent intent = new Intent(MainActivity.this, MessageActivity.class);
-        intent.putExtra("RoomName", roomList.get(position).getName());
+        intent.putExtra(ROOM_NAME, roomList.get(position).getName());
         startActivity(intent);
         overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
     }
