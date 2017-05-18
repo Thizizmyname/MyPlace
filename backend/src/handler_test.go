@@ -24,12 +24,6 @@ func TestMain(m *testing.M) {
 	os.Exit(retCode)
 }
 
-<<<<<<< HEAD
-func executeAndTestResponse(t *testing.T, request requests_responses.Request, expectedResponse requests_responses.Response) {
-	handlerChan := make(chan myplaceutils.HandlerArgs)
-	go responseHandler(handlerChan) //now handler is waiting for requests
-	defer close(handlerChan)
-=======
 //Initialize loggers
 func initLoggers(
     traceHandle io.Writer,
@@ -59,7 +53,6 @@ func executeAndTestResponse_chan(t *testing.T,
 	responseChan chan requests_responses.Response,
 	request requests_responses.Request,
 	expectedResponse requests_responses.Response) {
->>>>>>> backend
 
 	handlerArgs := myplaceutils.HandlerArgs{request, responseChan}
 
@@ -70,7 +63,23 @@ func executeAndTestResponse_chan(t *testing.T,
 		req := request.(requests_responses.PostMsgRequest)
 		expResp := expectedResponse.(requests_responses.PostMsgResponse)
 		testPostMsgResponse(t, req, expResp, r, responseChan)
-	} else if response != expectedResponse {
+	}else if _, ok := response.(requests_responses.GetRoomUsersResponse); ok {
+		if !reflect.DeepEqual(response,expectedResponse){
+			t.Errorf("request: %v\nresponse: %v\nactual response: %v\nexpected response:%v",
+				reflect.TypeOf(request),
+				reflect.TypeOf(response),
+				response,
+				expectedResponse)
+		}
+	}else if _, ok := response.(requests_responses.GetRoomsResponse); ok {
+		if !reflect.DeepEqual(response,expectedResponse){
+			t.Errorf("request: %v\nresponse: %v\nactual response: %v\nexpected response:%v",
+				reflect.TypeOf(request),
+	  			reflect.TypeOf(response),
+				response,
+				expectedResponse)
+		}
+	}else if response != expectedResponse {
 		t.Errorf("request: %v\nresponse: %v\nactual response: %v\nexpected response:%v",
 			reflect.TypeOf(request),
 			reflect.TypeOf(response),
@@ -141,12 +150,6 @@ func responseChanIsEmpty(c chan requests_responses.Response) bool {
 		return true
 	}
 }
-
-
-
-
-
-
 
 func TestSignUp(t *testing.T) {
 	//Example:
@@ -387,7 +390,7 @@ func TestSignOut(t *testing.T) {
 			r2.OutgoingChannels.Len())
 	}
 }
-/*
+
 func TestGetRoomUsers(t *testing.T){
 	myplaceutils.InitDBs()
 	u1 := myplaceutils.AddNewUser("ask", "embla")
@@ -399,11 +402,11 @@ func TestGetRoomUsers(t *testing.T){
 	u2.JoinRoom(r1)
 
 	req := requests_responses.GetRoomUsersRequest{12345,r1.ID}
-	users := []string{"adam","ask"}
+	users := []string{"ask","adam"}
 	resp := requests_responses.GetRoomUsersResponse{12345,r1.ID,users}
 	executeAndTestResponse(t, req, resp)
 }
-*/
+
 func TestJoinRoom(t *testing.T){
 	myplaceutils.InitDBs()
 	room := myplaceutils.AddNewRoom("213")
@@ -427,7 +430,7 @@ func TestJoinRoom(t *testing.T){
 	resp = requests_responses.JoinRoomResponse{12345,roomInfo,true}
 	executeAndTestResponse(t,req,resp)
 }
-/*
+
 func TestGetRooms(t *testing.T){
 	myplaceutils.InitDBs()
 	u1 := myplaceutils.AddNewUser("ask", "embla")
@@ -448,13 +451,44 @@ func TestGetRooms(t *testing.T){
 
 	executeAndTestResponse(t,req,resp)	
 }
-*/
 
+/*
 func TestGetOlderMsgs(t *testing.T){
 	myplaceutils.InitDBs()
 	u1 := myplaceutils.AddNewUser("ask", "embla")
 	u2 := myplaceutils.AddNewUser("adam", "eva")
 	r1 := myplaceutils.AddNewRoom("livingroom")
+	u1_responseChan := make(chan requests_responses.Response, 1)
 	u1.JoinRoom(r1)
 	u2.JoinRoom(r1)
+
+	var respMsg []requests_responses.MsgInfo
+	
+	str := "hello? This is message 1"
+	req := requests_responses.PostMsgRequest{12345, u1.UName, r1.ID, str}
+	msgI := requests_responses.MsgInfo{0, r1.ID, u1.UName, -1, str}
+	//respMsg = append(respMsg, msgI)
+	resp := requests_responses.PostMsgResponse{12345, msgI}
+	executeAndTestResponse_chan(t, u1_responseChan, req, resp)
+
+	str = "hello? This is message 2"
+	req = requests_responses.PostMsgRequest{12345, u1.UName, r1.ID, str}
+	msgI = requests_responses.MsgInfo{1, r1.ID, u2.UName, -1, str}
+	respMsg = append(respMsg, msgI)
+	resp = requests_responses.PostMsgResponse{12345, msgI}
+	executeAndTestResponse_chan(t, u1_responseChan, req, resp)
+
+	str = "hello? This is message 3"
+	req = requests_responses.PostMsgRequest{12345, u1.UName, r1.ID, str}
+	msgI = requests_responses.MsgInfo{2, r1.ID, u1.UName, -1, str}
+	//respMsg = append(respMsg, msgI)
+	resp = requests_responses.PostMsgResponse{12345, msgI}
+	executeAndTestResponse_chan(t, u1_responseChan, req, resp)
+
+
+	req1 := requests_responses.GetOlderMsgsRequest{12345, r1.ID, 2}
+	resp1 := requests_responses.GetOlderMsgsResponse{12345, respMsg}
+	
+	executeAndTestResponse(t, req1, resp1)
 }
+*/

@@ -173,7 +173,7 @@ func getOlderMsgs(request requests_responses.GetOlderMsgsRequest) requests_respo
 	id := request.RequestID
 	roomID := request.RoomID
 	msgID := request.MsgID
-	NoMsgs := 10  // Anger hur många meddelande som ska hämtas
+	NoMsgs := 1  // Anger hur många meddelande som ska hämtas
 	room := myplaceutils.GetRoom(roomID)
 	var messages []requests_responses.MsgInfo
 	
