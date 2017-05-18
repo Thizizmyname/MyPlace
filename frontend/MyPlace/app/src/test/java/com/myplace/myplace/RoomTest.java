@@ -3,12 +3,12 @@ package com.myplace.myplace;
 import com.myplace.myplace.models.Room;
 
 import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
 
 /**
  * Created by jsepr on 2017-05-15.
  */
+
 public class RoomTest {
     private static int    TEST_ROOM_ID   = 123;
     private static String TEST_ROOM_NAME = "TestRoom";

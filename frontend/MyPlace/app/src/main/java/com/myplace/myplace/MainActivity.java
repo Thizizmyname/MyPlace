@@ -30,6 +30,7 @@ import java.util.ArrayList;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
+import com.myplace.myplace.models.RoomInfo;
 import com.myplace.myplace.services.ConnectionService;
 import com.myplace.myplace.services.MainBroadcastReceiver;
 
@@ -52,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
     private static String username;
     FloatingActionsMenu actionMenu;
     ListView listView;
-    ArrayList<Room> roomList = null;
+    ArrayList<RoomInfo> roomList = null;
     public static RoomAdapter roomAdapter = null;
 
     //Defines the database
@@ -92,7 +93,10 @@ public class MainActivity extends AppCompatActivity {
         // with actions named "custom-event-name".
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter(ConnectionService.BROADCAST_TAG));
-    }
+    ArrayList<RoomInfo> updatedRoomList = roomDB.getRoomList();
+        roomAdapter.updateData(updatedRoomList);
+        roomAdapter.notifyDataSetChanged();
+}
 
     @Override
     protected void onPause() {
@@ -196,11 +200,13 @@ public class MainActivity extends AppCompatActivity {
     public void onThreadClick(int position) {
         Intent intent = new Intent(MainActivity.this, MessageActivity.class);
         intent.putExtra(ROOM_NAME, roomList.get(position).getName());
+        intent.putExtra("roomID", roomList.get(position).getRoomID());
         startActivity(intent);
         overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
     }
 
     public void onThreadLongClick(final int position) {
+        final int roomID = roomList.get(position).getRoomID();
         final String roomName = roomList.get(position).getName();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
@@ -208,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
         builder.setPositiveButton(R.string.leave_room, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                roomDB.deleteRoom(roomName);
+                roomDB.deleteRoom(roomID);
                 roomList.remove(position);
                 roomAdapter.notifyDataSetChanged();
 
@@ -243,9 +249,10 @@ public class MainActivity extends AppCompatActivity {
                 String roomName = inputRoom.getText().toString();
 
                 //TODO: Change below string to JSON-request
+                int roomID = (int) System.currentTimeMillis()/1000;
 
-                roomDB.createRoomTable(roomName);
-                roomList.add(new Room(0,roomName));
+                roomDB.createRoomTable(roomID, roomName);
+                roomList.add(new RoomInfo(new Room(roomID, roomName), null, 0));
                 roomAdapter.notifyDataSetChanged();
 
                 //Log.e("MainActivity", "Running sendMessage");

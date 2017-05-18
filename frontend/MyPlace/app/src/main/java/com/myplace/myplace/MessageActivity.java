@@ -115,6 +115,7 @@ public class MessageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_message);
 
         final String roomName = getIntent().getExtras().getString(MainActivity.ROOM_NAME);
+        final int roomID = getIntent().getExtras().getInt("roomID");
 
         //noinspection ConstantConditions
         getSupportActionBar().setTitle(roomName);
@@ -122,7 +123,7 @@ public class MessageActivity extends AppCompatActivity {
 
         roomDB = new RoomDbHelper(this);
 
-        ArrayList<Message> messageList = roomDB.getMessages(roomName);
+        ArrayList<Message> messageList = roomDB.getMessages(roomID);
         messageAdapter = new MessageAdapter(this, messageList);
 
         // Finds the listview and specifies the adapter to use
@@ -157,7 +158,7 @@ public class MessageActivity extends AppCompatActivity {
                 Message newMessage = new Message(username, message.getText().toString());
 //                messageAdapter.add(newMessage);
 //
-//                roomDB.addMessage(roomName, newMessage);
+//                roomDB.addMessage(roomID, newMessage);
 //                MainActivity.roomAdapter.notifyDataSetChanged();
 
                 mService.sendMessage(newMessage.getText());

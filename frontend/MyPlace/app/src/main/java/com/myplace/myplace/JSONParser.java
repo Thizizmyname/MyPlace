@@ -286,10 +286,10 @@ public final class JSONParser {
         int id = json.getInt("MsgID");
         int roomID = json.getInt("RoomID");
         String fromUser = json.getString("FromUser");
-        Date date = new Date(json.getInt("Time"));
+        long timestamp = json.getInt("Time");
         String body = json.getString("Body");
 
-        return new Message(id, roomID, fromUser, body, date);
+        return new Message(id, roomID, fromUser, body, timestamp);
     }
 
     private static RoomInfo constructRoom(JSONObject json) throws JSONException {

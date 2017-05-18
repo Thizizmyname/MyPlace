@@ -1,8 +1,5 @@
 package com.myplace.myplace.models;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -13,29 +10,29 @@ public class Message {
     private int roomID;
     private String name;
     private String text;
-    private Date date;
+    private long timestamp;
     public static DateFormat df = new SimpleDateFormat("HH:mm", Locale.getDefault());
 
     private static final int CROP_LIMIT = 32;
 
-    public Message(int id, int roomID, String name, String text, Date date) {
+    public Message(int id, int roomID, String name, String text, long timestamp) {
         this.id = id;
         this.roomID = roomID;
         this.name = name;
         this.text = text;
-        this.date = date;
+        this.timestamp = timestamp;
     }
 
-    public Message(String name, String message, Date date) {
+    public Message(String name, String message, long timestamp) {
         this.name = name;
         this.text = message;
-        this.date = date;
+        this.timestamp = timestamp;
     }
 
     public Message(String username, String message) {
         this.name = username;
         this.text = message;
-        this.date = new Date();
+        this.timestamp = System.currentTimeMillis();
 
     }
 
@@ -55,8 +52,13 @@ public class Message {
         return text;
     }
 
-    public Date getDate() {
-        return date;
+    public String getShortTime() {
+        Date date = new Date(timestamp);
+        return df.format(date);
+    }
+
+    public long getTimestamp() {
+        return timestamp;
     }
 
     public String abbreviateText() {
