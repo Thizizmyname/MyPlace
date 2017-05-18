@@ -17,6 +17,12 @@ public class RoomInfo {
         latestMsgRead = latestRead;
     }
 
+    public RoomInfo(Room _room) {
+        room = _room;
+        latestMsg = null;
+        latestMsgRead = 0;
+    }
+
     public String getName() {
         return room.getName();
     }

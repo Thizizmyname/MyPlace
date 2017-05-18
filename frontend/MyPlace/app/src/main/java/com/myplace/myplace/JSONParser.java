@@ -47,7 +47,7 @@ public final class JSONParser {
 
 
     public static int determineJSONType(String rawString) {
-        int result = Integer.parseInt(rawString.substring(0, 1));
+        int result = Integer.parseInt(rawString.substring(0, 2));
         if (result == ERROR_TYPE) throwErrorResponse(rawString);
 
         return result;
@@ -285,7 +285,7 @@ public final class JSONParser {
     private static Message constructMessage(JSONObject json) throws JSONException {
         int id = json.getInt("MsgID");
         int roomID = json.getInt("RoomID");
-        String fromUser = json.getString("FromUser");
+        String fromUser = json.getString("UName");
         long timestamp = json.getInt("Time");
         String body = json.getString("Body");
 

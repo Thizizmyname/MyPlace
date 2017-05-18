@@ -63,6 +63,12 @@ public class MainActivity extends AppCompatActivity {
     // with an action named "custom-event-name" is broadcasted.
     private MainBroadcastReceiver mMessageReceiver = new MainBroadcastReceiver() {
         @Override
+        public void handleCreatedRoomInActivity(Room room) {
+            roomAdapter.add(new RoomInfo(room));
+            roomAdapter.notifyDataSetChanged();
+        }
+
+        @Override
         public void handleNewMessageInActivity(Message msg) {
             roomAdapter.notifyDataSetChanged();
         }
@@ -247,14 +253,16 @@ public class MainActivity extends AppCompatActivity {
                 //TODO: Change below string to JSON-request
                 int roomID = (int) System.currentTimeMillis()/1000;
 
-                roomDB.createRoomTable(roomID, roomName);
+                try {
+                    mService.sendMessage(JSONParser.createRoomRequest(roomName, username));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+/*                roomDB.createRoomTable(roomID, roomName);
                 roomList.add(new RoomInfo(new Room(roomID, roomName), null, 0));
                 roomAdapter.notifyDataSetChanged();
 
-                //Log.e("MainActivity", "Running sendMessage");
-                mService.sendMessage(roomName);
-                //new ConnectTask().execute("");
-                //TCPClient.request = getResources().getString(createOrJoin)+roomName;
+                mService.sendMessage(roomName);*/
             }
         });
 
