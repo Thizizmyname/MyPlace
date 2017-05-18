@@ -16,7 +16,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <service android:name=".services.ConnectionService" android:enabled="true" />
+        <service android:name=".services.ConnectionService"
+            android:enabled="true"
+            android:stopWithTask="true"/>
 
         <activity
             android:name=".LoginActivity"
@@ -43,6 +45,8 @@
             android:name=".MessageActivity"
             android:exported="true"
             android:parentActivityName=".MainActivity"/>
+
+        <receiver android:name=".services.MainBroadcastReceiver" />
     </application>
 
 </manifest>

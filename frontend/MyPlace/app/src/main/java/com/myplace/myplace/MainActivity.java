@@ -1,13 +1,16 @@
 package com.myplace.myplace;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -20,6 +23,8 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
+
+import com.myplace.myplace.models.Message;
 import com.myplace.myplace.models.Room;
 import java.util.ArrayList;
 
@@ -27,16 +32,25 @@ import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.myplace.myplace.models.RoomInfo;
 import com.myplace.myplace.services.ConnectionService;
+import com.myplace.myplace.services.MainBroadcastReceiver;
+
+
+import org.json.JSONException;
 
 import static com.myplace.myplace.LoginActivity.LOGIN_PREFS;
 import static com.myplace.myplace.R.id.action_create;
 import static com.myplace.myplace.R.id.action_join;
 
 public class MainActivity extends AppCompatActivity {
+
+    protected static final String ROOM_NAME = "RoomName";
+    protected static final String NO_USERNAME_FOUND = "N/A";
+
     final Context context = this;
     ConnectionService mService;
     boolean mBound = false;
 
+    private static String username;
     FloatingActionsMenu actionMenu;
     ListView listView;
     ArrayList<RoomInfo> roomList = null;
@@ -44,6 +58,57 @@ public class MainActivity extends AppCompatActivity {
 
     //Defines the database
     public RoomDbHelper roomDB = null;
+
+    // Our handler for received Intents. This will be called whenever an Intent
+    // with an action named "custom-event-name" is broadcasted.
+    private MainBroadcastReceiver mMessageReceiver = new MainBroadcastReceiver() {
+        @Override
+        public void handleNewMessageInActivity(Message msg) {
+            roomAdapter.notifyDataSetChanged();
+        }
+    };
+
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // Bind to LocalService
+        Log.d("Main_Activity", "I'm in onStart!");
+        Intent intent = new Intent(this, ConnectionService.class);
+        bindService(intent, mTConnection, Context.BIND_AUTO_CREATE);
+        roomAdapter.notifyDataSetChanged();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Register to receive messages.
+        // We are registering an observer (mMessageReceiver) to receive Intents
+        // with actions named "custom-event-name".
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
+                new IntentFilter(ConnectionService.BROADCAST_TAG));
+    ArrayList<RoomInfo> updatedRoomList = roomDB.getRoomList();
+        roomAdapter.updateData(updatedRoomList);
+        roomAdapter.notifyDataSetChanged();
+}
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // Unbind from the service
+        if (mBound) {
+            unbindService(mTConnection);
+            mBound = false;
+        }
+    }
 
     /** Defines callbacks for service binding, passed to bindService() */
     private ServiceConnection mTConnection = new ServiceConnection() {
@@ -98,7 +163,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        startService(new Intent(this, ConnectionService.class));
+
+        SharedPreferences loginInfo = getSharedPreferences(LOGIN_PREFS, 0);
+        username = loginInfo.getString("username", NO_USERNAME_FOUND);
 
         actionMenu = (FloatingActionsMenu) findViewById(R.id.action_menu);
 
@@ -124,44 +191,11 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        // Bind to LocalService
-        Log.e("Main_Activity", "I'm in onStart!");
-        Intent intent = new Intent(this, ConnectionService.class);
-        bindService(intent, mTConnection, Context.BIND_AUTO_CREATE);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        ArrayList<RoomInfo> updatedRoomList = roomDB.getRoomList();
-        roomAdapter.updateData(updatedRoomList);
-        roomAdapter.notifyDataSetChanged();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        // Unbind from the service
-        if (mBound) {
-            unbindService(mTConnection);
-            mBound = false;
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        stopService(new Intent(this, ConnectionService.class));
-    }
 
 
     public void onThreadClick(int position) {
         Intent intent = new Intent(MainActivity.this, MessageActivity.class);
-        intent.putExtra("RoomName", roomList.get(position).getName());
+        intent.putExtra(ROOM_NAME, roomList.get(position).getName());
         intent.putExtra("roomID", roomList.get(position).getRoomID());
         startActivity(intent);
         overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);

@@ -1,8 +1,14 @@
 package com.myplace.myplace;
 
 import android.app.ProgressDialog;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
@@ -14,13 +20,22 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.myplace.myplace.services.ConnectionService;
+import com.myplace.myplace.services.LoginBroadcastReceiver;
+
+import org.json.JSONException;
+
 import butterknife.ButterKnife;
 import butterknife.Bind;
 
 public class LoginActivity extends AppCompatActivity {
+    ConnectionService mService;
+    boolean mBound = false;
     private static final String TAG = "LoginActivity";
     private static final int REQUEST_SIGNUP = 0;
     public static final String LOGIN_PREFS = "login_prefs";
+    private ProgressDialog progressDialog;
+    private String username;
 
     @Bind(R.id.input_username) EditText _username;
     @Bind(R.id.input_password) EditText _password;
@@ -34,6 +49,8 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
         getSupportActionBar().hide();
+
+        startService(new Intent(this, ConnectionService.class));
 
         SharedPreferences loginInfo = getSharedPreferences(LOGIN_PREFS, 0);
         boolean loggedIn = loginInfo.getBoolean("loggedIn", false);
@@ -71,21 +88,30 @@ public class LoginActivity extends AppCompatActivity {
 
         _login.setEnabled(false);
 
-        final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this);
+        progressDialog = new ProgressDialog(LoginActivity.this);
         progressDialog.setIndeterminate(true);
         progressDialog.setMessage("Authenticating");
         progressDialog.show();
 
-        final String username = _username.getText().toString();
-        String password = _password.getText().toString();
+        username = _username.getText().toString();
+        final String password = _password.getText().toString();
 
-        new android.os.Handler().postDelayed(
-                new Runnable() {
-                    public void run() {
-                        onLoginSuccess(username);
-                        progressDialog.dismiss();
-                    }
-                }, 3000);
+        try {
+            mService.sendMessage(JSONParser.signupRequest(username, password));
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+//        new android.os.Handler().postDelayed(
+//                new Runnable() {
+//                    public void run() {
+//                        while (loginAccepted == null) {}
+//                        if (loginAccepted) {
+//                            onLoginSuccess(username);
+//                        }
+//                        progressDialog.dismiss();
+//                    }
+//                }, 3000);
     }
 
     @Override
@@ -143,4 +169,69 @@ public class LoginActivity extends AppCompatActivity {
         }
         return valid;
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // Bind to LocalService
+        Log.d("Main_Activity", "I'm in onStart!");
+        Intent intent = new Intent(this, ConnectionService.class);
+        bindService(intent, mTConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // Unbind from the service
+        if (mBound) {
+            unbindService(mTConnection);
+            mBound = false;
+        }
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Register to receive messages.
+        // We are registering an observer (mMessageReceiver) to receive Intents
+        // with actions named "custom-event-name".
+        LocalBroadcastManager.getInstance(this).registerReceiver(loginBroadcastReceiver,
+                new IntentFilter(ConnectionService.BROADCAST_TAG));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(loginBroadcastReceiver);
+    }
+
+    private LoginBroadcastReceiver loginBroadcastReceiver = new LoginBroadcastReceiver() {
+        public void handleBooleanResponse(boolean serverResponse) {
+            Log.d("Signup Activity", "Response Received: " + serverResponse);
+            progressDialog.dismiss();
+            if (serverResponse) {
+                onLoginSuccess(username);
+            } else {
+                onLoginFailed();
+            }
+        }
+    };
+
+    /** Defines callbacks for service binding, passed to bindService() */
+    private ServiceConnection mTConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            ConnectionService.ConnectionBinder binder = (ConnectionService.ConnectionBinder) service;
+            mService = binder.getService();
+            mBound = true;
+            //mService.setUpConnection();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
 }

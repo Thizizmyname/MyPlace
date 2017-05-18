@@ -24,6 +24,11 @@ import java.util.concurrent.Future;
  */
 
 public class ConnectionService extends Service {
+
+
+    public static final String REPLY_PACKAGE = "com.myplace.CONNECTION_RESPONSE_PACKAGE";
+    public static final String BROADCAST_TAG = "com.myplace.NEW_BROADCAST";
+
     // Binder given to clients
     private final IBinder mBinder = new ConnectionBinder();
 
@@ -102,8 +107,9 @@ public class ConnectionService extends Service {
     // For the moment it sends to all active activities that subscribe
     // to NEW_MESSAGE broadcasts, should be implementing a dynamic broadcast-system
     public void sendToActivity (final String str) {
-        Intent intent  = new Intent("com.myplace.NEW_MESSAGE");
-        intent.putExtra("Result", str);
+        Intent intent  = new Intent(BROADCAST_TAG);
+        intent.putExtra(REPLY_PACKAGE, str);
+        Log.e("ConnectionService", "Sending: " + str);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
@@ -140,17 +146,18 @@ public class ConnectionService extends Service {
             //Log.e("TCP Client", "C: I got to the while loop!");
             if (!pauseListener) {
                 try {
-                    serverMessage = in.readLine();
+                    final String dserverMessage = in.readLine();
 
+                    if (dserverMessage.equals("")) {continue;}
 
-                    Log.e("TCP Service", "C: serverMessage = " + serverMessage);
+                    Log.e("TCP Service", "C: serverMessage = " + dserverMessage);
 
-                    sendToActivity(serverMessage);
+                    sendToActivity(dserverMessage);
 
-                    if (serverMessage != null && mMessageListener != null) {
-                        Log.e("TCP Client", "C: serverMessage = " + serverMessage);
+                    if (dserverMessage != null && mMessageListener != null) {
+                        Log.e("TCP Client", "C: serverMessage = " + dserverMessage);
                         //call the method messageReceived from MyActivity class
-                        mMessageListener.messageReceived(serverMessage);
+                        mMessageListener.messageReceived(dserverMessage);
                     } else {
                         serverMessage = null;
                     }

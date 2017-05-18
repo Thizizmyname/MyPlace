@@ -23,12 +23,15 @@ import android.widget.Toast;
 
 import com.myplace.myplace.models.Message;
 import com.myplace.myplace.services.ConnectionService;
+import com.myplace.myplace.services.MainBroadcastReceiver;
 
 import java.util.ArrayList;
 
 import static com.myplace.myplace.LoginActivity.LOGIN_PREFS;
 
 public class MessageActivity extends AppCompatActivity {
+
+    private static final String EMPTY_STRING = "";
 
     MessageAdapter messageAdapter;
     private Toast messageEmptyToast = null;
@@ -40,38 +43,23 @@ public class MessageActivity extends AppCompatActivity {
 
     // Our handler for received Intents. This will be called whenever an Intent
     // with an action named "custom-event-name" is broadcasted.
-    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+    private MainBroadcastReceiver mMessageReceiver = new MainBroadcastReceiver() {
         @Override
-        public void onReceive(Context context, Intent intent) {
-            // Get extra data included in the Intent
-            String message = intent.getStringExtra("Result");
-            Message newMessage = new Message("Stefan", message);
-            final int roomID = getIntent().getExtras().getInt("roomID");
-            messageAdapter.add(newMessage);
-
-            roomDB.addMessage(roomID, newMessage);
-            MainActivity.roomAdapter.notifyDataSetChanged();
+        public void handleNewMessageInActivity(Message msg) {
+            messageAdapter.add(msg);
         }
     };
 
-    //TEST FOR INCOMING AND OUTGOING
-    int a = 0;
-    String name = "Joel";
 
-    //TEST FOR INCOMING AND OUTGOING
-    private int mod(int x, int y)
-    {
-        int result = x % y;
-        if (result < 0)
-            result += y;
-        return result;
-    }
+
+
+
 
     @Override
     protected void onStart() {
         super.onStart();
         // Bind to LocalService
-        Log.e("Main_Activity", "I'm in onStart!");
+        Log.d("MessageActivity", "I'm in onStart!");
         Intent intent = new Intent(this, ConnectionService.class);
         bindService(intent, mTConnection, Context.BIND_AUTO_CREATE);
     }
@@ -81,7 +69,7 @@ public class MessageActivity extends AppCompatActivity {
         super.onStop();
         // Unbind from the service
         if (mBound) {
-            Log.e("MessageActivity", "Stopping event");
+            Log.d("MessageActivity", "Stopping event");
             unbindService(mTConnection);
             mBound = false;
         }
@@ -112,7 +100,7 @@ public class MessageActivity extends AppCompatActivity {
         // We are registering an observer (mMessageReceiver) to receive Intents
         // with actions named "custom-event-name".
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
-                new IntentFilter("com.myplace.NEW_MESSAGE"));
+                new IntentFilter(ConnectionService.BROADCAST_TAG));
     }
 
     @Override
@@ -126,7 +114,7 @@ public class MessageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_message);
 
-        final String roomName = getIntent().getExtras().getString("RoomName");
+        final String roomName = getIntent().getExtras().getString(MainActivity.ROOM_NAME);
         final int roomID = getIntent().getExtras().getInt("roomID");
 
         //noinspection ConstantConditions
@@ -155,32 +143,26 @@ public class MessageActivity extends AppCompatActivity {
 
                 // Check if message is empty
                 String messageString = message.getText().toString();
-                if (messageString.matches("")) {
+                if (messageString.matches(EMPTY_STRING)) {
                     if (messageEmptyToast != null) messageEmptyToast.cancel();
                     messageEmptyToast = Toast.makeText(MessageActivity.this, R.string.message_empty, Toast.LENGTH_SHORT);
                     messageEmptyToast.show();
                     return;
                 }
 
-                //TEST FOR INCOMING AND OUTGOING
-                if(mod(a, 2) == 0) {
-                    String username = "N/A";
-                    SharedPreferences loginInfo = getSharedPreferences(LOGIN_PREFS, 0);
-                    name = loginInfo.getString("username", username);
-                } else {
-                    name = "Joel";
-                }
+                SharedPreferences loginInfo = getSharedPreferences(LOGIN_PREFS, 0);
+                final String username = loginInfo.getString("username", MainActivity.NO_USERNAME_FOUND);
 
-                Message newMessage = new Message(name, message.getText().toString());
-                messageAdapter.add(newMessage);
 
-                roomDB.addMessage(roomID, newMessage);
-                MainActivity.roomAdapter.notifyDataSetChanged();
+
+                Message newMessage = new Message(username, message.getText().toString());
+//                messageAdapter.add(newMessage);
+//
+//                roomDB.addMessage(roomID, newMessage);
+//                MainActivity.roomAdapter.notifyDataSetChanged();
 
                 mService.sendMessage(newMessage.getText());
 
-                //TEST FOR INCOMING AND OUTGOING
-                ++a; //TEST
 
                 message.setText(null); // Reset input field
             }

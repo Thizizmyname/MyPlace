@@ -29,8 +29,8 @@ public class Message {
         this.timestamp = timestamp;
     }
 
-    public Message(String name, String message) {
-        this.name = name;
+    public Message(String username, String message) {
+        this.name = username;
         this.text = message;
         this.timestamp = System.currentTimeMillis();
 
