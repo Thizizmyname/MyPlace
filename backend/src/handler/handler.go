@@ -141,7 +141,24 @@ func signIn(request requests_responses.SignInRequest, responseChan chan requests
 }
 
 func getRooms(request requests_responses.GetRoomsRequest) requests_responses.Response {
-	return requests_responses.ErrorResponse{request.RequestID, requests_responses.GetRoomsIndex, "not implemented yet"}
+  /*
+    1) Hitta user
+    2) loopa över listan, ta e.Value.(typen)
+    3) 
+  */
+  var userRoomArray []requests_responses.RoomInfo
+  user := myplaceutils.GetUser(request.UName)
+  if user==nil{
+    return requests_responses.ErrorResponse{request.RequestID, requests_responses.GetRoomsIndex, "User not found"}//TODO ändra denna till lämplig rad
+  }
+  for e := user.Rooms.Front(); e != nil; e = e.Next() {
+    room := e.Value.(myplaceutils.RoomIDAndLatestReadMsgID)
+    userRoom := myplaceutils.GetRoom(room.RoomID)
+
+    userRoomArray = append(userRoomArray, myplaceutils.CreateRoomInfo(userRoom,user))
+  }
+  return requests_responses.GetRoomsResponse{request.RequestID, userRoomArray}
+
 }
 
 func getRoomUsers(request requests_responses.GetRoomUsersRequest) requests_responses.Response {
