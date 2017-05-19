@@ -23,7 +23,14 @@ public class Message {
         this.timestamp = timestamp;
     }
 
-    public Message(String name, String message, long timestamp) {
+    public Message(int roomID, String name, String text, long timestamp) {
+        this.roomID = roomID;
+        this.name = name;
+        this.text = text;
+        this.timestamp = timestamp;
+    }
+
+/*    public Message(String name, String message, long timestamp) {
         this.name = name;
         this.text = message;
         this.timestamp = timestamp;
@@ -34,7 +41,7 @@ public class Message {
         this.text = message;
         this.timestamp = System.currentTimeMillis();
 
-    }
+    }*/
 
     public int getId() {
         return id;

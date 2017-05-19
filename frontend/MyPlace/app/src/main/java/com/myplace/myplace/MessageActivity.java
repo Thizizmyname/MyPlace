@@ -22,8 +22,12 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.myplace.myplace.models.Message;
+import com.myplace.myplace.models.Room;
+import com.myplace.myplace.models.RoomInfo;
 import com.myplace.myplace.services.ConnectionService;
 import com.myplace.myplace.services.MainBroadcastReceiver;
+
+import org.json.JSONException;
 
 import java.util.ArrayList;
 
@@ -39,21 +43,25 @@ public class MessageActivity extends AppCompatActivity {
 
     ConnectionService mService;
     boolean mBound = false;
+    private int roomID;
 
 
     // Our handler for received Intents. This will be called whenever an Intent
     // with an action named "custom-event-name" is broadcasted.
     private MainBroadcastReceiver mMessageReceiver = new MainBroadcastReceiver() {
         @Override
-        public void handleNewMessageInActivity(Message msg) {
-            messageAdapter.add(msg);
+        public void handleCreatedRoomInActivity(Room room) {
+
         }
+
+        @Override
+        public void handleNewMessageInActivity(Message msg) {
+            if (roomID == msg.getRoomID()) {
+                messageAdapter.add(msg);
+            }
+        }
+
     };
-
-
-
-
-
 
     @Override
     protected void onStart() {
@@ -115,7 +123,7 @@ public class MessageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_message);
 
         final String roomName = getIntent().getExtras().getString(MainActivity.ROOM_NAME);
-        final int roomID = getIntent().getExtras().getInt("roomID");
+        roomID = getIntent().getExtras().getInt("roomID");
 
         //noinspection ConstantConditions
         getSupportActionBar().setTitle(roomName);
@@ -153,14 +161,20 @@ public class MessageActivity extends AppCompatActivity {
                 SharedPreferences loginInfo = getSharedPreferences(LOGIN_PREFS, 0);
                 final String username = loginInfo.getString("username", MainActivity.NO_USERNAME_FOUND);
 
+                long timestamp = System.currentTimeMillis();
 
-
-                Message newMessage = new Message(username, message.getText().toString());
+                Message newMessage = new Message(roomID, username, message.getText().toString(), timestamp);
 //                messageAdapter.add(newMessage);
 //
 //                roomDB.addMessage(roomID, newMessage);
 //                MainActivity.roomAdapter.notifyDataSetChanged();
+                try {
+                    mService.sendMessage(JSONParser.postMsgRequest(newMessage));
 
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+//        new android.os.Handle
                 mService.sendMessage(newMessage.getText());
 
 

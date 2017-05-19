@@ -9,6 +9,7 @@ import com.myplace.myplace.JSONParser;
 import com.myplace.myplace.RoomDbHelper;
 import com.myplace.myplace.models.Message;
 import com.myplace.myplace.models.RequestTypes;
+import com.myplace.myplace.models.Room;
 import com.myplace.myplace.models.RoomInfo;
 
 import org.json.JSONException;
@@ -22,7 +23,7 @@ import java.util.ArrayList;
 public abstract class MainBroadcastReceiver extends BroadcastReceiver {
 
 
-    RoomDbHelper roomDB;
+    RoomDbHelper roomDB = null;
 
 
     @Override
@@ -36,6 +37,7 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
 
         Log.d("MainBroadcastReceiver", "Received: " + serverMessage);
         int i = JSONParser.determineJSONType(serverMessage);
+        Log.d("MainBroadcastReceiver", "JSONType: " + i);
 
         try {
 
@@ -56,6 +58,10 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
                     break;
                 case RequestTypes.GET_NEWER:
 
+                    break;
+                case RequestTypes.CREATE_ROOM:
+                    Room room = JSONParser.createRoomResponse(serverMessage);
+                    handleCreatedRoom(room);
                     break;
                 case RequestTypes.JOIN_ROOM:
 
@@ -93,6 +99,7 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
         throw new RuntimeException("No implementation");
     }
 
+
     private void newMessageReceived(final Message message) {
 
         roomDB.addMessage(message.getRoomID(), message);
@@ -100,6 +107,12 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
 
     }
 
+    private void handleCreatedRoom(final Room room) {
+        roomDB.createRoomTable(room);
+        handleCreatedRoomInActivity(room);
+    }
+
+    public abstract void handleCreatedRoomInActivity(final Room room);
 
     public abstract void handleNewMessageInActivity(final Message msg);
 
