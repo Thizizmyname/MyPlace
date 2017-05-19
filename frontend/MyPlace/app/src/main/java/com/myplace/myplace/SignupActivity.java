@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.StrictMode;
 import android.support.v4.content.LocalBroadcastManager;
@@ -25,15 +26,22 @@ import com.myplace.myplace.services.LoginBroadcastReceiver;
 
 import org.json.JSONException;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import butterknife.ButterKnife;
 import butterknife.Bind;
 
 public class SignupActivity extends AppCompatActivity {
     private static final String TAG = "SignupActivity";
-    ConnectionService mService;
-    boolean mBound = false;
+    private ConnectionService mService;
+    private boolean mBound = false;
     private String username;
     private ProgressDialog progressDialog;
+    private Handler signupHandler = new Handler();
 
     @Bind(R.id.sign_retype) EditText _passRetype;
     @Bind(R.id.sign_username) EditText _userSign;
@@ -74,13 +82,24 @@ public class SignupActivity extends AppCompatActivity {
 
         _btnSign.setEnabled(false);
 
-        //final ProgressDialog progressDialog = new ProgressDialog(SignupActivity.this);
         progressDialog.setIndeterminate(true);
         progressDialog.setMessage("Creating Account...");
         progressDialog.show();
 
         username = _userSign.getText().toString();
         final String password = _passSign.getText().toString();
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(loginBroadcastReceiver,
+                new IntentFilter(ConnectionService.BROADCAST_TAG));
+
+        signupHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                progressDialog.dismiss();
+                LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(loginBroadcastReceiver);
+                onSignUpFailed();
+            }
+        }, 10000);
 
         try {
             mService.sendMessage(JSONParser.signupRequest(username, password));
@@ -89,27 +108,6 @@ public class SignupActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-//        new android.os.Handler().postDelayed(
-//                new Runnable() {
-//                    public void run() {
-//                        try {
-//                            mService.sendMessage(JSONParser.signupRequest(username, password));
-//
-//                        while (signupAccepted == null) {
-//                            Thread.sleep(100);
-//                        }
-//                        if (signupAccepted) {
-//                            onSignUpSuccess(username);
-//                        }
-//                        else {
-//                            onSignUpFailed();
-//                        }
-//                        progressDialog.dismiss();
-//                        } catch (InterruptedException | JSONException e) {
-//                            e.printStackTrace();
-//                        }
-//                    }
-//                }, 3000);
     }
 
     public void onSignUpSuccess(String username) {
@@ -121,7 +119,7 @@ public class SignupActivity extends AppCompatActivity {
     }
 
     public void onSignUpFailed() {
-        Toast.makeText(getBaseContext(), "Login Failed",  Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "Login Failed",  Toast.LENGTH_LONG).show();
 
         _btnSign.setEnabled(true);
     }
@@ -171,7 +169,7 @@ public class SignupActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         // Bind to LocalService
-        Log.d("SignupActivity", "Activity onStart!");
+        Log.d(TAG, "Activity onStart!");
         Intent intent = new Intent(this, ConnectionService.class);
         bindService(intent, mTConnection, Context.BIND_AUTO_CREATE);
     }
@@ -185,26 +183,12 @@ public class SignupActivity extends AppCompatActivity {
             mBound = false;
         }
     }
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // Register to receive messages.
-        // We are registering an observer (mMessageReceiver) to receive Intents
-        // with actions named "custom-event-name".
-        LocalBroadcastManager.getInstance(this).registerReceiver(loginBroadcastReceiver,
-                new IntentFilter(ConnectionService.BROADCAST_TAG));
-    }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(loginBroadcastReceiver);
-    }
 
     private LoginBroadcastReceiver loginBroadcastReceiver = new LoginBroadcastReceiver() {
         @Override
         public void handleBooleanResponse(boolean serverResponse) {
-            Log.d("Signup Activity", "Response Received: " + serverResponse);
+            Log.d(TAG, "Response Received: " + serverResponse);
             progressDialog.dismiss();
             if (serverResponse) {
                 onSignUpSuccess(username);
@@ -224,7 +208,6 @@ public class SignupActivity extends AppCompatActivity {
             ConnectionService.ConnectionBinder binder = (ConnectionService.ConnectionBinder) service;
             mService = binder.getService();
             mBound = true;
-            //mService.setUpConnection();
         }
 
         @Override
