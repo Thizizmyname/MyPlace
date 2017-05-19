@@ -64,6 +64,11 @@ public class MessageActivity extends AppCompatActivity {
         }
 
         @Override
+        public void handleJoinedRoomInActivity(RoomInfo roominfo) {
+
+        }
+
+        @Override
         public void handleOlderMessagesInActivity(ArrayList<Message> messages) {
             messageAdapter.updateData(roomDB.getMessages(roomID));
             swipeContainer.setRefreshing(false);

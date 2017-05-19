@@ -7,9 +7,9 @@ import android.content.Context;
  */
 
 public class RoomInfo {
-    public Room room;
-    public Message latestMsg;
-    public int latestMsgRead;
+    private Room room;
+    private Message latestMsg;
+    private int latestMsgRead;
 
     public RoomInfo(Room _room, Message msg, int latestRead) {
         room = _room;
@@ -23,12 +23,30 @@ public class RoomInfo {
         latestMsgRead = 0;
     }
 
+    public Room getRoom() {
+        return room;
+    }
+
     public String getName() {
         return room.getName();
     }
 
     public int getRoomID() {
         return room.getRoomID();
+    }
+
+    public Message getLatestMessage(Context ctx) {
+        Message message = null;
+        if (latestMsg != null) {
+            message = latestMsg;
+        } else {
+            try {
+                message = room.getLastMessage(ctx);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return message;
     }
 
     public String getLastSender(Context ctx) {
