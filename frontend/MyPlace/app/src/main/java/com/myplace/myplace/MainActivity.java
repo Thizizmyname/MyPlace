@@ -40,6 +40,7 @@ import org.json.JSONException;
 import static com.myplace.myplace.LoginActivity.LOGIN_PREFS;
 import static com.myplace.myplace.R.id.action_create;
 import static com.myplace.myplace.R.id.action_join;
+import static java.lang.Thread.sleep;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -63,6 +64,11 @@ public class MainActivity extends AppCompatActivity {
     // with an action named "custom-event-name" is broadcasted.
     private MainBroadcastReceiver mMessageReceiver = new MainBroadcastReceiver() {
         @Override
+        public void handleOlderMessagesInActivity(ArrayList<Message> messages) {
+
+        }
+
+        @Override
         public void handleCreatedRoomInActivity(Room room) {
             roomAdapter.add(new RoomInfo(room));
             roomAdapter.notifyDataSetChanged();
@@ -83,8 +89,28 @@ public class MainActivity extends AppCompatActivity {
         Log.d("Main_Activity", "I'm in onStart!");
         Intent intent = new Intent(this, ConnectionService.class);
         bindService(intent, mTConnection, Context.BIND_AUTO_CREATE);
-        roomAdapter.notifyDataSetChanged();
 
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(!mBound) {
+                    Log.d("MainActivity", "Waiting for mBound");
+                    try {
+                        sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                try {
+                    mService.sendMessage(JSONParser.getRoomRequest(username));
+                } catch (JSONException e) {
+                    Log.d("MainActivity", "Get room request error");
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        thread.start();
     }
 
     @Override

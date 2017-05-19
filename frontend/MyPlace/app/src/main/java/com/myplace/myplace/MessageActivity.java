@@ -9,6 +9,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -44,6 +45,7 @@ public class MessageActivity extends AppCompatActivity {
     ConnectionService mService;
     boolean mBound = false;
     private int roomID;
+    private SwipeRefreshLayout swipeContainer;
 
 
     // Our handler for received Intents. This will be called whenever an Intent
@@ -61,6 +63,11 @@ public class MessageActivity extends AppCompatActivity {
             }
         }
 
+        @Override
+        public void handleOlderMessagesInActivity(ArrayList<Message> messages) {
+            messageAdapter.updateData(roomDB.getMessages(roomID));
+            swipeContainer.setRefreshing(false);
+        }
     };
 
     @Override
@@ -130,6 +137,22 @@ public class MessageActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         roomDB = new RoomDbHelper(this);
+
+        // Initialize swipecontainer
+        swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
+        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                try {
+                    if (!messageAdapter.isEmpty()) {
+                        Message oldestMessage = messageAdapter.getItem(0);
+                        mService.sendMessage(JSONParser.getOlderMsgsRequest(roomID, oldestMessage.getId()));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
 
         ArrayList<Message> messageList = roomDB.getMessages(roomID);
         messageAdapter = new MessageAdapter(this, messageList);

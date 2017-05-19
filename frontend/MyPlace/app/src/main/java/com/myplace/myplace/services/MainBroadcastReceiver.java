@@ -54,7 +54,8 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
 
                     break;
                 case RequestTypes.GET_OLDER:
-
+                    ArrayList<Message> messages = JSONParser.getOlderMsgsResponse(serverMessage);
+                    handleOlderMessages(messages);
                     break;
                 case RequestTypes.GET_NEWER:
 
@@ -111,6 +112,15 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
         roomDB.createRoomTable(room);
         handleCreatedRoomInActivity(room);
     }
+
+    private void handleOlderMessages(final ArrayList<Message> messages) {
+        for (Message message : messages) {
+            roomDB.addMessage(message.getRoomID(), message);
+        }
+
+    }
+
+    public abstract void handleOlderMessagesInActivity(final ArrayList<Message> messages);
 
     public abstract void handleCreatedRoomInActivity(final Room room);
 

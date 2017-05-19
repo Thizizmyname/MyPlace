@@ -216,7 +216,7 @@ public final class JSONParser {
         JSONObject json = constructJSONRequest();
         json.put(KEY_USERNAME, msg.getName());
 
-        if (msg.getRoomID() == 0) throw new AssertionError();
+        if (msg.getRoomID() == -1) throw new AssertionError();
         json.put(KEY_ROOM_ID, msg.getRoomID());
         json.put(KEY_MSG_BODY, msg.getText());
 

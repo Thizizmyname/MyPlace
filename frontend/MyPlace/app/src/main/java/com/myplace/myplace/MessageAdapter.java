@@ -19,8 +19,11 @@ public class MessageAdapter extends ArrayAdapter<Message> {
     private static final int TYPE_OUTGOING = 1;
     private static final int TYPE_MAX_COUNT = TYPE_OUTGOING + 1;
 
+    ArrayList<Message> messages;
+
     public MessageAdapter(Context context, ArrayList<Message> messages) {
         super(context, 0, messages);
+        this.messages = messages;
     }
 
     @Override
@@ -63,5 +66,10 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         text.setText(message.getText());
 
         return convertView;
+    }
+
+    public void updateData(ArrayList<Message> list) {
+        this.messages.clear();
+        messages.addAll(list);
     }
 }
