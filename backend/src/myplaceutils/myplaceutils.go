@@ -162,7 +162,8 @@ func (u *User) ShowRoomIDs() []int {
 	
 	if UserExists(u.UName){
 		for e := id.Front(); e != nil; e = e.Next() {
-			rooms = append(rooms, e.Value.(int))
+			RoomMsgID := e.Value.(RoomIDAndLatestReadMsgID)
+			rooms = append(rooms, RoomMsgID.RoomID)
 		}
 		return rooms
 	}

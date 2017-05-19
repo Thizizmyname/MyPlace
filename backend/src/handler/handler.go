@@ -145,13 +145,12 @@ func getRooms(request requests_responses.GetRoomsRequest) requests_responses.Res
 	name := request.UName
 	user := myplaceutils.GetUser(name)
 	rids := user.ShowRoomIDs()
-	var RoomInfos []requests_responses.RoomInfo
+	RoomInfos := []requests_responses.RoomInfo{}
 	
 	for _,x := range rids{
 		
 		room := myplaceutils.GetRoom(x)
-		msg,_ := myplaceutils.GetLatestMsg(room)
-		roominfo := myplaceutils.CreateRoomInfo(room, msg, name) 
+		roominfo := myplaceutils.CreateRoomInfo(room,user) 
 		RoomInfos = append(RoomInfos, roominfo)
 		
 	}
@@ -180,18 +179,9 @@ func getOlderMsgs(request requests_responses.GetOlderMsgsRequest) requests_respo
 	room := myplaceutils.GetRoom(roomID)
 	var messages []requests_responses.MsgInfo
 	
-	if (len(room.Messages) == 0){
-		response := requests_responses.ErrorResponse{
-			id,
-			requests_responses.GetOlderMsgsIndex,
-			"No messages in room"}
-		return response
-	}
-	
 	for x := msgID; x > (msgID - NoMsgs); x-- {
 		msg := room.Messages[x]
-		uname := msg.UName
-		msginfo := myplaceutils.CreateMsgInfo(room, msg, uname)
+		msginfo := myplaceutils.CreateMsgInfo(msg, roomID)
 		messages = append(messages,msginfo)
 	}
 	response := requests_responses.GetOlderMsgsResponse{id,messages}
@@ -266,7 +256,6 @@ func leaveRoom(request requests_responses.LeaveRoomRequest, responseChan chan re
 
 */
   return requests_responses.ErrorResponse{request.RequestID, requests_responses.LeaveRoomIndex, "not implemented yet"}
-
 }
 
 func createRoom(request requests_responses.CreateRoomRequest, responseChan chan requests_responses.Response) requests_responses.Response {
