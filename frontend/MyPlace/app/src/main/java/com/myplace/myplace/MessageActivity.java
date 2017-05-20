@@ -192,20 +192,13 @@ public class MessageActivity extends AppCompatActivity {
                 long timestamp = System.currentTimeMillis();
 
                 Message newMessage = new Message(roomID, username, message.getText().toString(), timestamp);
-//                messageAdapter.add(newMessage);
-//
-//                roomDB.addMessage(roomID, newMessage);
-//                MainActivity.roomAdapter.notifyDataSetChanged();
+
                 try {
                     mService.sendMessage(JSONParser.postMsgRequest(newMessage));
 
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-//        new android.os.Handle
-                mService.sendMessage(newMessage.getText());
-
-
                 message.setText(null); // Reset input field
             }
         });

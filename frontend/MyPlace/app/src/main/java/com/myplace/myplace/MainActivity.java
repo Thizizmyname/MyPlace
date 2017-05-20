@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, ConnectionService.class);
         bindService(intent, mTConnection, Context.BIND_AUTO_CREATE);
 
-/*        Thread thread = new Thread(new Runnable() {
+        Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 while(!mBound) {
@@ -117,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        thread.start();*/
+        thread.start();
     }
 
     @Override
