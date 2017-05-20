@@ -2,6 +2,8 @@ package com.myplace.myplace;
 
 
 import android.support.annotation.NonNull;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.myplace.myplace.models.Message;
 import com.myplace.myplace.models.Room;
@@ -10,6 +12,7 @@ import com.myplace.myplace.models.RoomInfo;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.ProcessingInstruction;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,7 +26,7 @@ import static com.myplace.myplace.models.RequestTypes.*;
 
 public final class JSONParser {
 
-    private static int number;
+    private static int number = 1;
 
     private static final String KEY_REQUEST_ID = "RequestID";
     private static final String KEY_USERNAME = "UName";
@@ -38,6 +41,9 @@ public final class JSONParser {
     private static final String KEY_MSG_ID = "MsgID";
     private static final String KEY_MESSAGE = "Msg";
     private static final String KEY_MSG_BODY = "Body";
+    private static final String KEY_MSG_TIME  = "Time";
+    private static final String KEY_LATEST_MSG = "LatestMsg";
+    private static final String KEY_LATEST_MSG_ID = "LatestReadMsgID";
     private static final String KEY_MSG_LIST = "Messages";
     private static final String KEY_ERROR_CAUSE = "ErrorCause";
 
@@ -257,7 +263,8 @@ public final class JSONParser {
         try {
             JSONObject json = makeProperJsonObject(rawString);
             String error = json.getString(KEY_ERROR_CAUSE);
-            throw new RuntimeException(error);
+            Log.e("JSONParser", "ERROR-RESPONSE: " + error);
+            //throw new RuntimeException(error);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -283,24 +290,24 @@ public final class JSONParser {
     }
 
     private static Message constructMessage(JSONObject json) throws JSONException {
-        int id = json.getInt("MsgID");
-        int roomID = json.getInt("RoomID");
-        String fromUser = json.getString("UName");
-        long timestamp = json.getInt("Time");
-        String body = json.getString("Body");
+        int id = json.getInt(KEY_MSG_ID);
+        int roomID = json.getInt(KEY_ROOM_ID);
+        String fromUser = json.getString(KEY_USERNAME);
+        long timestamp = json.getInt(KEY_MSG_TIME);
+        String body = json.getString(KEY_MSG_BODY);
 
         return new Message(id, roomID, fromUser, body, timestamp);
     }
 
     private static RoomInfo constructRoom(JSONObject json) throws JSONException {
-        int roomID = json.getInt("RoomID");
-        String roomName = json.getString("RoomName");
+        int roomID = json.getInt(KEY_ROOM_ID);
+        String roomName = json.getString(KEY_ROOM_NAME);
         Room room = new Room(roomID, roomName);
 
-        JSONObject ms = json.getJSONObject("LatestMsg");
+        JSONObject ms = json.getJSONObject(KEY_LATEST_MSG);
         Message msg = constructMessage(ms);
 
-        int latestReadMsg = json.getInt("LatestReadMsgID");
+        int latestReadMsg = json.getInt(KEY_LATEST_MSG_ID);
 
         return new RoomInfo(room, msg, latestReadMsg);
     }
