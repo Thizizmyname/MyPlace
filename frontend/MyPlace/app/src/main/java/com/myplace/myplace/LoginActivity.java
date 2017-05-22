@@ -97,7 +97,7 @@ public class LoginActivity extends AppCompatActivity {
         final String password = _password.getText().toString();
 
         try {
-            mService.sendMessage(JSONParser.signupRequest(username, password));
+            mService.sendMessage(JSONParser.signinRequest(username, password));
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -206,7 +206,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private LoginBroadcastReceiver loginBroadcastReceiver = new LoginBroadcastReceiver() {
         public void handleBooleanResponse(boolean serverResponse) {
-            Log.d("Signup Activity", "Response Received: " + serverResponse);
+            Log.d("Login Activity", "Response Received: " + serverResponse);
             progressDialog.dismiss();
             if (serverResponse) {
                 onLoginSuccess(username);

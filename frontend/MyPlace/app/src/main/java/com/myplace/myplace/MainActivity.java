@@ -14,6 +14,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -40,6 +41,7 @@ import org.json.JSONException;
 import static com.myplace.myplace.LoginActivity.LOGIN_PREFS;
 import static com.myplace.myplace.R.id.action_create;
 import static com.myplace.myplace.R.id.action_join;
+import static java.lang.Thread.sleep;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -63,6 +65,12 @@ public class MainActivity extends AppCompatActivity {
     // with an action named "custom-event-name" is broadcasted.
     private MainBroadcastReceiver mMessageReceiver = new MainBroadcastReceiver() {
         @Override
+        public void handleJoinedRoomInActivity(RoomInfo roominfo) {
+            roomAdapter.add(roominfo);
+            roomAdapter.notifyDataSetChanged();
+        }
+
+        @Override
         public void handleCreatedRoomInActivity(Room room) {
             roomAdapter.add(new RoomInfo(room));
             roomAdapter.notifyDataSetChanged();
@@ -83,8 +91,28 @@ public class MainActivity extends AppCompatActivity {
         Log.d("Main_Activity", "I'm in onStart!");
         Intent intent = new Intent(this, ConnectionService.class);
         bindService(intent, mTConnection, Context.BIND_AUTO_CREATE);
-        roomAdapter.notifyDataSetChanged();
 
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(!mBound) {
+                    Log.d("MainActivity", "Waiting for mBound");
+                    try {
+                        sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                try {
+                    mService.sendMessage(JSONParser.getRoomRequest(username));
+                } catch (JSONException e) {
+                    Log.d("MainActivity", "Get room request error");
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        thread.start();
     }
 
     @Override
@@ -95,10 +123,10 @@ public class MainActivity extends AppCompatActivity {
         // with actions named "custom-event-name".
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter(ConnectionService.BROADCAST_TAG));
-    ArrayList<RoomInfo> updatedRoomList = roomDB.getRoomList();
+        ArrayList<RoomInfo> updatedRoomList = roomDB.getRoomList();
         roomAdapter.updateData(updatedRoomList);
         roomAdapter.notifyDataSetChanged();
-}
+    }
 
     @Override
     protected void onPause() {
@@ -244,31 +272,43 @@ public class MainActivity extends AppCompatActivity {
         builder.setView(dialogView);
 
         final EditText inputRoom = (EditText) dialogView.findViewById(R.id.input_room);
+        if (getResources().getString(createOrJoin).equals(getResources().getString(R.string.join_room))) {
+            inputRoom.setHint(R.string.enter_room_id);
+            inputRoom.setInputType(InputType.TYPE_CLASS_NUMBER);
+        }
 
         builder.setPositiveButton(createOrJoin, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                String roomName = inputRoom.getText().toString();
+                String nameOrId = inputRoom.getText().toString();
 
-                //TODO: Change below string to JSON-request
-                int roomID = (int) System.currentTimeMillis()/1000;
-
-                try {
-                    mService.sendMessage(JSONParser.createRoomRequest(roomName, username));
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                if (getResources().getString(createOrJoin).equals(getResources().getString(R.string.join_room))) {
+                    joinRoomRequest(Integer.parseInt(nameOrId));
+                } else {
+                    createRoomRequest(nameOrId);
                 }
-/*                roomDB.createRoomTable(roomID, roomName);
-                roomList.add(new RoomInfo(new Room(roomID, roomName), null, 0));
-                roomAdapter.notifyDataSetChanged();
-
-                mService.sendMessage(roomName);*/
             }
         });
 
         AlertDialog alertDialog = builder.create();
         alertDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         alertDialog.show();
+    }
+
+    private void createRoomRequest(String roomName) {
+        try {
+            mService.sendMessage(JSONParser.createRoomRequest(roomName, username));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void joinRoomRequest(int roomid) {
+        try {
+            mService.sendMessage(JSONParser.joinRoomRequest(roomid, username));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
