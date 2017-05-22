@@ -7,16 +7,38 @@ import (
 	"fmt"
 	"math/rand"
 	"myplaceutils"
+	"data"
 	"handler"
 	"requests_responses"
 	"time"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 var noUsers int = 0
 var noRooms int = 0
 var msgLengthIndicator int = 20
+var stopFlag = false
 
 func main() {
+	c := make(chan os.Signal, 2)
+	c2 := make(chan bool)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		stopFlag = true
+		time.Sleep(time.Second)
+		err := data.StoreDBs(myplaceutils.Users, myplaceutils.Rooms)
+		if err!=nil {
+			fmt.Printf("Error store db, %v\n", err)
+		} else {
+			fmt.Println("DBs successfully stored to file")
+		}
+		c2<-true
+	}()
+
+
 	rand.Seed(time.Now().Unix())
 	myplaceutils.InitDBs()
 	initLoggers(ioutil.Discard, ioutil.Discard, ioutil.Discard, ioutil.Discard)
@@ -24,7 +46,7 @@ func main() {
 	go handler.ResponseHandler(handlerChan)
 	defer close(handlerChan)
 
-	for i := 0; ; i++ {
+	for i := 0; !stopFlag; i++ {
 		request := generateRequest(noUsers, noRooms)
 		responseChan := make(chan requests_responses.Response, 20)
 		handlerArgs := myplaceutils.HandlerArgs{request, responseChan}
@@ -44,6 +66,8 @@ func main() {
 			noRooms++
 		}
 	}
+	<-c2
+	os.Exit(1)
 }
 
 func generateRequest(noUsers int, noRooms int) requests_responses.Request {
