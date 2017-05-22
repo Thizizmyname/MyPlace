@@ -3,6 +3,7 @@ package com.myplace.myplace;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -10,16 +11,20 @@ import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.myplace.myplace.models.Message;
@@ -29,13 +34,14 @@ import com.myplace.myplace.services.ConnectionService;
 import com.myplace.myplace.services.MainBroadcastReceiver;
 
 import org.json.JSONException;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
 import static com.myplace.myplace.LoginActivity.LOGIN_PREFS;
 
 public class MessageActivity extends AppCompatActivity {
-
+    final Context context = this;
     private static final String EMPTY_STRING = "";
 
     MessageAdapter messageAdapter;
@@ -226,11 +232,35 @@ public class MessageActivity extends AppCompatActivity {
         }
     };
 
+    public void onShowRoomId() {
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View dialogView = inflater.inflate(R.layout.dialog_show_roomid, null);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+        builder.setView(dialogView);
+        TextView roomIdTextView = (TextView) dialogView.findViewById(R.id.room_id);
+        roomIdTextView.setText(Integer.toString(roomID));
+
+        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            // Cancel
+            }
+        });
+        builder.create();
+        builder.show();
+    }
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
 
         overridePendingTransition(R.anim.push_right_in, R.anim.push_right_out);
+    }
+
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.message_menu, menu);
+        return true;
     }
 
     @Override
@@ -239,6 +269,9 @@ public class MessageActivity extends AppCompatActivity {
 
         if (id == android.R.id.home) {
             onBackPressed();  return true;
+        } else if (id == R.id.show_roomid) {
+            onShowRoomId();
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
