@@ -7,7 +7,8 @@ import (
   //"reflect"
   "log"
   "container/list"
-  "requests_responses"
+	"requests_responses"
+	"strings"
 )
 
 var (
@@ -19,11 +20,12 @@ var (
   //connections []net.Conn
   Users UserDB
   Rooms RoomDB
-  ResponseChannel chan HandlerArgs
+  RequestChannel chan HandlerArgs
 )
 
 const (
 	MsgMaxLength = 1256
+	ConnReadMaxLength = 4096
 )
 
 type User struct {
@@ -114,20 +116,36 @@ func (user *User) JoinRoom(room *Room) {
 	room.Users.PushBack(user.UName)
 }
 
-// Removes the user from the room
-func (r *Room) RemoveUser(u *User) {
-  // for i, elem := range r.Users {
-  //   if reflect.DeepEqual(elem, u) {
-  //     r.Users = r.Users[:i+copy(r.Users[i:], r.Users[i+1:])]
-  //   }
-  // }
-  // r.NoPeople--
-}
 
-// Removes the room from the user
-func (u *User) LeaveRoom(r *Room) {
-//	u.Rooms.Remove(r.Name)
 
+// Purpose: A method so the user leaves the room. Also updates the room so the user istn't a member of the room
+// Argument: A room.
+// Returns: True if the user succeeded to leave the room, false if not
+// Tested: Yes
+func (u *User) LeaveRoom(r *Room) bool{
+	// Checks if an user is a member of the room
+	for e := r.Users.Front(); e != nil; e = e.Next() {
+		if strings.Compare(e.Value.(string),u.UName) == 0 {
+			break
+		}else if(e == nil){
+			return false
+		}
+	}
+	// Updates the user
+	for e := u.Rooms.Front(); e != nil; e = e.Next() {
+		if e.Value.(RoomIDAndLatestReadMsgID).RoomID == r.ID {
+			u.Rooms.Remove(e)
+		}
+	}
+	// Updates the room
+	for e := r.Users.Front(); e != nil; e = e.Next() {
+		if strings.Compare(e.Value.(string),u.UName) == 0 {
+			r.Users.Remove(e)
+			// Jag måste uppdatera outgoingChannels? Förstår inte vad den innehåller dock.
+		}
+	}
+
+	return true
 }
 
 func CreateUser(uname string, pass string) *User {
@@ -257,11 +275,12 @@ func GetLatestMsg(room *Room) (*Message,int){
 
 }
 
+// Returns true if the user is in the room
 func UserIsInRoom(uname string, room *Room) bool {
 	unameList := room.Users
 
 	for e := unameList.Front(); e != nil; e = e.Next() {
-		if e.Value.(string) == uname {
+		if strings.Compare (e.Value.(string), uname) == 0 {
 			return true
 		}
 	}
@@ -304,6 +323,7 @@ func outChanInUse(c chan requests_responses.Response, outChans *list.List) bool 
 	return false
 }
 
+// Vid tid, slumpa maxID och kolla om det är upptaget, annars skicka tillbaka det slumpade talet
 func findFreeRoomID() int {
 	maxID := -1
 
@@ -377,6 +397,8 @@ func (user *User) SetLatestReadMsg(room *Room, msgID int) bool {
 // Returns: RoomInfo about a room
 // Tested: No
 func CreateRoomInfo(room *Room, user *User) requests_responses.RoomInfo{
+	if room == nil { return requests_responses.RoomInfo{} }
+
 	latestMsg,_ := GetLatestMsg(room)
 	var latestMsgInfo requests_responses.MsgInfo
 
