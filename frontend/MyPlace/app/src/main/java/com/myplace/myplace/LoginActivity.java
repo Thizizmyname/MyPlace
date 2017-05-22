@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -36,11 +37,16 @@ public class LoginActivity extends AppCompatActivity {
     public static final String LOGIN_PREFS = "login_prefs";
     private ProgressDialog progressDialog;
     private String username;
+    private Handler loginHandler = new Handler();
 
-    @Bind(R.id.input_username) EditText _username;
-    @Bind(R.id.input_password) EditText _password;
-    @Bind(R.id.btn_login) Button _login;
-    @Bind(R.id.link_signup) TextView _signup;
+    @Bind(R.id.input_username)
+    EditText _username;
+    @Bind(R.id.input_password)
+    EditText _password;
+    @Bind(R.id.btn_login)
+    Button _login;
+    @Bind(R.id.link_signup)
+    TextView _signup;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -54,7 +60,7 @@ public class LoginActivity extends AppCompatActivity {
 
         SharedPreferences loginInfo = getSharedPreferences(LOGIN_PREFS, 0);
         boolean loggedIn = loginInfo.getBoolean("loggedIn", false);
-        if(loggedIn == true){
+        if (loggedIn == true) {
             Intent startMain = new Intent(getApplicationContext(), MainActivity.class);
             startActivity(startMain);
             finish();
@@ -78,10 +84,10 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    public void login(){
+    public void login() {
         Log.d(TAG, "login");
 
-        if(!validate()) {
+        if (!validate()) {
             onLoginFailed();
             return;
         }
@@ -96,22 +102,17 @@ public class LoginActivity extends AppCompatActivity {
         username = _username.getText().toString();
         final String password = _password.getText().toString();
 
+        LocalBroadcastManager.getInstance(this).registerReceiver(loginBroadcastReceiver,
+                new IntentFilter(ConnectionService.BROADCAST_TAG));
+
+        loginHandler.postDelayed(LoginRun, 10000);
+
         try {
             mService.sendMessage(JSONParser.signupRequest(username, password));
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
-//        new android.os.Handler().postDelayed(
-//                new Runnable() {
-//                    public void run() {
-//                        while (loginAccepted == null) {}
-//                        if (loginAccepted) {
-//                            onLoginSuccess(username);
-//                        }
-//                        progressDialog.dismiss();
-//                    }
-//                }, 3000);
     }
 
     @Override
@@ -144,6 +145,12 @@ public class LoginActivity extends AppCompatActivity {
 
     public void onLoginFailed() {
         Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();
+
+        _login.setEnabled(true);
+    }
+
+    public void loginConnectionFailed() {
+        Toast.makeText(getBaseContext(), "Connection Failed", Toast.LENGTH_LONG).show();
 
         _login.setEnabled(true);
     }
@@ -188,26 +195,36 @@ public class LoginActivity extends AppCompatActivity {
             mBound = false;
         }
     }
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // Register to receive messages.
-        // We are registering an observer (mMessageReceiver) to receive Intents
-        // with actions named "custom-event-name".
-        LocalBroadcastManager.getInstance(this).registerReceiver(loginBroadcastReceiver,
-                new IntentFilter(ConnectionService.BROADCAST_TAG));
-    }
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+//        // Register to receive messages.
+//        // We are registering an observer (mMessageReceiver) to receive Intents
+//        // with actions named "custom-event-name".
+//        LocalBroadcastManager.getInstance(this).registerReceiver(loginBroadcastReceiver,
+//                new IntentFilter(ConnectionService.BROADCAST_TAG));
+//    }
+//
+//    @Override
+//    protected void onPause() {
+//        super.onPause();
+//        LocalBroadcastManager.getInstance(this).unregisterReceiver(loginBroadcastReceiver);
+//    }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(loginBroadcastReceiver);
-    }
+    private Runnable LoginRun = new Runnable() {
+        @Override
+        public void run() {
+            progressDialog.dismiss();
+            LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(loginBroadcastReceiver);
+            loginConnectionFailed();
+        }
+    };
 
     private LoginBroadcastReceiver loginBroadcastReceiver = new LoginBroadcastReceiver() {
         public void handleBooleanResponse(boolean serverResponse) {
             Log.d("Signup Activity", "Response Received: " + serverResponse);
             progressDialog.dismiss();
+            loginHandler.removeCallbacks(LoginRun);
             if (serverResponse) {
                 onLoginSuccess(username);
             } else {

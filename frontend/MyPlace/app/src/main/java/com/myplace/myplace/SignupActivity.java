@@ -84,14 +84,7 @@ public class SignupActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(loginBroadcastReceiver,
                 new IntentFilter(ConnectionService.BROADCAST_TAG));
 
-        signupHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                progressDialog.dismiss();
-                LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(loginBroadcastReceiver);
-                onSignUpFailed();
-            }
-        }, 10000);
+        signupHandler.postDelayed(SignUpRun, 10000);
 
         try {
             mService.sendMessage(JSONParser.signupRequest(username, password));
@@ -112,6 +105,12 @@ public class SignupActivity extends AppCompatActivity {
 
     public void onSignUpFailed() {
         Toast.makeText(getApplicationContext(), "Login Failed",  Toast.LENGTH_LONG).show();
+
+        _btnSign.setEnabled(true);
+    }
+
+    public void signUpConnectionFailed() {
+        Toast.makeText(getApplicationContext(), "Connection Failed", Toast.LENGTH_LONG).show();
 
         _btnSign.setEnabled(true);
     }
@@ -176,12 +175,22 @@ public class SignupActivity extends AppCompatActivity {
         }
     }
 
+    private Runnable SignUpRun = new Runnable() {
+        @Override
+        public void run() {
+            progressDialog.dismiss();
+            LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(loginBroadcastReceiver);
+            signUpConnectionFailed();
+        }
+    };
+
 
     private LoginBroadcastReceiver loginBroadcastReceiver = new LoginBroadcastReceiver() {
         @Override
         public void handleBooleanResponse(boolean serverResponse) {
             Log.d(TAG, "Response Received: " + serverResponse);
             progressDialog.dismiss();
+            signupHandler.removeCallbacks(SignUpRun);
             if (serverResponse) {
                 onSignUpSuccess(username);
             } else {
