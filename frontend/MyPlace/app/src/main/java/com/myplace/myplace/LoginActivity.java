@@ -39,14 +39,10 @@ public class LoginActivity extends AppCompatActivity {
     private String username;
     private Handler loginHandler = new Handler();
 
-    @Bind(R.id.input_username)
-    EditText _username;
-    @Bind(R.id.input_password)
-    EditText _password;
-    @Bind(R.id.btn_login)
-    Button _login;
-    @Bind(R.id.link_signup)
-    TextView _signup;
+    @Bind(R.id.input_username) EditText _username;
+    @Bind(R.id.input_password) EditText _password;
+    @Bind(R.id.btn_login) Button _login;
+    @Bind(R.id.link_signup) TextView _signup;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -195,21 +191,6 @@ public class LoginActivity extends AppCompatActivity {
             mBound = false;
         }
     }
-//    @Override
-//    protected void onResume() {
-//        super.onResume();
-//        // Register to receive messages.
-//        // We are registering an observer (mMessageReceiver) to receive Intents
-//        // with actions named "custom-event-name".
-//        LocalBroadcastManager.getInstance(this).registerReceiver(loginBroadcastReceiver,
-//                new IntentFilter(ConnectionService.BROADCAST_TAG));
-//    }
-//
-//    @Override
-//    protected void onPause() {
-//        super.onPause();
-//        LocalBroadcastManager.getInstance(this).unregisterReceiver(loginBroadcastReceiver);
-//    }
 
     private Runnable LoginRun = new Runnable() {
         @Override
