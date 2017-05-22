@@ -57,21 +57,12 @@ public class MessageActivity extends AppCompatActivity {
     // Our handler for received Intents. This will be called whenever an Intent
     // with an action named "custom-event-name" is broadcasted.
     private MainBroadcastReceiver mMessageReceiver = new MainBroadcastReceiver() {
-        @Override
-        public void handleCreatedRoomInActivity(Room room) {
-
-        }
 
         @Override
         public void handleNewMessageInActivity(Message msg) {
             if (roomID == msg.getRoomID()) {
                 messageAdapter.add(msg);
             }
-        }
-
-        @Override
-        public void handleJoinedRoomInActivity(RoomInfo roominfo) {
-
         }
 
         @Override

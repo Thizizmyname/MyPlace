@@ -127,11 +127,11 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
 
     }
 
-    public abstract void handleJoinedRoomInActivity(final RoomInfo roominfo);
+    public void handleJoinedRoomInActivity(final RoomInfo roominfo) {}
 
-    public abstract void handleOlderMessagesInActivity(final ArrayList<Message> messages);
+    public void handleOlderMessagesInActivity(final ArrayList<Message> messages){}
 
-    public abstract void handleCreatedRoomInActivity(final Room room);
+    public void handleCreatedRoomInActivity(final Room room){}
 
     public abstract void handleNewMessageInActivity(final Message msg);
 

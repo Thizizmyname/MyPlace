@@ -71,11 +71,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public void handleOlderMessagesInActivity(ArrayList<Message> messages) {
-
-        }
-
-        @Override
         public void handleCreatedRoomInActivity(Room room) {
             roomAdapter.add(new RoomInfo(room));
             roomAdapter.notifyDataSetChanged();
@@ -301,8 +296,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void createRoomRequest(String roomName) {
-        int roomID = (int) System.currentTimeMillis()/1000;
-
         try {
             mService.sendMessage(JSONParser.createRoomRequest(roomName, username));
         } catch (JSONException e) {
@@ -311,8 +304,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void joinRoomRequest(int roomid) {
-        int roomID = (int) System.currentTimeMillis()/1000;
-
         try {
             mService.sendMessage(JSONParser.joinRoomRequest(roomid, username));
         } catch (JSONException e) {
