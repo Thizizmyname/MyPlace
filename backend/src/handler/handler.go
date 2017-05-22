@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 
@@ -10,45 +10,46 @@ import (
 )
 
 
-func clientResponseHandler(conn net.Conn, clientResponseChannel chan requests_responses.Response) {
-	myplaceutils.Info.Printf("Split client communication to clientResponseHandler\nConn: %v\n", conn)
-	for args := range clientResponseChannel {
-		responseString, err := requests_responses.ToResponseString(args)
-		myplaceutils.Info.Printf("Parsed responseString: %v\n",responseString)
-		if err!=nil{
-			fmt.Fprintf(conn,"%v\n",err)
-		}
-		fmt.Fprintf(conn,"%v\n",responseString)
-	}
+
+func ClientResponseHandler(conn net.Conn, clientResponseChannel chan requests_responses.Response) {
+  myplaceutils.Info.Printf("Split client communication to clientResponseHandler\nConn: %v\n", conn)
+  for args := range clientResponseChannel {
+    responseString, err := requests_responses.ToResponseString(args)
+    myplaceutils.Info.Printf("Parsed responseString: %v\n",responseString)
+    if err!=nil{
+      fmt.Fprintf(conn,"%v\n",err)
+    }
+    fmt.Fprintf(conn,"%v\n",responseString)
+  }
 }
 
-func clientHandler(conn net.Conn, clientChannel chan requests_responses.Response) {
-	myplaceutils.Info.Println("Connection sent to clientHandler in go routine")
-	go clientResponseHandler(conn, clientChannel)
-	var requestParsed myplaceutils.HandlerArgs
-	var parseError error
-	for {
-		request ,err := bufio.NewReader(conn).ReadString('\n')
-		if err!=nil {
-			myplaceutils.Error.Println("User disconnected from the server")
-			//TODO SignOutRequest
-			break
-		}
-		myplaceutils.Info.Printf("New request: %v",request)
-		requestParsed.IncomingRequest, parseError = requests_responses.FromRequestString(request)
-		requestParsed.ResponseChannel = clientChannel
-		if parseError==nil {
-			myplaceutils.ResponseChannel <- requestParsed
-		} else {
-			myplaceutils.Error.Printf("Bad request from client: %v\n", parseError)
-			//Har vi en default Bad request?
-		}
-	}
+func ClientHandler(conn net.Conn, clientChannel chan requests_responses.Response) {
+  myplaceutils.Info.Println("Connection sent to clientHandler in go routine")
+  go ClientResponseHandler(conn, clientChannel)
+  var requestParsed myplaceutils.HandlerArgs
+  var parseError error
+  for {
+    request ,err := bufio.NewReader(conn).ReadString('\n')
+    if err!=nil {
+      myplaceutils.Error.Println("User disconnected from the server")
+      //TODO SignOutRequest
+      break
+    }
+    myplaceutils.Info.Printf("New request: %v",request)
+    requestParsed.IncomingRequest, parseError = requests_responses.FromRequestString(request)
+    requestParsed.ResponseChannel = clientChannel
+    if parseError==nil {
+      myplaceutils.ResponseChannel <- requestParsed
+    } else {
+      myplaceutils.Error.Printf("Bad request from client: %v\n", parseError)
+      //Har vi en default Bad request?
+    }
+  }
 }
 
 
 
-func responseHandler(incomingChannel chan myplaceutils.HandlerArgs) {
+func ResponseHandler(incomingChannel chan myplaceutils.HandlerArgs) {
 	myplaceutils.Info.Println("Reached responseHandler")
 	for args := range incomingChannel {
 		request := args.IncomingRequest
@@ -87,6 +88,9 @@ func responseHandler(incomingChannel chan myplaceutils.HandlerArgs) {
 		case requests_responses.PostMsgRequest:
 			myplaceutils.Info.Println("Matched request to PostMsg")
 			response = postMsg(request.(requests_responses.PostMsgRequest), responseChan)
+		case requests_responses.MsgReadRequest:
+			myplaceutils.Info.Println("Matched request to SignOut")
+			response = msgRead(request.(requests_responses.MsgReadRequest))
 		case requests_responses.SignOutRequest:
 			myplaceutils.Info.Println("Matched request to SignOut")
 			response = signOut(request.(requests_responses.SignOutRequest), responseChan)
@@ -130,8 +134,8 @@ func signIn(request requests_responses.SignInRequest, responseChan chan requests
 	}
 
 	for e := user.Rooms.Front(); e != nil; e = e.Next() {
-		roomID := e.Value.(int)
-		room := myplaceutils.GetRoom(roomID)
+		room_ := e.Value.(myplaceutils.RoomIDAndLatestReadMsgID)
+		room := myplaceutils.GetRoom(room_.RoomID)
 		room.AddOutgoingChannel(responseChan)
 	}
 
@@ -155,43 +159,37 @@ func getNewerMsgs(request requests_responses.GetNewerMsgsRequest) requests_respo
 }
 
 func joinRoom(request requests_responses.JoinRoomRequest, responseChan chan requests_responses.Response) requests_responses.Response {
-	// Vill uppdatera ett rum så att en user är medlem i det
-	
-	requestID := request.RequestID
-	roomID := request.RoomID
-	username := request.UName
 
+  // Vill uppdatera ett rum så att en user är medlem i det
 
-	room := myplaceutils.GetRoom(roomID)
-	user := myplaceutils.GetUser(username)
-	latestMsg,_ := myplaceutils.GetLatestMsg(room)
+  requestID := request.RequestID
+  roomID := request.RoomID
+  username := request.UName
 
-	if user == nil{
-		return requests_responses.ErrorResponse{
-			requestID,
-			requests_responses.JoinRoomIndex,
-			"There is no such user"}
+  room := myplaceutils.GetRoom(roomID)
+  user := myplaceutils.GetUser(username)
 
-	}
-	
-	if room == nil { // Kan inte skapa en respons utan att skapa en ha ett rum
-		roomInfo := requests_responses.RoomInfo{}
-		
-		return requests_responses.JoinRoomResponse{
-			requestID,
-			roomInfo,
-			false}      
-	}
-	
-	user.JoinRoom(room)
+  if user == nil{
+    return requests_responses.ErrorResponse{
+      requestID,
+      requests_responses.JoinRoomIndex,
+      "There is no such user"}
+  }
 
-	roomInfo := myplaceutils.CreateRoomInfo(room,latestMsg,username)
+  if room == nil { // Kan inte skapa en respons utan att skapa en ha ett rum
+    return requests_responses.ErrorResponse{
+      requestID,
+      requests_responses.JoinRoomIndex,
+      "Bad roomID"}
+  }
 
-	response := requests_responses.JoinRoomResponse{request.RequestID,roomInfo,true}
-	
-	
-	room.AddOutgoingChannel(responseChan)
-	return response
+  user.JoinRoom(room)
+  room.AddOutgoingChannel(responseChan)
+
+  roomInfo := myplaceutils.CreateRoomInfo(room,user)
+  response := requests_responses.JoinRoomResponse{request.RequestID,roomInfo,true}
+
+  return response
 }
 
 
@@ -219,7 +217,7 @@ func leaveRoom(request requests_responses.LeaveRoomRequest, responseChan chan re
 		
 		return requests_responses.ErrorResponse{
 			requestID,
-			requests_responses.JoinRoomIndex,
+			requests_responses.LeaveRoomIndex,
 			"Bad roomID"}      
 	}
 	
@@ -299,7 +297,34 @@ func postMsg(request requests_responses.PostMsgRequest, responseChan chan reques
 }
 
 func msgRead(request requests_responses.MsgReadRequest) requests_responses.Response {
-		return requests_responses.ErrorResponse{request.RequestID, requests_responses.MsgReadIndex, "not implemented yet"}
+	requestID := request.RequestID
+	msgID := request.MsgID
+	room := myplaceutils.GetRoom(request.RoomID)
+	user := myplaceutils.GetUser(request.UName)
+
+	if room == nil {
+		return requests_responses.ErrorResponse{
+			requestID,
+			requests_responses.MsgReadIndex,
+			"bad roomID"}
+	}
+	if user == nil {
+		return requests_responses.ErrorResponse{
+			requestID,
+			requests_responses.MsgReadIndex,
+			"bad userID"}
+	}
+
+	ok := user.SetLatestReadMsg(room, msgID)
+
+	if ok == false {
+		return requests_responses.ErrorResponse{
+			requestID,
+			requests_responses.MsgReadIndex,
+			"bad msgID or user not in room"}
+	}
+
+	return requests_responses.MsgReadResponse{requestID}
 }
 
 func signOut(request requests_responses.SignOutRequest, responseChan chan requests_responses.Response) requests_responses.Response {

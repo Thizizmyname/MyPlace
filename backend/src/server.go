@@ -9,6 +9,7 @@ import (
     "myplaceutils"
     "requests_responses"
     "data"
+    "handler"
 )
 
 
@@ -27,7 +28,7 @@ func listenLoop(listener net.Listener) {
       connections = append(connections, newConnection)
       myplaceutils.Info.Printf("Connection established: %v\n", newConnection)
       clientChannel := make(chan requests_responses.Response, 8)
-      go clientHandler(newConnection, clientChannel)
+      go handler.ClientHandler(newConnection, clientChannel)
     }
   }
 }
@@ -86,7 +87,7 @@ func main() {
   myplaceutils.ResponseChannel = make(chan myplaceutils.HandlerArgs, 255)
   //Initialize RequestChannel, TODO döp om skiten till RequestChannel från ResponseChannel
 
-	go responseHandler(myplaceutils.ResponseChannel)
+	go handler.ResponseHandler(myplaceutils.ResponseChannel)
   myplaceutils.Info.Println("Creating a listener")
 
   tcpAddress,_ := net.ResolveTCPAddr("tcp","127.0.0.1:1337")

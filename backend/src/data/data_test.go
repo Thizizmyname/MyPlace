@@ -62,7 +62,7 @@ func initUsers(users myplaceutils.UserDB, no_users int, no_rooms int) {
 		u.Rooms = list.New()
 
 		for j := 0; j < no_rooms; j++ {
-			u.Rooms.PushBack(j)
+			u.Rooms.PushBack(myplaceutils.RoomIDAndLatestReadMsgID{j, -1})
 		}
 
 		users[u.UName] = &u
