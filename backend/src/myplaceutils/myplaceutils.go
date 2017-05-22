@@ -19,11 +19,12 @@ var (
   //connections []net.Conn
   Users UserDB
   Rooms RoomDB
-  ResponseChannel chan HandlerArgs
+  RequestChannel chan HandlerArgs
 )
 
 const (
 	MsgMaxLength = 1256
+	ConnReadMaxLength = 4096
 )
 
 type User struct {
