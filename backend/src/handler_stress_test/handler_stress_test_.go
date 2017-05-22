@@ -9,6 +9,7 @@ import (
 	"myplaceutils"
 	"handler"
 	"requests_responses"
+	"time"
 )
 
 var noUsers int = 0
@@ -16,21 +17,22 @@ var noRooms int = 0
 var msgLengthIndicator int = 20
 
 func main() {
+	rand.Seed(time.Now().Unix())
 	myplaceutils.InitDBs()
 	initLoggers(ioutil.Discard, ioutil.Discard, ioutil.Discard, ioutil.Discard)
 	handlerChan := make(chan myplaceutils.HandlerArgs)
 	go handler.ResponseHandler(handlerChan)
 	defer close(handlerChan)
-	responseChan := make(chan requests_responses.Response)
 
 	for i := 0; ; i++ {
 		request := generateRequest(noUsers, noRooms)
+		responseChan := make(chan requests_responses.Response, 20)
 		handlerArgs := myplaceutils.HandlerArgs{request, responseChan}
 		handlerChan <- handlerArgs
 		response := <-responseChan
 
-		fmt.Printf("%v.\nRequest:  %v\nResponse: %v\n\n",
-			i, request, response)
+		fmt.Printf("%v.\n%T: %v\n%T: %v\n\n",
+			i, request, request, response, response)
 
 		if r, ok := response.(requests_responses.SignUpResponse); ok {
 			if r.Result {
@@ -115,7 +117,7 @@ func getExistingRoomID() int {
 func getRandomText() string {
         str := ""
         for i := 0; i < rand.Intn(msgLengthIndicator); i++ {
-                str = fmt.Sprintf("%s %s", str, "hello")
+                str = fmt.Sprintf("%s %s ", str, "hello")
         }
         return str
 }
