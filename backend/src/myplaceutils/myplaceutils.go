@@ -122,8 +122,6 @@ func (user *User) JoinRoom(room *Room) {
 // Returns: True if the user succeeded to leave the room, false if not
 // Tested: Yes
 func (u *User) LeaveRoom(r *Room) bool{
-	
-	
 	// Checks if an user is a member of the room
 	for e := r.Users.Front(); e != nil; e = e.Next() {
 		if strings.Compare(e.Value.(string),u.UName) == 0 {
@@ -134,7 +132,7 @@ func (u *User) LeaveRoom(r *Room) bool{
 	}
 	// Updates the user
 	for e := u.Rooms.Front(); e != nil; e = e.Next() {
-		if e.Value.(int) == r.ID {
+		if e.Value.(RoomIDAndLatestReadMsgID).RoomID == r.ID {
 			u.Rooms.Remove(e)
 		}
 	}
@@ -324,6 +322,7 @@ func outChanInUse(c chan requests_responses.Response, outChans *list.List) bool 
 	return false
 }
 
+// Vid tid, slumpa maxID och kolla om det är upptaget, annars skicka tillbaka det slumpade talet
 func findFreeRoomID() int {
 	maxID := -1
 
