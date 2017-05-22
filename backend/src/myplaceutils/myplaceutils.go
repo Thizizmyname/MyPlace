@@ -144,7 +144,7 @@ func (u *User) LeaveRoom(r *Room) bool{
 			// Jag måste uppdatera outgoingChannels? Förstår inte vad den innehåller dock.
 		}
 	}
-	
+
 	return true
 }
 
@@ -397,6 +397,8 @@ func (user *User) SetLatestReadMsg(room *Room, msgID int) bool {
 // Returns: RoomInfo about a room
 // Tested: No
 func CreateRoomInfo(room *Room, user *User) requests_responses.RoomInfo{
+	if room == nil { return requests_responses.RoomInfo{} }
+
 	latestMsg,_ := GetLatestMsg(room)
 	var latestMsgInfo requests_responses.MsgInfo
 
