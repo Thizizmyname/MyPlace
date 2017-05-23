@@ -110,7 +110,7 @@ func clientSender(responseChan chan requests_responses.Response, requestChan cha
 
 	for ; ; {
 		requestID++
-		postRoom := joinRooms[rand.Intn(len(joinRooms))]
+		postRoom := -1//joinRooms[rand.Intn(len(joinRooms))]
 		body := getRandomMsgBody()
 		postMsgReq := requests_responses.PostMsgRequest{
 			requestID, uname, postRoom, body}
@@ -173,8 +173,8 @@ func gatherAndPrintStats() {
 		t := time.Now()
 		if lastPrintTime.Add(time.Duration(printDelay * time.Millisecond)).Before(t) {
 			dbg.Printf("New wait time: %0.2f. Total wait time: %0.2f", waitTime, totalWaitTime)
-			out.Printf("no_clients:%v  avg_wait:%.2f  max_wait:%.2f  (c_length:%v)",
-				noClients, totalWaitTime / float64(noSamples), maxWaitTime, len(waitTimeChan))
+			out.Printf("no_clients:%v  no_responses:%v  max_wait:%.2f",
+				noClients, noSamples, maxWaitTime)
 			lastPrintTime = t
 		}
 	}
