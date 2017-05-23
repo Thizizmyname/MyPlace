@@ -13,7 +13,7 @@ import "io/ioutil"
 import "io"
 
 const (
-	noClientsToStartWith = 10000
+	noClientsToStartWith = 1000
 	maxSpawnDelay = 2
 	maxRequestDelay = 5000
 	noUsersPerRoom = 5
@@ -110,7 +110,7 @@ func clientSender(responseChan chan requests_responses.Response, requestChan cha
 
 	for ; ; {
 		requestID++
-		postRoom := -1//joinRooms[rand.Intn(len(joinRooms))]
+		postRoom := joinRooms[rand.Intn(len(joinRooms))]
 		body := getRandomMsgBody()
 		postMsgReq := requests_responses.PostMsgRequest{
 			requestID, uname, postRoom, body}
