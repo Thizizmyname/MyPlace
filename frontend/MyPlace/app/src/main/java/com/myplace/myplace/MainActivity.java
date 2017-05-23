@@ -249,7 +249,6 @@ public class MainActivity extends AppCompatActivity {
                 roomAdapter.notifyDataSetChanged();
 
                 //TODO: Change below code to JSON-request
-                //TCPClient.request = "Leave room "+roomName;
                 //new ConnectTask().execute("");
             }
         });
