@@ -32,6 +32,7 @@ func ClientResponseHandler(conn net.Conn, clientResponseChannel chan requests_re
 func ClientHandler(conn net.Conn, clientChannel chan requests_responses.Response) {
 	myplaceutils.Info.Println("Connection sent to clientHandler in go routine")
 	go ClientResponseHandler(conn, clientChannel)
+
 	readBuf := make([]byte, myplaceutils.ConnReadMaxLength + 1)
 	signedInUser := ""
 
@@ -213,7 +214,6 @@ func getRoomUsers(request requests_responses.GetRoomUsersRequest) requests_respo
 	users := myplaceutils.ShowUsers(room)
 
 	response := requests_responses.GetRoomUsersResponse{id, roomId, users }
-	
 	return response
 }
 
@@ -244,9 +244,6 @@ func getOlderMsgs(request requests_responses.GetOlderMsgsRequest) requests_respo
 }
 
 func getNewerMsgs(request requests_responses.GetNewerMsgsRequest) requests_responses.Response {
-
-
-
 	/*
 	ID := request.RequestID
 	RoomID := request.RoomID
@@ -263,7 +260,30 @@ func getNewerMsgs(request requests_responses.GetNewerMsgsRequest) requests_respo
 	response := requests_responses.GetNewerMsgsResponse{ID,messages}
 	return response
 */
-	return nil
+	requestID := request.RequestID
+	roomID := request.RoomID
+	msgID := request.MsgID
+	getNoMsg := 10
+
+	room := myplaceutils.GetRoom(roomID)
+
+	if (getNoMsg + msgID) > len(room.Messages) {
+		getNoMsg = len(room.Messages)
+
+		
+	}else{
+		getNoMsg = msgID+getNoMsg +1 // inkluderar det sista meddelandet i rangen av taket från msgId
+	}
+
+	var msgInfos = make([] requests_responses.MsgInfo,getNoMsg)
+	for x := (msgID+1) ; x <= getNoMsg; x++ {
+		msg := room.Messages[x]
+		msgInfo := myplaceutils.CreateMsgInfo(msg,room.ID)
+		msgInfos = append(msgInfos,msgInfo)
+	}
+	
+	
+	return requests_responses.GetNewerMsgsResponse{requestID,msgInfos}
 }
 
 func joinRoom(request requests_responses.JoinRoomRequest, responseChan chan requests_responses.Response) requests_responses.Response {
@@ -283,15 +303,21 @@ func joinRoom(request requests_responses.JoinRoomRequest, responseChan chan requ
 			"There is no such user"}
 	}
 
-	if room == nil { // Kan inte skapa en respons utan att skapa en ha ett rum
+	if room == nil {
 		roomInfo := requests_responses.RoomInfo{}
-
 		return requests_responses.JoinRoomResponse{
 			requestID,
 			roomInfo,
 			false}
 	}
-
+	
+	if myplaceutils.UserIsInRoom(username,room) {
+		return requests_responses.ErrorResponse{
+			requestID,
+			requests_responses.JoinRoomIndex,
+			"User is already a member of the room"}
+	}
+	
 	user.JoinRoom(room)
 	room.AddOutgoingChannel(responseChan)
 
@@ -336,7 +362,7 @@ func leaveRoom(request requests_responses.LeaveRoomRequest, responseChan chan re
 			"There is no such user in the room"}
 	}
 
-	myplaceutils.RemoveUsersOutgoingChannels(user.UName,responseChan)
+	myplaceutils.RemoveUsersOutgoingChannels(user.UName,responseChan) // Ska denna göras här eller endast när en anvnändare lämnar ett rum?
 	user.LeaveRoom(room)
 	return requests_responses.LeaveRoomResponse{requestID}
 }
