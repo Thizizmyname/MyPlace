@@ -44,6 +44,7 @@ public class MessageActivity extends AppCompatActivity {
     private String TAG = "MessageActivity";
     final Context context = this;
     private static final String EMPTY_STRING = "";
+    private static final int FIRST_MSGID_IN_CONVERSATION = 0;
 
     MessageAdapter messageAdapter;
     private Toast messageEmptyToast = null;
@@ -158,6 +159,7 @@ public class MessageActivity extends AppCompatActivity {
         });
 
         ArrayList<Message> messageList = roomDB.getMessages(roomID);
+        getOlderIfNeeded(messageList);
         messageAdapter = new MessageAdapter(this, messageList);
 
         // Finds the listview and specifies the adapter to use
@@ -244,6 +246,18 @@ public class MessageActivity extends AppCompatActivity {
         });
         builder.create();
         builder.show();
+    }
+
+    private void getOlderIfNeeded(ArrayList<Message> msgList) {
+
+        int listLength = msgList.size();
+        if (listLength == 1 && msgList.get(0).getRoomID() != FIRST_MSGID_IN_CONVERSATION)
+
+            try {
+                mService.sendMessage(JSONParser.getOlderMsgsRequest(roomID, msgList.get(0).getId()));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
     }
 
     @Override
