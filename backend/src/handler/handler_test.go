@@ -519,9 +519,6 @@ func TestJoinRoom(t *testing.T){
 	req = requests_responses.JoinRoomRequest{12345,room0.ID,user1.UName}
 	eresp = requests_responses.ErrorResponse{12345,requests_responses.JoinRoomIndex,"User is already a member of the room"}
 	executeAndTestResponse(t,req,eresp)
-	
-	
-	
 }
 
 func TestLeaveRoom(t *testing.T){
@@ -617,10 +614,10 @@ func TestGetRooms(t *testing.T){
 	r2 := myplaceutils.AddNewRoom("bedroom")
 	u1.JoinRoom(r1)
 	u1.JoinRoom(r2)
-
 	
 	roomInfo1 := myplaceutils.CreateRoomInfo(r1,u1)
 	roomInfo2 := myplaceutils.CreateRoomInfo(r2,u1)
+
 	roomInfo := []requests_responses.RoomInfo{roomInfo1,roomInfo2}
 	req := requests_responses.GetRoomsRequest{12345, u1.UName}
 	resp := requests_responses.GetRoomsResponse{12345,roomInfo}
@@ -672,7 +669,7 @@ func TestGetOlderMsgs(t *testing.T){
 	u1.JoinRoom(r1)
 	u2.JoinRoom(r1)
 
-	var respMsg []requests_responses.MsgInfo
+	respMsg := []requests_responses.MsgInfo{}
 	
 	req1 := requests_responses.GetOlderMsgsRequest{12345, r1.ID,1}
 	erresp1 := requests_responses.ErrorResponse{12345,4,"MessageID does not exist"}
