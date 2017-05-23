@@ -456,26 +456,36 @@ func TestJoinRoom(t *testing.T){
 
 	user1 := myplaceutils.AddNewUser("Eva", "1337")
 
-	// Test if the room doesn't exist NOTIS: Går inte in i room == nil
+	// Test if the room doesn't exist
+	roomInfo := requests_responses.RoomInfo{}
 	req = requests_responses.JoinRoomRequest{12345,1,user1.UName}
-	roomInfo := myplaceutils.CreateRoomInfo(nil,user1)
-	resp := requests_responses.JoinRoomResponse{12345, roomInfo, false}
+	resp := requests_responses.JoinRoomResponse{12345,roomInfo,false}
 	executeAndTestResponse(t,req,resp)
-
-	room := myplaceutils.AddNewRoom("213")
-
-	roomInfo = myplaceutils.CreateRoomInfo(room,user1)
-	req = requests_responses.JoinRoomRequest{12345,room.ID,user1.UName}
+	
+	room0 := myplaceutils.AddNewRoom("213")
+	
+	//Test if Eva joins Room 213
+	roomInfo = myplaceutils.CreateRoomInfo(room0,user1)
+	req = requests_responses.JoinRoomRequest{12345,room0.ID,user1.UName}
 	resp =  requests_responses.JoinRoomResponse{12345,roomInfo,true}
 	executeAndTestResponse(t,req,resp)
 
-	user1.JoinRoom(room)
+	room1 := myplaceutils.AddNewRoom("2001")
 
-	roomInfo = myplaceutils.CreateRoomInfo(room,user1)
-	req = requests_responses.JoinRoomRequest{12345,room.ID,user1.UName}
+	// Test if a user can join another room aswell
+	roomInfo = myplaceutils.CreateRoomInfo(room1,user1)
+	req = requests_responses.JoinRoomRequest{12345,room1.ID,user1.UName}
 	resp = requests_responses.JoinRoomResponse{12345,roomInfo,true}
 	executeAndTestResponse(t,req,resp)
 
+	// Test if a user joins a room which his is allready a member of
+	roomInfo = myplaceutils.CreateRoomInfo(room0,user1)
+	req = requests_responses.JoinRoomRequest{12345,room0.ID,user1.UName}
+	eresp = requests_responses.ErrorResponse{12345,requests_responses.JoinRoomIndex,"User is already a member of the room"}
+	executeAndTestResponse(t,req,eresp)
+	
+	
+	
 }
 
 func TestLeaveRoom(t *testing.T){
@@ -510,6 +520,57 @@ func TestLeaveRoom(t *testing.T){
 	req = requests_responses.LeaveRoomRequest{12345,room.ID,u0.UName}
 	resp := requests_responses.LeaveRoomResponse{12345}
 	executeAndTestResponse(t,req,resp)
-
-
 }
+
+/*
+func TestGetNewerMsgs(t *testing.T){
+	myplaceutils.InitDBs()
+	u1 := myplaceutils.AddNewUser("ask", "embla")
+	u1_responseChan := make(chan requests_responses.Response, 1)
+	u2 := myplaceutils.AddNewUser("adam", "eva")
+	u2_responseChan := make(chan requests_responses.Response, 1)
+	r1 := myplaceutils.AddNewRoom("livingroom")
+	r2 := myplaceutils.AddNewRoom("bedroom")
+	u1.JoinRoom(r1)
+	u1.JoinRoom(r2)
+	u2.JoinRoom(r1)
+
+	//signin
+	lrq := requests_responses.SignInRequest{1234, u1.UName, u1.Pass}
+	lrp := requests_responses.SignInResponse{1234, true, ""}
+	executeAndTestResponse_chan(t, u1_responseChan, lrq, lrp)
+	lrq = requests_responses.SignInRequest{1234, u2.UName, u2.Pass}
+	lrp = requests_responses.SignInResponse{1234, true, ""}
+	executeAndTestResponse_chan(t, u2_responseChan, lrq, lrp)
+
+	//post msgs
+	str := "hello? who are you?"
+	req := requests_responses.PostMsgRequest{12345, u1.UName, r1.ID, str}
+	msgI := requests_responses.MsgInfo{0, r1.ID, u1.UName, -1, str}
+	resp := requests_responses.PostMsgResponse{12345, msgI}
+	executeAndTestResponse_chan(t, u1_responseChan, req, resp)
+
+	str = "anybody there?"
+	req = requests_responses.PostMsgRequest{12345, u1.UName, r1.ID, str}
+	msgI = requests_responses.MsgInfo{1, r1.ID, u1.UName, -1, str}
+	resp = requests_responses.PostMsgResponse{12345, msgI}
+	executeAndTestResponse_chan(t, u1_responseChan, req, resp)
+
+	str = "Yea, what's your name?"
+	req = requests_responses.PostMsgRequest{12345, u1.UName, r1.ID, str}
+	msgI = requests_responses.MsgInfo{2, r1.ID, u1.UName, -1, str}
+	resp = requests_responses.PostMsgResponse{12345, msgI}
+	executeAndTestResponse_chan(t, u1_responseChan, req, resp)
+
+	str = "My name is Alex"
+	req = requests_responses.PostMsgRequest{12345, u1.UName, r1.ID, str}
+	msgI = requests_responses.MsgInfo{3, r1.ID, u1.UName, -1, str}
+	resp = requests_responses.PostMsgResponse{12345, msgI}
+	executeAndTestResponse_chan(t, u1_responseChan, req, resp)
+
+//	req = requests_responses.
+//		resp =
+//		executeAndTestResponse()
+} */
+
+
