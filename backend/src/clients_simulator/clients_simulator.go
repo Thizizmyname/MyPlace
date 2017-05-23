@@ -1,5 +1,8 @@
 package main
 
+import "net"
+import "bufio"
+import "strings"
 import "time"
 import "fmt"
 import "requests_responses"
@@ -13,13 +16,14 @@ import "io/ioutil"
 import "io"
 
 const (
-	noClientsToStartWith = 1000
-	maxSpawnDelay = 2
-	maxRequestDelay = 5000
+	noClientsToStartWith = 100
+	maxSpawnDelay = 100
+	maxRequestDelay = 1000
 	noUsersPerRoom = 5
 	noJoinedRoomsPerUser = 7
 	printDelay = 2000
 	msgLengthIndicator = 20
+	maxNoSentChars = 4096
 )
 
 type clientWriterArgs struct {
@@ -63,6 +67,11 @@ func main() {
 }
 
 func startNewClient(index int) bool {
+	conn, err := net.Dial("tcp", "127.0.0.1:1337")
+	if err != nil {
+		return false
+	}
+
 	createRoom := ""
 	if index % noUsersPerRoom == 0 {
 		createRoom = fmt.Sprintf("room%v", noRooms)
@@ -70,17 +79,15 @@ func startNewClient(index int) bool {
 	}
 
 	clientWriterArgsChan := make(chan clientWriterArgs, 1)
-	responseChan := make(chan requests_responses.Response, 5)
-
-	go clientSender(responseChan, clientWriterArgsChan, index, createRoom)
-	go clientReceiver(responseChan, clientWriterArgsChan)
+	go clientSender(conn, clientWriterArgsChan, index, createRoom)
+	go clientReceiver(conn, clientWriterArgsChan)
 	dbg.Printf("New spawn, index:%v, create:%v", index, createRoom)
 
 	return true
 }
 
 
-func clientSender(responseChan chan requests_responses.Response, requestChan chan clientWriterArgs, index int, createRoom string) {
+func clientSender(conn net.Conn, requestChan chan clientWriterArgs, index int, createRoom string) {
 	uname := fmt.Sprintf("user%v", index)
 	pass := "pass"
 	joinRooms := getRandomRoomIDs(noRooms)
@@ -88,25 +95,25 @@ func clientSender(responseChan chan requests_responses.Response, requestChan cha
 	requestID := 0
 	signUpReq := requests_responses.SignUpRequest{
 		requestID, uname, pass}
-	sendAndSleep(responseChan, requestChan, signUpReq, requestID)
+	sendAndSleep(conn, requestChan, signUpReq, requestID)
 
 	requestID++
 	signInReq := requests_responses.SignInRequest{
 		requestID, uname, pass}
-	sendAndSleep(responseChan, requestChan, signInReq, requestID)
+	sendAndSleep(conn, requestChan, signInReq, requestID)
 
 	requestID++
 	if createRoom != "" {
 		createRoomReq := requests_responses.CreateRoomRequest{
 			requestID, createRoom, uname}
-		sendAndSleep(responseChan, requestChan, createRoomReq, requestID)
+		sendAndSleep(conn, requestChan, createRoomReq, requestID)
 	}
 
 	for _, roomID := range joinRooms {
 		requestID++
 		joinRoomReq := requests_responses.JoinRoomRequest{
 			requestID, roomID, uname}
-		sendAndSleep(responseChan, requestChan, joinRoomReq, requestID)
+		sendAndSleep(conn, requestChan, joinRoomReq, requestID)
 	}
 
 	for ; ; {
@@ -115,44 +122,59 @@ func clientSender(responseChan chan requests_responses.Response, requestChan cha
 		body := getRandomMsgBody()
 		postMsgReq := requests_responses.PostMsgRequest{
 			requestID, uname, postRoom, body}
-		sendAndSleep(responseChan, requestChan, postMsgReq, requestID)
+		sendAndSleep(conn, requestChan, postMsgReq, requestID)
 	}
 }
 
-func sendAndSleep(responseChan chan requests_responses.Response, requestChan chan clientWriterArgs, request requests_responses.Request, requestID int) {
+func sendAndSleep(conn net.Conn, requestChan chan clientWriterArgs, request requests_responses.Request, requestID int) {
 	reqJ, _ := requests_responses.ToRequestString(request)
 	dbg.Printf("Request sent: %v", reqJ)
 
 	clientWriterArgs := clientWriterArgs{requestID, time.Now()}
 	requestChan <- clientWriterArgs
 
-	handlerArgs := myplaceutils.HandlerArgs{request, responseChan}
-	handlerChan <- handlerArgs
-
+	fmt.Fprintf(conn, "%s\n", reqJ)  //send request to server
 
 	time.Sleep(time.Duration(rand.Intn(maxRequestDelay)) * time.Millisecond)
 }
 
-func clientReceiver(responseChan chan requests_responses.Response, requestChan chan clientWriterArgs) {
+func clientReceiver(conn net.Conn, requestChan chan clientWriterArgs) {
+	buf := make([]byte, maxNoSentChars + 1)
 	requests := []clientWriterArgs{}
 
 	for {
-		response := <-responseChan
+		n, err := conn.Read(buf)
 		newReqs := newRequests(requestChan)
 		requests = append(requests, newReqs...)
 
-		respJ, _ := requests_responses.ToResponseString(response)
-		responseID := extractResponseID(respJ)
-		if responseID == -1 { continue }
+		if n > maxNoSentChars {
+			panic("Too big response!")
+		} else if n == 0 || err != nil {
+			panic("Reading response failed")
+		}
 
-		dbg.Printf("Response recieved: %v", respJ)
-		responseTime := time.Now()
-		var matchingReq clientWriterArgs
-		requests, matchingReq = removeRequest(requests, responseID)
-		requestTime := matchingReq.requestTime
+		reader := strings.NewReader(string(buf[:n]))
+		scanner := bufio.NewScanner(reader)
 
-		waitTime := responseTime.Sub(requestTime)
-		waitTimeChan <- waitTime
+		for scanner.Scan() {
+			respJ := scanner.Text()
+			dbg.Printf("Response recieved: %v", respJ)
+
+			responseID := extractResponseID(respJ)
+			if responseID == -1 { continue }
+
+			responseTime := time.Now()
+			var matchingReq clientWriterArgs
+			requests, matchingReq = removeRequest(requests, responseID)
+			requestTime := matchingReq.requestTime
+
+			waitTime := responseTime.Sub(requestTime)
+			waitTimeChan <- waitTime
+		}
+
+		if err := scanner.Err(); err != nil {
+			panic("format error of incoming responses")
+		}
 	}
 }
 

@@ -67,34 +67,44 @@ func disconnectAll() {
 }
 
 func main() {
+	useLocalStorage := true
+	if len(os.Args) > 1 { useLocalStorage = false }
+
 	//Title
 	myplaceutils.PrintTitle()
 	//Initializing
 	//Loggers
 	log.Println("Initializing loggers")
-	InitLoggers(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
+	InitLoggers(ioutil.Discard, ioutil.Discard, os.Stdout, os.Stderr)
+
 	//Users and Rooms
-	myplaceutils.Info.Println("Loading database..")
-	var loadError error
-	myplaceutils.Users, myplaceutils.Rooms, loadError = data.LoadDBs()
-	if loadError!=nil {
-		myplaceutils.Error.Printf("Error loading database, continuing with empty databases.\nError message: %v\n",loadError)
+	if useLocalStorage {
+		myplaceutils.Info.Println("Loading database..")
+		var loadError error
+		myplaceutils.Users, myplaceutils.Rooms, loadError = data.LoadDBs()
+		if loadError!=nil {
+			myplaceutils.Error.Printf("Error loading database, continuing with empty databases.\nError message: %v\n",loadError)
+		}
+	} else {
+		myplaceutils.InitDBs()
 	}
 
 	//ctrl c listener for graceful exit
-	c := make(chan os.Signal, 2)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-c
-		err := data.StoreDBs(myplaceutils.Users, myplaceutils.Rooms)
-		if err!=nil {
+	if useLocalStorage {
+		c := make(chan os.Signal, 2)
+		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+		go func() {
+			<-c
+			err := data.StoreDBs(myplaceutils.Users, myplaceutils.Rooms)
+			if err!=nil {
 
-			myplaceutils.Error.Printf("Error storing DBs upon exit: %v\n", err)
-		} else {
-			myplaceutils.Info.Println("DBs successfully stored to file")
-		}
-		os.Exit(1)
-	}()
+				myplaceutils.Error.Printf("Error storing DBs upon exit: %v\n", err)
+			} else {
+				myplaceutils.Info.Println("DBs successfully stored to file")
+			}
+			os.Exit(1)
+		}()
+	}
 
 	log.Println("Initialization complete\n-------------------------")
 	//255 känns som en lämplig size så länge MAGIC NUMBER
