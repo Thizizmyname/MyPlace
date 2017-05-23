@@ -167,8 +167,8 @@ const (
 //---------------------------INTERFACE STOP
 
 type RoomInfo struct {
-	ID int
-	Name string
+	RoomID int
+	RoomName string
 	LatestMsg MsgInfo
 	LatestReadMsgID int
 }

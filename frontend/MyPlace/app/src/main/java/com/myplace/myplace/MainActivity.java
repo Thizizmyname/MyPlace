@@ -65,19 +65,28 @@ public class MainActivity extends AppCompatActivity {
     // with an action named "custom-event-name" is broadcasted.
     private MainBroadcastReceiver mMessageReceiver = new MainBroadcastReceiver() {
         @Override
+        public void handleRoomListInActivity(ArrayList<RoomInfo> roomlist) {
+            ArrayList<RoomInfo> updatedRoomList = roomDB.getRoomList();
+            roomAdapter.updateData(updatedRoomList);
+            roomAdapter.notifyDataSetChanged();
+        }
+
+        @Override
         public void handleJoinedRoomInActivity(RoomInfo roominfo) {
             roomAdapter.add(roominfo);
             roomAdapter.notifyDataSetChanged();
         }
 
         @Override
-        public void handleCreatedRoomInActivity(Room room) {
-            roomAdapter.add(new RoomInfo(room));
+        public void handleCreatedRoomInActivity(RoomInfo roominfo) {
+            roomAdapter.add(roominfo);
             roomAdapter.notifyDataSetChanged();
         }
 
         @Override
         public void handleNewMessageInActivity(Message msg) {
+            ArrayList<RoomInfo> updatedRoomList = roomDB.getRoomList();
+            roomAdapter.updateData(updatedRoomList);
             roomAdapter.notifyDataSetChanged();
         }
     };
@@ -123,6 +132,7 @@ public class MainActivity extends AppCompatActivity {
         // with actions named "custom-event-name".
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter(ConnectionService.BROADCAST_TAG));
+
         ArrayList<RoomInfo> updatedRoomList = roomDB.getRoomList();
         roomAdapter.updateData(updatedRoomList);
         roomAdapter.notifyDataSetChanged();
