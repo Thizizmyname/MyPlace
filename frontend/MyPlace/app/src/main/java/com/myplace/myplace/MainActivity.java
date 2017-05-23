@@ -258,9 +258,11 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void onThreadClick(int position) {
+        final RoomInfo roomInfo = roomList.get(position);
+
         Intent intent = new Intent(MainActivity.this, MessageActivity.class);
-        intent.putExtra(ROOM_NAME, roomList.get(position).getName());
-        intent.putExtra("roomID", roomList.get(position).getRoomID());
+        intent.putExtra(ROOM_NAME, roomInfo.getName());
+        intent.putExtra("roomID", roomInfo.getRoomID());
         startActivity(intent);
         overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
     }
@@ -284,6 +286,7 @@ public class MainActivity extends AppCompatActivity {
                 roomDB.deleteRoom(roomID);
                 roomList.remove(position);
                 roomAdapter.notifyDataSetChanged();
+
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -381,6 +384,7 @@ public class MainActivity extends AppCompatActivity {
         builder.create();
         builder.show();
     }
+
 
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
