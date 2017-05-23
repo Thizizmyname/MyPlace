@@ -1,0 +1,78 @@
+00.signup
+args: uname, pass
+response: result(true/false), errorCause("", "uname" or "pass")
+note: result=true if all is ok. retuls=false if uname is taken/ pass to short/ illegal characters/. errorCause set correspondingly.
+side-effect: updates users_db
+
+01.signin
+args: uname, pass
+response: result(true/false), errorCause("", "uname" or "pass")
+note: result=false if uname not in use/ incorrect pass
+side-effect: new messages from all rooms that the client has joined start being pushed to client
+
+02.get_rooms
+args: uname
+respose: for each of user's room's: roomID, room name, latest msg, latest read msgID
+note: list ordered by latest activity
+
+03.get_room_users
+args: roomID
+response: joined users
+
+04.get_older_msgs
+args: roomID, msgID
+response: 50? msgs older than msgID
+
+05.get_newer_msgs
+args: roomID, msgID
+response: all msgs newer than msgID
+
+06.join_room
+args: roomID, uname
+response: roomID, room name, latest msg, roomIDAccepted(true/false)
+note: roomIDAccepted=false if roomID doesn't exists
+side-effect: updates users_db, rooms_db
+
+07.leave_room (vs. join_room)
+args: roomID, uname
+response: -
+side-effect: updates users_db, rooms_db. if last person in room: delete room(?)
+
+08.create_room
+args: room_name, uname
+response: roomID, roomName
+side-effect: updates users_db, rooms_db
+
+09.post_msg
+args: uname, roomID, body
+response to ALL clients in room: msgID, roomID, uname, time, body, (echo requestID to sending client, -1 as requestID to others)
+note: client can match incoming response msg with his sending msg using the echoed requestID.
+note2: special responses from the room's "bot" is sent when a user joins or leaves room. Like ordinary msgs, these are pushed to everyone in room.
+side-effect: update rooms_db(messages)
+
+10.message_read
+args: uname, roomID, msgID
+response: -
+Note: When entering a room with unread messages, the client sends the MsgID of the latest read message. When a new message gets received in a room the client is in, the client sends the last msgID directly.
+
+11.signout
+args: uname
+response: -
+side-effect: connection with server is lost
+
+extras:
+
+*delete_user (completely purge user)
+args: uname
+response: -
+side-effet: user is completely removed from all dbs
+note: user not removed form clients local dbs
+
+edit_msg, delete_msg, ...
+
+******************************************************
+
+notes:
+-Every request also contains a local requestID which will be echoed back in the response
+-The indexing in the above list defines the index of each request & response. When requests/ responses are sent over the network, the index is also sent, so the receiver can parse the data correctly. In the string beeing sent over the network, the first two digits is the index, and the rest is a json object describing the request/ response.
+-A bad request results in an error-response which contains requestID, requestIndex and string describing error cause. The error-response is indexed -1
