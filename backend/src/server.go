@@ -109,13 +109,13 @@ func main() {
 		<-c
 		err := data.StoreDBs(myplaceutils.Users, myplaceutils.Rooms)
 		if err!=nil {
-
 			myplaceutils.Error.Printf("Error storing DBs upon exit: %v\n", err)
 		} else {
 			myplaceutils.Info.Println("DBs successfully stored to file")
 		}
 		os.Exit(1)
 	}()
+
 
 	log.Println("Initialization complete\n-------------------------")
 	//255 känns som en lämplig size så länge MAGIC NUMBER
@@ -124,7 +124,7 @@ func main() {
 	go handler.ResponseHandler(myplaceutils.RequestChannel)
 	myplaceutils.Info.Println("Creating a listener")
 
-	tcpAddress,_ := net.ResolveTCPAddr("tcp","127.0.0.1:1337")
+	tcpAddress,_ := net.ResolveTCPAddr("tcp",":1337")
 	listener, err := net.ListenTCP("tcp",tcpAddress)
 
 	if err != nil {
