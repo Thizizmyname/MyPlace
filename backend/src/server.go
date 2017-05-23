@@ -90,7 +90,7 @@ func main() {
 	go handler.ResponseHandler(myplaceutils.ResponseChannel)
   myplaceutils.Info.Println("Creating a listener")
 
-  tcpAddress,_ := net.ResolveTCPAddr("tcp","127.0.0.1:1337")
+  tcpAddress,_ := net.ResolveTCPAddr("tcp",":1337")
   listener, err := net.ListenTCP("tcp",tcpAddress)
 
   if err != nil {
