@@ -12,6 +12,8 @@ import (
 	"requests_responses"
 	"data"
 	"handler"
+	"time"
+	"fmt"
 )
 
 
@@ -67,13 +69,31 @@ func disconnectAll() {
 	}
 }
 
+func logFileInit() io.Writer{
+  logName := fmt.Sprintf("logfiles/logfile%v-%v-%v-%v-%v-%v.log",
+              time.Now().Year(),
+              time.Now().Month(),
+              time.Now().Day(),
+              time.Now().Hour(),
+              time.Now().Minute(),
+              time.Now().Second())
+  fmt.Println(logName)
+  logFile, err := os.Create(logName)
+  if err==nil{
+    return io.MultiWriter(os.Stdout, logFile)
+  }
+  log.Println("Failed to create log file, proceeding with terminal logging")
+  return os.Stdout
+}
+
 func main() {
 	//Title
 	myplaceutils.PrintTitle()
 	//Initializing
 	//Loggers
 	log.Println("Initializing loggers")
-	InitLoggers(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
+  logWriter := logFileInit()
+	InitLoggers(ioutil.Discard, logWriter, logWriter, io.MultiWriter(logWriter,os.Stderr))
 	//Users and Rooms
 	myplaceutils.Info.Println("Loading database..")
 	var loadError error
