@@ -21,11 +21,12 @@ var (
   //connections []net.Conn
   Users UserDB
   Rooms RoomDB
-  ResponseChannel chan HandlerArgs
+  RequestChannel chan HandlerArgs
 )
 
 const (
 	MsgMaxLength = 1256
+	ConnReadMaxLength = 4096
 )
 
 type User struct {
@@ -59,12 +60,12 @@ type HandlerArgs struct {
   ResponseChannel chan requests_responses.Response
 }
 
-type UserDB map[string]*User //UName is key
+type UserDB map[string]*User //UName is keyx
 type RoomDB map[int]*Room //ID is key
 
 func InitDBs() {
-  Users = make(UserDB)
-  Rooms = make(RoomDB)
+  Users = make(map[string]*User)
+  Rooms = make(map[int]*Room)
 }
 
 /*
@@ -117,8 +118,6 @@ func (user *User) JoinRoom(room *Room) {
 	room.Users.PushBack(user.UName)
 }
 
-
-
 // Purpose: A method so the user leaves the room. Also updates the room so the user istn't a member of the room
 // Argument: A room.
 // Returns: True if the user succeeded to leave the room, false if not
@@ -145,12 +144,13 @@ func (u *User) LeaveRoom(r *Room) bool{
 			// Jag måste uppdatera outgoingChannels? Förstår inte vad den innehåller dock.
 		}
 	}
-	
+
 	return true
 }
 
 func CreateUser(uname string, pass string) *User {
 	u := User{uname, pass, list.New()}
+
 	return &u
 }
 
@@ -158,40 +158,75 @@ func CreateUser(uname string, pass string) *User {
 //Use:    When the client software wants to list rooms, passing a name as an argument for joining a room, etc.
 //Tested: NO
 func (u *User) ShowRooms() []string {
-  // var roomNames []string
-  // for _, r := range u.Rooms {
-  //   roomNames = append(roomNames, r.Name)
-  // }
-  // return roomNames
-  return nil
+	var rooms []string
+	var room *Room
+	id := u.Rooms
+	
+	if UserExists(u.UName){
+		for e := id.Front(); e != nil; e = e.Next() {
+			room = GetRoom(e.Value.(int))
+			rooms = append(rooms, room.Name)
+		}
+		return rooms
+	}
+	return nil
+}
+
+//purpose: returns an array of the id of the rooms the user is in
+//Use:
+//Tested: NO
+func (u *User) ShowRoomIDs() []int {
+	var rooms []int
+	id := u.Rooms
+	
+	if UserExists(u.UName){
+		for e := id.Front(); e != nil; e = e.Next() {
+			RoomMsgID := e.Value.(RoomIDAndLatestReadMsgID)
+			rooms = append(rooms, RoomMsgID.RoomID)
+		}
+		return rooms
+	}
+	return nil
 }
 
 //Purpose: Creating a new room
 //Use: To create a new chat room
 //Tested: No
-func CreateRoom(name string) *Room {
-  r := Room{}
-  r.Name = name
-  // r.Users = []*User{}
-  // r.Messages = []Message{}
-
-  //Rooms = append(Rooms, &r)
-
-  return &r
+func CreateRoom(name string, id int) *Room {
+	r := Room{}
+	r.ID = id
+	r.Name = name
+	r.Users = list.New()
+	r.Messages = make(map[int]*Message)
+	r.OutgoingChannels = list.New()
+	
+	return &r
 }
 
-//Purpose: Create
+func CreateMessage(Uname string, text string, id int) *Message{
+	m := Message{}
+	m.Time = time.Now()
+	m.UName = Uname
+	m.Body = text
+	m.ID = id
+
+	return &m
+}
 
 //Purpose: returns an array of the names of the users in the room
 //Use: when the client or server wishes to know what users are in the room
 //Tested: NO
-func ShowUsers(r Room) []string {
-  var users []string
-  // for _, u := range r.Users {
-  //   fmt.Printf("%v\n", u.Uname)
-  //   users = append(users, u.Uname)
-  // }
-  return users
+func ShowUsers(r *Room) []string {
+	var names []string
+	users := r.Users
+	
+	if RoomExists(r.ID){
+		for e := users.Front(); e != nil; e = e.Next() {
+			names = append(names, e.Value.(string))
+		}
+		return names
+	}
+	return nil
 }
 
 //Purpose: Create a new user and add it to db, and return it.
@@ -345,6 +380,27 @@ func findFreeMsgID(r *Room) int {
 	return maxID + 1
 }
 
+/*
+func (u *User)PostMsg(r *Room,text string){
+	len := len(r.Messages)
+	//oldmsg := msgs[len(msgs)-1] //senaste meddelandet
+
+	newmsg := CreateMessage(u.UName, text, len)
+
+	r.Messages = append(r.Messages, newmsg)
+}
+
+func GetMessage(msgId int, r *Room) *Message{
+	msg := r.Messages
+	return msg[msgId]
+}
+
+func GetMessages(msgId int, r *Room) []*Message{
+	msg := r.Messages
+	msgs := msg[msgId:]
+	return msgs
+}
+*/
 func DestroyUser(id string){
 
 }
@@ -353,7 +409,7 @@ func DestroyRoom(id string){
 
 }
 
-func getOlderMessages() {
+func getOlderMessages(name string, room string) {
 
 }
 
@@ -398,6 +454,8 @@ func (user *User) SetLatestReadMsg(room *Room, msgID int) bool {
 // Returns: RoomInfo about a room
 // Tested: No
 func CreateRoomInfo(room *Room, user *User) requests_responses.RoomInfo{
+	if room == nil { return requests_responses.RoomInfo{} }
+
 	latestMsg,_ := GetLatestMsg(room)
 	var latestMsgInfo requests_responses.MsgInfo
 
