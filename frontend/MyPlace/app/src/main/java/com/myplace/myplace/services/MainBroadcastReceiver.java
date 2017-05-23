@@ -80,7 +80,7 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
                     newMessageReceived(message);
                     break;
                 case RequestTypes.MSG_READ:
-
+                    handleMessageReadInActivity();
                     break;
                 case RequestTypes.SIGN_OUT:
                     handleLogoutInActivity();
@@ -134,6 +134,8 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
         handleOlderMessagesInActivity(messages);
 
     }
+
+    public void handleMessageReadInActivity() {}
 
     public void handleLogoutInActivity() {}
 

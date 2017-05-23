@@ -104,6 +104,11 @@ public class MainActivity extends AppCompatActivity {
             startActivity(startLogin);
             finish();
         }
+
+        @Override
+        public void handleMessageReadInActivity() {
+            MainActivity.roomAdapter.notifyDataSetChanged();
+        }
     };
 
 

@@ -27,6 +27,13 @@ public class RoomInfo {
         lastMsgRead = 0;
     }
 
+    public int getLastMsgRead() {
+        if (lastMsg != null) {
+            return lastMsgRead;
+        }
+        return -1;
+    }
+
     public Room getRoom() {
         return room;
     }

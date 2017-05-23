@@ -39,6 +39,7 @@ import org.w3c.dom.Text;
 import java.util.ArrayList;
 
 import static com.myplace.myplace.LoginActivity.LOGIN_PREFS;
+import static java.lang.Thread.sleep;
 
 public class MessageActivity extends AppCompatActivity {
     private String TAG = "MessageActivity";
@@ -48,6 +49,7 @@ public class MessageActivity extends AppCompatActivity {
     MessageAdapter messageAdapter;
     private Toast messageEmptyToast = null;
     RoomDbHelper roomDB = null;
+    private static String username;
 
     ConnectionService mService;
     boolean mBound = false;
@@ -63,6 +65,7 @@ public class MessageActivity extends AppCompatActivity {
         public void handleNewMessageInActivity(Message msg) {
             if (roomID == msg.getRoomID()) {
                 messageAdapter.add(msg);
+                sendMessageReadRequest(msg.getId());
             }
         }
 
@@ -71,6 +74,11 @@ public class MessageActivity extends AppCompatActivity {
             messageAdapter.updateData(roomDB.getMessages(roomID));
             swipeContainer.setRefreshing(false);
         }
+
+//        @Override
+//        public void handleMessageReadInActivity() {
+//            MainActivity.roomAdapter.notifyDataSetChanged();
+//        }
     };
 
     @Override
@@ -119,6 +127,35 @@ public class MessageActivity extends AppCompatActivity {
         // with actions named "custom-event-name".
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter(ConnectionService.BROADCAST_TAG));
+
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(!mBound) {
+                    Log.d("MainActivity", "Waiting for mBound");
+                    try {
+                        sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (messageAdapter.getCount() > 0) {
+                    int lastMsgID = messageAdapter.getItem(messageAdapter.getCount() - 1).getId();
+                    sendMessageReadRequest(lastMsgID);
+                }
+            }
+        });
+
+        thread.start();
+    }
+
+    private void sendMessageReadRequest(int lastMsgID) {
+        try {
+            mService.sendMessage(JSONParser.messageReadRequest(username, roomID, lastMsgID));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        roomDB.updateMessageRead(roomID, lastMsgID);
     }
 
     @Override
@@ -138,6 +175,9 @@ public class MessageActivity extends AppCompatActivity {
         //noinspection ConstantConditions
         getSupportActionBar().setTitle(roomName);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        SharedPreferences loginInfo = getSharedPreferences(LOGIN_PREFS, 0);
+        username = loginInfo.getString("username", MainActivity.NO_USERNAME_FOUND);
 
         roomDB = new RoomDbHelper(this);
 
@@ -188,9 +228,6 @@ public class MessageActivity extends AppCompatActivity {
             messageEmptyToast.show();
             return;
         }
-
-        SharedPreferences loginInfo = getSharedPreferences(LOGIN_PREFS, 0);
-        final String username = loginInfo.getString("username", MainActivity.NO_USERNAME_FOUND);
 
         long timestamp = System.currentTimeMillis();
 
