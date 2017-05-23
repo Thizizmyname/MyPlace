@@ -89,6 +89,26 @@ public class MainActivity extends AppCompatActivity {
             roomAdapter.updateData(updatedRoomList);
             roomAdapter.notifyDataSetChanged();
         }
+
+        @Override
+        public void handleLeaveRoomInActivity(){
+
+        }
+
+        @Override
+        public void handleLogoutInActivity() {
+            roomDB.dropAllTables();
+            logout();
+
+            Intent startLogin = new Intent(getApplicationContext(), LoginActivity.class);
+            startActivity(startLogin);
+            finish();
+        }
+
+        @Override
+        public void handleMessageReadInActivity() {
+            MainActivity.roomAdapter.notifyDataSetChanged();
+        }
     };
 
 
@@ -268,12 +288,17 @@ public class MainActivity extends AppCompatActivity {
         builder.setPositiveButton(R.string.leave_room, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                try {
+                    mService.sendMessage(JSONParser.leaveRoomRequest(roomID, username));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                // TODO: Handle this when response received
                 roomDB.deleteRoom(roomID);
                 roomList.remove(position);
                 roomAdapter.notifyDataSetChanged();
 
-                //TODO: Change below code to JSON-request
-                //new ConnectTask().execute("");
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -355,12 +380,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 // TODO: Send logout request
-                roomDB.dropAllTables();
-                logout();
-
-                Intent startLogin = new Intent(getApplicationContext(), LoginActivity.class);
-                startActivity(startLogin);
-                finish();
+                try {
+                    mService.sendMessage(JSONParser.signoutRequest(username));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         });
         builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
