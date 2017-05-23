@@ -8,19 +8,22 @@ import android.content.Context;
 
 public class RoomInfo {
     private Room room;
-    private Message latestMsg;
-    private int latestMsgRead;
+    private Message lastMsg = null;
+    private int lastMsgRead;
+
+    public final static String EMPTY_STRING = "";
+    public final static long EMPTY_TIMESTAMP = 0;
 
     public RoomInfo(Room _room, Message msg, int latestRead) {
         room = _room;
-        latestMsg = msg;
-        latestMsgRead = latestRead;
+        lastMsg = msg;
+        lastMsgRead = latestRead;
     }
 
     public RoomInfo(Room _room) {
         room = _room;
-        latestMsg = null;
-        latestMsgRead = 0;
+        lastMsg = null;
+        lastMsgRead = 0;
     }
 
     public Room getRoom() {
@@ -35,25 +38,35 @@ public class RoomInfo {
         return room.getRoomID();
     }
 
-    public Message getLatestMessage(Context ctx) {
-        Message message = null;
-        if (latestMsg != null) {
-            message = latestMsg;
-        } else {
-            try {
-                message = room.getLastMessage(ctx);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+    public Message getLastMessage() {
+        if (lastMsg != null) {
+            return lastMsg;
         }
-        return message;
+        return null;
     }
 
-    public String getLastSender(Context ctx) {
-        return room.getLastSender(ctx);
+    public String getLastSender() {
+        if (lastMsg != null) {
+            return lastMsg.getName();
+        }
+        return EMPTY_STRING;
     }
 
-    public String getLastMessageText(Context ctx) {
-        return room.getLastMessageText(ctx);
+    public String getLastMessageText() {
+        if (lastMsg != null) {
+            return lastMsg.getText();
+        }
+        return EMPTY_STRING;
+    }
+
+    public long getLastMessageTime() {
+        if (lastMsg != null) {
+            return lastMsg.getTimestamp();
+        }
+        return EMPTY_TIMESTAMP;
+    }
+
+    public boolean hasLastMessage() {
+        return lastMsg != null;
     }
 }

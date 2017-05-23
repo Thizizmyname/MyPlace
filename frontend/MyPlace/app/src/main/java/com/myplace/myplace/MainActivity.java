@@ -78,8 +78,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public void handleCreatedRoomInActivity(Room room) {
-            roomAdapter.add(new RoomInfo(room));
+        public void handleCreatedRoomInActivity(RoomInfo roominfo) {
+            roomAdapter.add(roominfo);
             roomAdapter.notifyDataSetChanged();
         }
 

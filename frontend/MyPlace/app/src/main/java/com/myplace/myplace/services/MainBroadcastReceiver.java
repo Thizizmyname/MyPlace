@@ -61,7 +61,7 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
 
                     break;
                 case RequestTypes.CREATE_ROOM:
-                    Room room = JSONParser.createRoomResponse(serverMessage);
+                    RoomInfo room = JSONParser.createRoomResponse(serverMessage);
                     handleCreatedRoom(room);
                     break;
                 case RequestTypes.JOIN_ROOM:
@@ -99,7 +99,7 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
 
     protected void handleRoomList(ArrayList<RoomInfo> roomResponse) {
         for (RoomInfo r : roomResponse) {
-            roomDB.createRoomTable(r.getRoom());
+            roomDB.createRoomTable(r);
         }
         handleRoomListInActivity(roomResponse);
     }
@@ -112,13 +112,13 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
 
     }
 
-    private void handleCreatedRoom(final Room room) {
+    private void handleCreatedRoom(final RoomInfo room) {
         roomDB.createRoomTable(room);
         handleCreatedRoomInActivity(room);
     }
 
     private void handleJoinedRoom(final RoomInfo room) {
-        roomDB.createRoomTable(room.getRoom());
+        roomDB.createRoomTable(room);
         handleJoinedRoomInActivity(room);
     }
 
@@ -136,7 +136,7 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
 
     public void handleOlderMessagesInActivity(final ArrayList<Message> messages){}
 
-    public void handleCreatedRoomInActivity(final Room room){}
+    public void handleCreatedRoomInActivity(final RoomInfo roominfo){}
 
     public abstract void handleNewMessageInActivity(final Message msg);
 

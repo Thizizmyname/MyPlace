@@ -212,11 +212,12 @@ public final class JSONParser {
         return String.format(TWO_CHAR_FORMAT, CREATE_ROOM) + json.toString();
     }
 
-    public static Room createRoomResponse(String rawString) throws JSONException {
+    public static RoomInfo createRoomResponse(String rawString) throws JSONException {
         JSONObject json = makeProperJsonObject(rawString);
         int _id = json.getInt(KEY_ROOM_ID);
         String _name = json.getString(KEY_ROOM_NAME);
-        return new Room(_id, _name);
+        Room room = new Room(_id, _name);
+        return new RoomInfo(room);
     }
 
     public static String postMsgRequest(Message msg) throws JSONException {
