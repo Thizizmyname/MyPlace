@@ -1,53 +1,96 @@
 package handler
 
 import (
-
 	"myplaceutils"
 	"requests_responses"
 	"net"
 	"bufio"
 	"fmt"
+	"strings"
 )
 
 
 
 func ClientResponseHandler(conn net.Conn, clientResponseChannel chan requests_responses.Response) {
-  myplaceutils.Info.Printf("Split client communication to clientResponseHandler\nConn: %v\n", conn)
-  for args := range clientResponseChannel {
-    responseString, err := requests_responses.ToResponseString(args)
-    myplaceutils.Info.Printf("Parsed responseString: %v\n",responseString)
-    if err!=nil{
-      fmt.Fprintf(conn,"%v\n",err)
-    }
-    fmt.Fprintf(conn,"%v\n",responseString)
-  }
+	myplaceutils.Info.Printf("Split client communication to clientResponseHandler\nConn: %v\n", conn)
+	for args := range clientResponseChannel {
+		responseString, err := requests_responses.ToResponseString(args)
+		myplaceutils.Info.Printf("Parsed responseString: %v\n",responseString)
+		if err!=nil {
+			panic("Error while encrypting response")
+		}
+
+		_, writeErr := fmt.Fprintf(conn,"%v\n", responseString)
+
+		if writeErr != nil {
+			conn.Close()
+			return
+		}
+	}
 }
 
 func ClientHandler(conn net.Conn, clientChannel chan requests_responses.Response) {
-  myplaceutils.Info.Println("Connection sent to clientHandler in go routine")
-  go ClientResponseHandler(conn, clientChannel)
-  var requestParsed myplaceutils.HandlerArgs
-  var parseError error
-  for {
-    request ,err := bufio.NewReader(conn).ReadString('\n')
-    if err!=nil {
-      myplaceutils.Error.Println("User disconnected from the server")
-      //TODO SignOutRequest
-      break
-    }
-    myplaceutils.Info.Printf("New request: %v",request)
-    requestParsed.IncomingRequest, parseError = requests_responses.FromRequestString(request)
-    requestParsed.ResponseChannel = clientChannel
-    if parseError==nil {
-      myplaceutils.ResponseChannel <- requestParsed
-    } else {
-      myplaceutils.Error.Printf("Bad request from client: %v\n", parseError)
-      //Har vi en default Bad request?
-    }
-  }
+	myplaceutils.Info.Println("Connection sent to clientHandler in go routine")
+	go ClientResponseHandler(conn, clientChannel)
+	readBuf := make([]byte, myplaceutils.ConnReadMaxLength + 1)
+	signedInUser := ""
+
+	for {
+		n, err := conn.Read(readBuf)
+
+		if n > myplaceutils.ConnReadMaxLength {
+			myplaceutils.Error.Printf("Request from client too large!")
+			clientChannel <- requests_responses.ErrorResponse{-1, -1, "request too large, handler overwhelmed"}
+		}
+
+		if err != nil || n == 0 {
+			myplaceutils.Info.Println("User disconnected from the server")
+			if signedInUser != "" {
+				sendSignOutRequest(-1, signedInUser, clientChannel)
+			}
+			conn.Close()
+			return
+		}
+
+		reader := strings.NewReader(string(readBuf[:n]))
+		scanner := bufio.NewScanner(reader)
+
+		for scanner.Scan() {
+			requestJson := scanner.Text()
+
+			myplaceutils.Info.Printf("New request: %v", requestJson)
+			request, parseError := requests_responses.FromRequestString(requestJson)
+
+			if parseError != nil {
+				myplaceutils.Error.Printf("Bad request from client: %v\n", parseError)
+				clientChannel <- requests_responses.ErrorResponse{-1, -1, "parse error of request"}
+				continue
+			}
+
+			if signInReq, ok := request.(requests_responses.SignInRequest); ok {
+				if signedInUser == "" {
+					signedInUser = signInReq.UName  //new user signing in
+				} else {
+					//trying to sign in without signing out previous user.
+					//shouldn't happen.., still:
+					sendSignOutRequest(signInReq.RequestID, signInReq.UName, clientChannel)
+				}
+			} else if _, ok := request.(requests_responses.SignOutRequest); ok {
+				signedInUser = ""
+			}
+
+			var requestParsed myplaceutils.HandlerArgs
+			requestParsed.IncomingRequest = request
+			requestParsed.ResponseChannel = clientChannel
+			myplaceutils.RequestChannel <- requestParsed
+		}
+	}
 }
 
-
+func sendSignOutRequest(reqID int, uname string, c chan requests_responses.Response) {
+	args := myplaceutils.HandlerArgs{requests_responses.SignOutRequest{reqID, uname}, c}
+	myplaceutils.RequestChannel <- args
+}
 
 func ResponseHandler(incomingChannel chan myplaceutils.HandlerArgs) {
 	myplaceutils.Info.Println("Reached responseHandler")
@@ -143,72 +186,135 @@ func signIn(request requests_responses.SignInRequest, responseChan chan requests
 }
 
 func getRooms(request requests_responses.GetRoomsRequest) requests_responses.Response {
-  /*
+	/*
     1) Hitta user
     2) loopa över listan, ta e.Value.(typen)
-    3) 
+    3)
   */
-  var userRoomArray []requests_responses.RoomInfo
-  user := myplaceutils.GetUser(request.UName)
-  if user==nil{
-    return requests_responses.ErrorResponse{request.RequestID, requests_responses.GetRoomsIndex, "User not found"}//TODO ändra denna till lämplig rad
-  }
-  for e := user.Rooms.Front(); e != nil; e = e.Next() {
-    room := e.Value.(myplaceutils.RoomIDAndLatestReadMsgID)
-    userRoom := myplaceutils.GetRoom(room.RoomID)
+	userRoomArray := []requests_responses.RoomInfo{}
+	user := myplaceutils.GetUser(request.UName)
+	if user==nil{
+		return requests_responses.ErrorResponse{request.RequestID, requests_responses.GetRoomsIndex, "User not found"}//TODO ändra denna till lämplig rad
+	}
+	for e := user.Rooms.Front(); e != nil; e = e.Next() {
+		room := e.Value.(myplaceutils.RoomIDAndLatestReadMsgID)
+		userRoom := myplaceutils.GetRoom(room.RoomID)
 
-    userRoomArray = append(userRoomArray, myplaceutils.CreateRoomInfo(userRoom,user))
-  }
-  return requests_responses.GetRoomsResponse{request.RequestID, userRoomArray}
-
+		userRoomArray = append(userRoomArray, myplaceutils.CreateRoomInfo(userRoom,user))
+	}
+	return requests_responses.GetRoomsResponse{request.RequestID, userRoomArray}
 }
 
 func getRoomUsers(request requests_responses.GetRoomUsersRequest) requests_responses.Response {
-	return requests_responses.ErrorResponse{request.RequestID, requests_responses.GetRoomUsersIndex, "not implemented yet"}
+	id := request.RequestID
+	roomId := request.RoomID
+
+	room := myplaceutils.GetRoom(roomId)
+	users := myplaceutils.ShowUsers(room)
+
+	response := requests_responses.GetRoomUsersResponse{id, roomId, users }
+	
+	return response
 }
 
 func getOlderMsgs(request requests_responses.GetOlderMsgsRequest) requests_responses.Response {
-	return requests_responses.ErrorResponse{request.RequestID, requests_responses.GetOlderMsgsIndex, "not implemented yet"}
+	// Denna returenerar även det senaste lästa meddelandet
+	id := request.RequestID 
+	roomID := request.RoomID
+	msgID := request.MsgID // Senaste meddelandet som lästs
+	NoMsgs := 20  // Anger hur många meddelande som ska hämtas
+	room := myplaceutils.GetRoom(roomID)
+	messages := []requests_responses.MsgInfo{}
+
+	if msgID > len(room.Messages) {
+		return requests_responses.ErrorResponse{id,4,"MessageID does not exist"}	
+	}
+	
+	if NoMsgs > msgID {
+		NoMsgs = msgID
+	}
+	
+	for x := (msgID - NoMsgs); x < msgID; x++ {
+		msg := room.Messages[x] // Meddelande x i rummet
+		msginfo := myplaceutils.CreateMsgInfo(msg, roomID) // Skapar ett MsgInfo
+		messages = append(messages,msginfo) // Lägger till MsgInfo till messages
+	}
+	response := requests_responses.GetOlderMsgsResponse{id,messages}
+	return response
 }
 
 func getNewerMsgs(request requests_responses.GetNewerMsgsRequest) requests_responses.Response {
-	return requests_responses.ErrorResponse{request.RequestID, requests_responses.GetNewerMsgsIndex, "not implemented yet"}
+
+	requestID := request.RequestID
+	roomID := request.RoomID
+	msgID := request.MsgID
+	getNoMsg := 10
+	msgInfos := []requests_responses.MsgInfo{}
+	
+	room := myplaceutils.GetRoom(roomID)
+	// Checks if the user has a msgID which is greater than the latestMsgID in the room
+	if msgID > len(room.Messages) {
+		return requests_responses.ErrorResponse{requestID,requests_responses.GetNewerMsgsIndex,"MessageID does not exist"}
+	}
+	
+	if (getNoMsg + msgID) > len(room.Messages) {
+		getNoMsg = len(room.Messages)
+	}else{
+		getNoMsg = msgID+getNoMsg +1 // inkluderar det sista meddelandet i rangen av taket från msgId
+	}
+	
+	for x := (msgID+1) ; x < getNoMsg; x++ {
+		msg := room.Messages[x]
+		msgInfo := myplaceutils.CreateMsgInfo(msg,room.ID)
+		msgInfos = append(msgInfos,msgInfo)
+	}
+	
+	
+	return requests_responses.GetNewerMsgsResponse{requestID,msgInfos}
+
 }
 
 func joinRoom(request requests_responses.JoinRoomRequest, responseChan chan requests_responses.Response) requests_responses.Response {
+	// Vill uppdatera ett rum så att en user är medlem i det
 
-  // Vill uppdatera ett rum så att en user är medlem i det
+	requestID := request.RequestID
+	roomID := request.RoomID
+	username := request.UName
 
-  requestID := request.RequestID
-  roomID := request.RoomID
-  username := request.UName
+	room := myplaceutils.GetRoom(roomID)
+	user := myplaceutils.GetUser(username)
 
-  room := myplaceutils.GetRoom(roomID)
-  user := myplaceutils.GetUser(username)
+	if user == nil{
+		return requests_responses.ErrorResponse{
+			requestID,
+			requests_responses.JoinRoomIndex,
+			"There is no such user"}
+	}
 
-  if user == nil{
-    return requests_responses.ErrorResponse{
-      requestID,
-      requests_responses.JoinRoomIndex,
-      "There is no such user"}
-  }
+	if room == nil { // Kan inte skapa en respons utan att skapa en ha ett rum
+		roomInfo := requests_responses.RoomInfo{}
 
-  if room == nil {
-    return requests_responses.ErrorResponse{
-      requestID,
-      requests_responses.JoinRoomIndex,
-      "Bad roomID"}
-  }
+		return requests_responses.JoinRoomResponse{
+			requestID,
+			roomInfo,
+			false}
+	}
 
-  user.JoinRoom(room)
-  room.AddOutgoingChannel(responseChan)
+	if myplaceutils.UserIsInRoom(username,room) {
+		return requests_responses.ErrorResponse{
+			requestID,
+			requests_responses.JoinRoomIndex,
+			"User is already a member of the room"}
+	}
+	
+	user.JoinRoom(room)
+	room.AddOutgoingChannel(responseChan)
 
-  roomInfo := myplaceutils.CreateRoomInfo(room,user)
-  response := requests_responses.JoinRoomResponse{request.RequestID,roomInfo,true}
+	roomInfo := myplaceutils.CreateRoomInfo(room,user)
+	response := requests_responses.JoinRoomResponse{request.RequestID,roomInfo,true}
 
-  return response
+	return response
 }
-
 
 // Purpose: The user leaves a room
 // Argument: a request, response channel
@@ -229,15 +335,15 @@ func leaveRoom(request requests_responses.LeaveRoomRequest, responseChan chan re
 			requests_responses.LeaveRoomIndex,
 			"There is no such user"}
 	}
-	
+
 	if room == nil {
-		
+
 		return requests_responses.ErrorResponse{
 			requestID,
 			requests_responses.LeaveRoomIndex,
-			"Bad roomID"}      
+			"Bad roomID"}
 	}
-	
+
 	if !myplaceutils.UserIsInRoom(username,room) {
 		return requests_responses.ErrorResponse{
 			requestID,
