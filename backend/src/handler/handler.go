@@ -186,23 +186,6 @@ func signIn(request requests_responses.SignInRequest, responseChan chan requests
 }
 
 func getRooms(request requests_responses.GetRoomsRequest) requests_responses.Response {
-<<<<<<< HEAD
-	id := request.RequestID
-	name := request.UName
-	user := myplaceutils.GetUser(name)
-	rids := user.ShowRoomIDs()
-	RoomInfos := []requests_responses.RoomInfo{}
-	
-	for _,x := range rids{
-		
-		room := myplaceutils.GetRoom(x)
-		roominfo := myplaceutils.CreateRoomInfo(room,user) 
-		RoomInfos = append(RoomInfos, roominfo)
-	}
-
-	response := requests_responses.GetRoomsResponse{id,RoomInfos}
-	return response
-=======
 	/*
     1) Hitta user
     2) loopa över listan, ta e.Value.(typen)
@@ -220,8 +203,6 @@ func getRooms(request requests_responses.GetRoomsRequest) requests_responses.Res
 		userRoomArray = append(userRoomArray, myplaceutils.CreateRoomInfo(userRoom,user))
 	}
 	return requests_responses.GetRoomsResponse{request.RequestID, userRoomArray}
-
->>>>>>> backend
 }
 
 func getRoomUsers(request requests_responses.GetRoomUsersRequest) requests_responses.Response {
