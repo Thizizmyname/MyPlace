@@ -522,7 +522,7 @@ func TestLeaveRoom(t *testing.T){
 	executeAndTestResponse(t,req,resp)
 }
 
-/*
+
 func TestGetNewerMsgs(t *testing.T){
 	myplaceutils.InitDBs()
 	u1 := myplaceutils.AddNewUser("ask", "embla")
@@ -535,6 +535,8 @@ func TestGetNewerMsgs(t *testing.T){
 	u1.JoinRoom(r2)
 	u2.JoinRoom(r1)
 
+//	var msgInfos = make([] requests_responses.MsgInfo,10) // 10 = antal meddelanden
+	
 	//signin
 	lrq := requests_responses.SignInRequest{1234, u1.UName, u1.Pass}
 	lrp := requests_responses.SignInResponse{1234, true, ""}
@@ -568,9 +570,11 @@ func TestGetNewerMsgs(t *testing.T){
 	resp = requests_responses.PostMsgResponse{12345, msgI}
 	executeAndTestResponse_chan(t, u1_responseChan, req, resp)
 
-//	req = requests_responses.
-//		resp =
-//		executeAndTestResponse()
-} */
+	/*
+	req1 := requests_responses.GetNewerMsgsRequest{12345,r1.ID,2} //Tror vi har bytt namn from room.ID till room.roomID 
+	resp1 := requests_responses.GetNewerMsgsResponse{12345,msgInfos}
+	executeAndTestResponse(t, req1,resp1)
+*/
+} 
 
 
