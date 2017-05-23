@@ -41,6 +41,7 @@ func main() {
 		dbg = log.New(ioutil.Discard, "\nEVENT:\n", 0)
 	}
 
+	rand.Seed(time.Now().Unix())
 	myplaceutils.InitDBs()
 	initLoggers(ioutil.Discard, ioutil.Discard, ioutil.Discard, ioutil.Discard)
 	go handler.ResponseHandler(handlerChan)
