@@ -81,31 +81,14 @@ func executeAndTestResponse_chan(t *testing.T,
 		}
 	}else if resp, ok := response.(requests_responses.GetOlderMsgsResponse); ok {
 		expResp := expectedResponse.(requests_responses.GetOlderMsgsResponse)
+		req := request.(requests_responses.GetOlderMsgsRequest)
+		testGetOlderMsgsResponse(t, req, resp, expResp)
 
-		msgs := resp.Messages
-		expMsgs := expResp.Messages
+	}else if resp, ok:= response.(requests_responses.GetNewerMsgsResponse); ok {
+		expResp := expectedResponse.(requests_responses.GetNewerMsgsResponse)
+		req := request.(requests_responses.GetNewerMsgsRequest)
+		testGetNewerMsgsResponse(t, req, resp, expResp)
 		
-		if len(msgs) != len(expMsgs){
-			t.Errorf("request: %v\nresponse: %v\nactual response: %v\nexpected response:%v",
-				reflect.TypeOf(request),
-	  			reflect.TypeOf(response),
-				response,
-				expectedResponse)
-		}
-
-		for i,_ := range msgs{
-			msgs[i].Time = 1
-			expMsgs[i].Time = 1
-		}
-
-		if !reflect.DeepEqual(response,expectedResponse){
-			t.Errorf("request: %v\nresponse: %v\nactual response: %v\nexpected response:%v",
-				reflect.TypeOf(request),
-	  			reflect.TypeOf(response),
-				response,
-				expectedResponse)
-		}
-
 	}else if response != expectedResponse {
 		t.Errorf("request: %v\nresponse: %v\nactual response: %v\nexpected response:%v",
 			reflect.TypeOf(request),
@@ -547,6 +530,34 @@ func TestGetRooms(t *testing.T){
 	executeAndTestResponse(t,req,resp)
 }
 
+func testGetOlderMsgsResponse(t *testing.T ,request requests_responses.GetOlderMsgsRequest, response requests_responses.GetOlderMsgsResponse, expectedResponse requests_responses.GetOlderMsgsResponse){
+
+		expResp := expectedResponse
+
+		msgs := response.Messages
+		expMsgs := expResp.Messages
+		
+		if len(msgs) != len(expMsgs){
+			t.Errorf("request: %v\nresponse: %v\nactual response: %v\nexpected response:%v",
+				reflect.TypeOf(request),
+	  			reflect.TypeOf(response),
+				response,
+				expectedResponse)
+		}
+		
+		for i,_ := range msgs{
+			msgs[i].Time = 1
+			expMsgs[i].Time = 1
+		}
+	
+		if !reflect.DeepEqual(response,expectedResponse){
+			t.Errorf("request: %v\nresponse: %v\nactual response: %v\nexpected response:%v",
+				reflect.TypeOf(request),
+	  			reflect.TypeOf(response),
+				response,
+				expectedResponse)
+		}
+}
 
 func TestGetOlderMsgs(t *testing.T){
 	myplaceutils.InitDBs()
@@ -559,30 +570,124 @@ func TestGetOlderMsgs(t *testing.T){
 
 	var respMsg []requests_responses.MsgInfo
 	
-	str := "hello? This is message 1"
+	req1 := requests_responses.GetOlderMsgsRequest{12345, r1.ID,1}
+	erresp1 := requests_responses.ErrorResponse{12345,4,"MessageID does not exist"}
+	executeAndTestResponse(t, req1, erresp1)
+
+	req1 = requests_responses.GetOlderMsgsRequest{12345, r1.ID, -1}
+	resp1 := requests_responses.GetOlderMsgsResponse{12345, respMsg}
+	executeAndTestResponse(t, req1, resp1)
+	
+	str := "hello? who are you?"
 	req := requests_responses.PostMsgRequest{12345, u1.UName, r1.ID, str}
 	msgI := requests_responses.MsgInfo{0, r1.ID, u1.UName, -1, str}
 	respMsg = append(respMsg, msgI)
 	resp := requests_responses.PostMsgResponse{12345, msgI}
 	executeAndTestResponse_chan(t, u1_responseChan, req, resp)
 
-/*	str = "hello? This is message 2"
+	str = "anybody there?"
 	req = requests_responses.PostMsgRequest{12345, u1.UName, r1.ID, str}
-	msgI = requests_responses.MsgInfo{1, r1.ID, u2.UName, -1, str}
-	//respMsg = append(respMsg, msgI)
-	resp = requests_responses.PostMsgResponse{12345, msgI}
-	executeAndTestResponse_chan(t, u1_responseChan, req, resp)
-
-	str = "hello? This is message 3"
-	req = requests_responses.PostMsgRequest{12345, u1.UName, r1.ID, str}
-	msgI = requests_responses.MsgInfo{0, r1.ID, u1.UName, -1, str}
+	msgI = requests_responses.MsgInfo{1, r1.ID, u1.UName, -1, str}
 	respMsg = append(respMsg, msgI)
 	resp = requests_responses.PostMsgResponse{12345, msgI}
 	executeAndTestResponse_chan(t, u1_responseChan, req, resp)
-*/
 
-	req1 := requests_responses.GetOlderMsgsRequest{12345, r1.ID, 0}
-	resp1 := requests_responses.GetOlderMsgsResponse{12345, respMsg}
+	str = "I am in Room X"
+	req = requests_responses.PostMsgRequest{12345, u1.UName, r1.ID, str}
+	msgI = requests_responses.MsgInfo{2, r1.ID, u1.UName, -1, str}
+	resp = requests_responses.PostMsgResponse{12345, msgI}
+	executeAndTestResponse_chan(t, u1_responseChan, req, resp)
+
+	str = "And I am in Room Y"
+	req = requests_responses.PostMsgRequest{12345, u1.UName, r1.ID, str}
+	msgI = requests_responses.MsgInfo{3, r1.ID, u1.UName, -1, str}
+	resp = requests_responses.PostMsgResponse{12345, msgI}
+	executeAndTestResponse_chan(t, u1_responseChan, req, resp)
 	
+	req1 = requests_responses.GetOlderMsgsRequest{12345, r1.ID, 2}
+	resp1 = requests_responses.GetOlderMsgsResponse{12345, respMsg}
+	executeAndTestResponse(t, req1, resp1)
+
+	respMsg = []requests_responses.MsgInfo{}
+	req1 = requests_responses.GetOlderMsgsRequest{12345, r1.ID, 0}
+	resp1 = requests_responses.GetOlderMsgsResponse{12345, respMsg}
+	executeAndTestResponse(t, req1, resp1)
+	
+	respMsg = []requests_responses.MsgInfo{}
+	req1 = requests_responses.GetOlderMsgsRequest{12345, r1.ID, -1}
+	resp1 = requests_responses.GetOlderMsgsResponse{12345, respMsg}
 	executeAndTestResponse(t, req1, resp1)
 }
+
+func testGetNewerMsgsResponse(t *testing.T ,request requests_responses.GetNewerMsgsRequest, response requests_responses.GetNewerMsgsResponse, expectedResponse requests_responses.GetNewerMsgsResponse){
+
+	
+	expResp := expectedResponse
+
+	msgs := response.Messages
+	expMsgs := expResp.Messages
+	
+	if len(msgs) != len(expMsgs){
+		t.Errorf("request: %v\nresponse: %v\nactual response: %v\nexpected response:%v",
+			reflect.TypeOf(request),
+			reflect.TypeOf(response),
+			response,
+			expectedResponse)
+	}
+	
+	for i,_ := range msgs{
+		msgs[i].Time = 1
+		expMsgs[i].Time = 1
+	}
+	
+	if !reflect.DeepEqual(response,expectedResponse){
+		t.Errorf("request: %v\nresponse: %v\nactual response: %v\nexpected response:%v",
+			reflect.TypeOf(request),
+			reflect.TypeOf(response),
+			response,
+			expectedResponse)
+	}
+}
+/*
+func TestGetNewerMsgs(t *testing.T){
+	myplaceutils.InitDBs()
+	u1 := myplaceutils.AddNewUser("ask", "embla")
+	u2 := myplaceutils.AddNewUser("adam", "eva")
+	r1 := myplaceutils.AddNewRoom("livingroom")
+	u1_responseChan := make(chan requests_responses.Response, 1)
+	u1.JoinRoom(r1)
+	u2.JoinRoom(r1)
+
+	var respMsg []requests_responses.MsgInfo
+
+	str := "hello? who are you?"
+	req := requests_responses.PostMsgRequest{12345, u1.UName, r1.ID, str}
+	msgI := requests_responses.MsgInfo{0, r1.ID, u1.UName, -1, str}
+	resp := requests_responses.PostMsgResponse{12345, msgI}
+	executeAndTestResponse_chan(t, u1_responseChan, req, resp)
+
+	str = "anybody there?"
+	req = requests_responses.PostMsgRequest{12345, u1.UName, r1.ID, str}
+	msgI = requests_responses.MsgInfo{1, r1.ID, u1.UName, -1, str}
+	resp = requests_responses.PostMsgResponse{12345, msgI}
+	executeAndTestResponse_chan(t, u1_responseChan, req, resp)
+
+	str = "I am in Room X"
+	req = requests_responses.PostMsgRequest{12345, u1.UName, r1.ID, str}
+	msgI = requests_responses.MsgInfo{2, r1.ID, u1.UName, -1, str}
+	respMsg = append(respMsg, msgI)
+	resp = requests_responses.PostMsgResponse{12345, msgI}
+	executeAndTestResponse_chan(t, u1_responseChan, req, resp)
+
+	str = "And I am in Room Y"
+	req = requests_responses.PostMsgRequest{12345, u1.UName, r1.ID, str}
+	msgI = requests_responses.MsgInfo{3, r1.ID, u1.UName, -1, str}
+	respMsg = append(respMsg, msgI)
+	resp = requests_responses.PostMsgResponse{12345, msgI}
+	executeAndTestResponse_chan(t, u1_responseChan, req, resp)
+
+	req1 := requests_responses.GetNewerMsgsRequest{12345,r1.ID,1}
+	resp1 := requests_responses.GetNewerMsgsResponse{12345,respMsg}
+	executeAndTestResponse(t, req1, resp1)
+}
+*/

@@ -152,7 +152,6 @@ func getRooms(request requests_responses.GetRoomsRequest) requests_responses.Res
 		room := myplaceutils.GetRoom(x)
 		roominfo := myplaceutils.CreateRoomInfo(room,user) 
 		RoomInfos = append(RoomInfos, roominfo)
-		
 	}
 
 	response := requests_responses.GetRoomsResponse{id,RoomInfos}
@@ -172,24 +171,52 @@ func getRoomUsers(request requests_responses.GetRoomUsersRequest) requests_respo
 }
 
 func getOlderMsgs(request requests_responses.GetOlderMsgsRequest) requests_responses.Response {
-	id := request.RequestID
+	// Denna returenerar även det senaste lästa meddelandet
+	id := request.RequestID 
 	roomID := request.RoomID
-	msgID := request.MsgID
-	NoMsgs := 1  // Anger hur många meddelande som ska hämtas
+	msgID := request.MsgID // Senaste meddelandet som lästs
+	NoMsgs := 10  // Anger hur många meddelande som ska hämtas
 	room := myplaceutils.GetRoom(roomID)
 	var messages []requests_responses.MsgInfo
+
+	if msgID > len(room.Messages) {
+		return requests_responses.ErrorResponse{id,4,"MessageID does not exist"}	
+	}
 	
-	for x := msgID; x > (msgID - NoMsgs); x-- {
-		msg := room.Messages[x]
-		msginfo := myplaceutils.CreateMsgInfo(msg, roomID)
-		messages = append(messages,msginfo)
+	if NoMsgs > msgID {
+		NoMsgs = msgID
+	}
+	
+	for x := (msgID - NoMsgs); x < msgID; x++ {
+		msg := room.Messages[x] // Meddelande x i rummet
+		msginfo := myplaceutils.CreateMsgInfo(msg, roomID) // Skapar ett MsgInfo
+		messages = append(messages,msginfo) // Lägger till MsgInfo till messages
 	}
 	response := requests_responses.GetOlderMsgsResponse{id,messages}
 	return response
 }
 
 func getNewerMsgs(request requests_responses.GetNewerMsgsRequest) requests_responses.Response {
-	return requests_responses.ErrorResponse{request.RequestID, requests_responses.GetNewerMsgsIndex, "not implemented yet"}
+
+
+
+	/*
+	ID := request.RequestID
+	RoomID := request.RoomID
+	MsgID := request.MsgID
+	Room := myplaceutils.GetRoom(RoomID)
+	NoMsgs := 1 // Anger hur många meddelanden som ska hämtas
+	messages := []requests_responses.MsgInfo{}
+
+	for x := MsgID; x >=(MsgID+NoMsgs); x++{
+		msg := Room.Messages[x]
+		msgInfo := myplaceutils.CreateMsgInfo(msg,RoomID)
+		messages = append(messages,msgInfo)
+	}
+	response := requests_responses.GetNewerMsgsResponse{ID,messages}
+	return response
+*/
+	return nil
 }
 
 func joinRoom(request requests_responses.JoinRoomRequest, responseChan chan requests_responses.Response) requests_responses.Response {
