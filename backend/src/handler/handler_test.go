@@ -762,8 +762,6 @@ func TestGetNewerMsgs(t *testing.T){
 	resp1 = requests_responses.GetNewerMsgsResponse{12345,respMsg2}
 	executeAndTestResponse(t, req1, resp1)
 	
-
-	
 }
 
 
