@@ -88,17 +88,12 @@ public class ConnectionService extends Service {
                 @Override
                 protected Boolean doInBackground(Void... params) {
 
-                    //pauseListener = true;
-
-                    Log.e("TCP Service", "Sending: " + message);
+                    Log.d("ConnectionService", "Sending: " + message);
                     if (out != null && !out.checkError()) {
                         out.println(message);
-                        Log.d("TCP Client", "Message: " + message);
                         out.flush();
-                        //out.close();
                     }
 
-                    //pauseListener = false;
 
 
                     return null;
@@ -110,7 +105,6 @@ public class ConnectionService extends Service {
 
     private void runListener() {
         while (mRun) {
-            //Log.e("TCP Client", "C: I got to the while loop!");
             if (!pauseListener) {
                 try {
                     final String serverMessage = in.readLine();
@@ -124,8 +118,7 @@ public class ConnectionService extends Service {
                         //call the method messageReceived from MyActivity class
                         sendToActivity(serverMessage);
                     } else {
-                        //serverMessage = null;
-                        Log.e("ConnectionService", "serverMessage == null");
+                        Log.e("ConnectionService", "serverMessage null, stopping listener");
                         break;
                     }
                 } catch (IOException e) {
