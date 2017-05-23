@@ -98,7 +98,10 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
     }
 
     protected void handleRoomList(ArrayList<RoomInfo> roomResponse) {
-        throw new RuntimeException("No implementation");
+        for (RoomInfo r : roomResponse) {
+            roomDB.createRoomTable(r.getRoom());
+        }
+        handleRoomListInActivity(roomResponse);
     }
 
 
@@ -126,6 +129,8 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
         handleOlderMessagesInActivity(messages);
 
     }
+
+    public void handleRoomListInActivity(final ArrayList<RoomInfo> roomlist) {}
 
     public void handleJoinedRoomInActivity(final RoomInfo roominfo) {}
 

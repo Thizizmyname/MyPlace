@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import static com.myplace.myplace.LoginActivity.LOGIN_PREFS;
 
 public class MessageActivity extends AppCompatActivity {
+    private String TAG = "MessageActivity";
     final Context context = this;
     private static final String EMPTY_STRING = "";
 
@@ -76,7 +77,7 @@ public class MessageActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         // Bind to LocalService
-        Log.d("MessageActivity", "I'm in onStart!");
+        Log.d(TAG, "I'm in onStart!");
         Intent intent = new Intent(this, ConnectionService.class);
         bindService(intent, mTConnection, Context.BIND_AUTO_CREATE);
     }
@@ -86,7 +87,7 @@ public class MessageActivity extends AppCompatActivity {
         super.onStop();
         // Unbind from the service
         if (mBound) {
-            Log.d("MessageActivity", "Stopping event");
+            Log.d(TAG, "Stopping event");
             unbindService(mTConnection);
             mBound = false;
         }
