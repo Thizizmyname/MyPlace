@@ -37,6 +37,7 @@ func listenLoop(listener net.Listener) {
 
 //Initialize loggers
 func InitLoggers(
+
 	traceHandle io.Writer,
 	infoHandle io.Writer,
 	warningHandle io.Writer,
@@ -47,7 +48,7 @@ func InitLoggers(
 		log.Ldate|log.Ltime|log.Lshortfile)
 
 	myplaceutils.Info = log.New(infoHandle,
-		"INFO: ",
+		"DEBUG: ",
 		log.Ldate|log.Ltime|log.Lshortfile)
 
 	myplaceutils.Warning = log.New(warningHandle,
