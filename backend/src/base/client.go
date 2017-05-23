@@ -22,6 +22,8 @@ func main() {
 	}
 	fmt.Printf("\nFINISHED DIALINGUP......\n")
   */
+  fmt.Printf("%v\n",time.Now())
+  fmt.Printf("%v\n",time.Now().UTC())
 	fmt.Println("Connecting to server..\n")
 	//Skapar två nya variabler, conn(ection) och err(or)
 	// err är nil om allt gick bra, annars inte nil
