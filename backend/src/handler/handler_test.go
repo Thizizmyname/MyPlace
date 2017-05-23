@@ -456,16 +456,17 @@ func TestJoinRoom(t *testing.T){
 
 	user1 := myplaceutils.AddNewUser("Eva", "1337")
 
-	// Test if the room doesn't exist NOTIS: Går inte in i room == nil 
+	// Test if the room doesn't exist NOTIS: Går inte in i room == nil
 	req = requests_responses.JoinRoomRequest{12345,1,user1.UName}
-	eresp = requests_responses.ErrorResponse{12345,requests_responses.JoinRoomIndex,"Bad roomID"}
-	executeAndTestResponse(t,req,eresp)
-	
+	roomInfo := myplaceutils.CreateRoomInfo(nil,user1)
+	resp := requests_responses.JoinRoomResponse{12345, roomInfo, false}
+	executeAndTestResponse(t,req,resp)
+
 	room := myplaceutils.AddNewRoom("213")
 
-	roomInfo := myplaceutils.CreateRoomInfo(room,user1)
+	roomInfo = myplaceutils.CreateRoomInfo(room,user1)
 	req = requests_responses.JoinRoomRequest{12345,room.ID,user1.UName}
-	resp :=  requests_responses.JoinRoomResponse{12345,roomInfo,true}
+	resp =  requests_responses.JoinRoomResponse{12345,roomInfo,true}
 	executeAndTestResponse(t,req,resp)
 
 	user1.JoinRoom(room)
@@ -474,7 +475,7 @@ func TestJoinRoom(t *testing.T){
 	req = requests_responses.JoinRoomRequest{12345,room.ID,user1.UName}
 	resp = requests_responses.JoinRoomResponse{12345,roomInfo,true}
 	executeAndTestResponse(t,req,resp)
-	
+
 }
 
 func TestLeaveRoom(t *testing.T){
@@ -482,19 +483,19 @@ func TestLeaveRoom(t *testing.T){
 
 
 	// Test 1 Error -The user doesn't exist
-	req := requests_responses.LeaveRoomRequest{12345,0,"Alex"}	
+	req := requests_responses.LeaveRoomRequest{12345,0,"Alex"}
 	eresp := requests_responses.ErrorResponse{12345,requests_responses.LeaveRoomIndex,"There is no such user"}
 	executeAndTestResponse(t,req,eresp)
 
 	u0 := myplaceutils.AddNewUser("Alex","qwerty")
 	u1 := myplaceutils.AddNewUser("Erik", "1337")
-	
+
 	// Test if the room doesn't exist
-	req = requests_responses.LeaveRoomRequest{12345,1,"Alex"}	
+	req = requests_responses.LeaveRoomRequest{12345,1,"Alex"}
 	eresp = requests_responses.ErrorResponse{12345,requests_responses.LeaveRoomIndex,"Bad roomID"}
 	executeAndTestResponse(t,req,eresp)
-	
-	room := myplaceutils.AddNewRoom("213")	
+
+	room := myplaceutils.AddNewRoom("213")
 
 
 	// Test 2 Error - The user isn't in the room
@@ -504,12 +505,11 @@ func TestLeaveRoom(t *testing.T){
 
 	u0.JoinRoom(room)
 	u1.JoinRoom(room)
-	
+
 	// Test 3 - Checks if it can remove the user
 	req = requests_responses.LeaveRoomRequest{12345,room.ID,u0.UName}
-	resp := requests_responses.LeaveRoomResponse{12345}	
+	resp := requests_responses.LeaveRoomResponse{12345}
 	executeAndTestResponse(t,req,resp)
-	
+
 
 }
-
