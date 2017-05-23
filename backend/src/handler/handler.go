@@ -1,12 +1,14 @@
 package handler
 
 import (
-  "myplaceutils"
-  "requests_responses"
-  "net"
-  "bufio"
-  "fmt"
+
+	"myplaceutils"
+	"requests_responses"
+	"net"
+	"bufio"
+	"fmt"
 )
+
 
 
 func ClientResponseHandler(conn net.Conn, clientResponseChannel chan requests_responses.Response) {
@@ -86,7 +88,7 @@ func ResponseHandler(incomingChannel chan myplaceutils.HandlerArgs) {
 		case requests_responses.PostMsgRequest:
 			myplaceutils.Info.Println("Matched request to PostMsg")
 			response = postMsg(request.(requests_responses.PostMsgRequest), responseChan)
-	        case requests_responses.MsgReadRequest:
+		case requests_responses.MsgReadRequest:
 			myplaceutils.Info.Println("Matched request to SignOut")
 			response = msgRead(request.(requests_responses.MsgReadRequest))
 		case requests_responses.SignOutRequest:
@@ -141,7 +143,24 @@ func signIn(request requests_responses.SignInRequest, responseChan chan requests
 }
 
 func getRooms(request requests_responses.GetRoomsRequest) requests_responses.Response {
-	return requests_responses.ErrorResponse{request.RequestID, requests_responses.GetRoomsIndex, "not implemented yet"}
+  /*
+    1) Hitta user
+    2) loopa över listan, ta e.Value.(typen)
+    3) 
+  */
+  var userRoomArray []requests_responses.RoomInfo
+  user := myplaceutils.GetUser(request.UName)
+  if user==nil{
+    return requests_responses.ErrorResponse{request.RequestID, requests_responses.GetRoomsIndex, "User not found"}//TODO ändra denna till lämplig rad
+  }
+  for e := user.Rooms.Front(); e != nil; e = e.Next() {
+    room := e.Value.(myplaceutils.RoomIDAndLatestReadMsgID)
+    userRoom := myplaceutils.GetRoom(room.RoomID)
+
+    userRoomArray = append(userRoomArray, myplaceutils.CreateRoomInfo(userRoom,user))
+  }
+  return requests_responses.GetRoomsResponse{request.RequestID, userRoomArray}
+
 }
 
 func getRoomUsers(request requests_responses.GetRoomUsersRequest) requests_responses.Response {
@@ -157,6 +176,7 @@ func getNewerMsgs(request requests_responses.GetNewerMsgsRequest) requests_respo
 }
 
 func joinRoom(request requests_responses.JoinRoomRequest, responseChan chan requests_responses.Response) requests_responses.Response {
+
   // Vill uppdatera ett rum så att en user är medlem i det
 
   requestID := request.RequestID
@@ -173,13 +193,11 @@ func joinRoom(request requests_responses.JoinRoomRequest, responseChan chan requ
       "There is no such user"}
   }
 
-  if room == nil { // Kan inte skapa en respons utan att skapa en ha ett rum
-    roomInfo := requests_responses.RoomInfo{}
-
-    return requests_responses.JoinRoomResponse{
+  if room == nil {
+    return requests_responses.ErrorResponse{
       requestID,
-      roomInfo,
-      false}
+      requests_responses.JoinRoomIndex,
+      "Bad roomID"}
   }
 
   user.JoinRoom(room)
@@ -191,36 +209,45 @@ func joinRoom(request requests_responses.JoinRoomRequest, responseChan chan requ
   return response
 }
 
+
+// Purpose: The user leaves a room
+// Argument: a request, response channel
+// Returns: a response
+// Tested: Yes
 func leaveRoom(request requests_responses.LeaveRoomRequest, responseChan chan requests_responses.Response) requests_responses.Response {
-/*
-  // Vill uppdatera ett rum så att en user har lämnat i det
-  requestID := request.RequestID
-  roomID := request.RoomID
-  username := request.UName
+	// Vill uppdatera ett rum så att en user har lämnat i det
+	requestID := request.RequestID
+	roomID := request.RoomID
+	username := request.UName
 
-  room := myplaceutils.GetRoom(roomID)
-  user := myplaceutils.GetUser(username)
+	room := myplaceutils.GetRoom(roomID)
+	user := myplaceutils.GetUser(username)
 
-  if user == nil{
-    return requests_responses.ErrorResponse{
-      requestID,
-      requests_responses.JoinRoomIndex,
-      "There is no such user"}
-  }
+	if user == nil{
+		return requests_responses.ErrorResponse{
+			requestID,
+			requests_responses.LeaveRoomIndex,
+			"There is no such user"}
+	}
+	
+	if room == nil {
+		
+		return requests_responses.ErrorResponse{
+			requestID,
+			requests_responses.LeaveRoomIndex,
+			"Bad roomID"}      
+	}
+	
+	if !myplaceutils.UserIsInRoom(username,room) {
+		return requests_responses.ErrorResponse{
+			requestID,
+			requests_responses.LeaveRoomIndex,
+			"There is no such user in the room"}
+	}
 
-  if room == nil {
-
-    return requests_responses.ErrorResponse{
-      requestID,
-      requests_responses.JoinRoomIndex,
-      "Bad roomID"}
-  }
-
-  user.LeaveRoom(room)
-
-*/
-  return requests_responses.ErrorResponse{request.RequestID, requests_responses.LeaveRoomIndex, "not implemented yet"}
-
+	myplaceutils.RemoveUsersOutgoingChannels(user.UName,responseChan)
+	user.LeaveRoom(room)
+	return requests_responses.LeaveRoomResponse{requestID}
 }
 
 func createRoom(request requests_responses.CreateRoomRequest, responseChan chan requests_responses.Response) requests_responses.Response {
@@ -267,7 +294,6 @@ func postMsg(request requests_responses.PostMsgRequest, responseChan chan reques
 			requests_responses.PostMsgIndex,
 			"bad msg length"}
 	}
-
 
 	msg := myplaceutils.AddNewMessage(uname, room, body)
 	msgResp := requests_responses.MsgInfo{msg.ID, roomID, msg.UName, msg.Time.Unix(), msg.Body}
