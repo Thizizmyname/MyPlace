@@ -4,9 +4,11 @@ import (
 	"net"
 	"testing"
 	"log"
-//	"fmt"
-//	"reflect"
+	//"fmt"
+	//"reflect"
 )
+
+
 
 func establishConnection() *net.TCPConn {
 	tcpLAddr, _ := net.ResolveTCPAddr("tcp", "127.0.0.1:1337")
@@ -16,7 +18,6 @@ func establishConnection() *net.TCPConn {
 		log.Fatal(err)
 	}
 	return conn
-
 }
 
 func TestGetLatestMsg(t *testing.T){
@@ -52,9 +53,7 @@ func TestGetLatestMsg(t *testing.T){
 		t.Error("Didn't get the latest message")
 
 	}
-	
 }
-
 
 func TestJoinRoom(t *testing.T){
 	InitDBs()
@@ -80,10 +79,6 @@ func TestJoinRoom(t *testing.T){
 	if (r1.Users).Len() != 3 {
 		t.Error("Users did't succeed to join the room")
 	}	
-
-	
-
-
 }
 
 func TestLeaveRoom(t *testing.T){
@@ -120,7 +115,7 @@ func TestLeaveRoom(t *testing.T){
 /*
 func createStuff(conn *net.TCPConn) (*User, *Room) {
 	workingRoom := CreateRoom("Room 213")
-	workingUser := CreateUser("Alex", "1337", conn)
+	workingUser := CreateUser("Alex", "1337")
 	return workingUser, workingRoom
 }
 
@@ -154,7 +149,7 @@ func TestAddUser(t *testing.T) {
 		t.Error("Failed to update the room, Room failed to get the user Alex ")
 	}
 
-	user2 := CreateUser("Erik", "1821", conn)
+	user2 := CreateUser("Erik", "1821")
 	workingRoom.AddUser(user2)
 
 	if len(workingRoom.Users) != 2 {
@@ -166,9 +161,9 @@ func TestAddUser(t *testing.T) {
 func TestRemoveUser(t *testing.T) {
 	conn := establishConnection()
 	room := CreateRoom("Room 213")
-	user0 := CreateUser("user0", "polis", conn)
-	user1 := CreateUser("user1", "skurk", conn)
-	user2 := CreateUser("user2", "inbrottstjuv", conn)
+	user0 := CreateUser("user0", "polis")
+	user1 := CreateUser("user1", "skurk")
+	user2 := CreateUser("user2", "inbrottstjuv")
 
 	room.AddUser(user0)
 	room.AddUser(user1)
@@ -203,7 +198,7 @@ func TestRemoveUser(t *testing.T) {
 
 func TestLeaveRoom(t *testing.T) {
 	conn := establishConnection()
-	user := CreateUser("MainUser", "1337", conn)
+	user := CreateUser("MainUser", "1337")
 	room0 := CreateRoom("Room 0")
 	room1 := CreateRoom("Room 1")
 	room2 := CreateRoom("Room 2")
@@ -233,35 +228,110 @@ func TestLeaveRoom(t *testing.T) {
 	}
 }
 
-
+*/
 
 func TestGetUser(t *testing.T){
-	conn := establishConnection()
-	usr0 := CreateUser("ussr0", "pass", conn)
+	InitDBs()
+	
+	//conn := estalishConnection()
+	usr0 := AddNewUser("ussr0", "pass")
 
 	usr1 := GetUser("ussr0")
 
-	usr1.Uname = "fisk" // kollar så att namnet ändras för alla instanser av usr
+	usr1.UName = "fisk" // kollar så att namnet ändras för alla instanser av usr
 	
-	if !(reflect.DeepEqual(usr0,usr1)){
+	if usr0 != usr1 {
 		t.Error("User not in global User list")
 	}
 
-	usr2 := GetUser("MainUser")
+	usr0 = GetUser("Not a valid username")
 
-	if (reflect.DeepEqual(usr1,usr2)){
-		t.Error("Different users are the same")
+	if usr0 != nil{
+		t.Error("This should be nil")
+	}
+
+}
+
+func TestShowRooms(t *testing.T){
+	InitDBs()
+
+	usr0 := AddNewUser("usr0", "pass0")
+	RoomNames := []string{"Room0","Room1","Room2","Room3"}
+	
+	room0 := AddNewRoom(RoomNames[0])
+	room1 := AddNewRoom(RoomNames[1])
+	room2 := AddNewRoom(RoomNames[2])
+	room3 := AddNewRoom(RoomNames[3])
+
+	usr0.JoinRoom(room0)
+	usr0.JoinRoom(room1)
+	usr0.JoinRoom(room2)
+	usr0.JoinRoom(room3)
+
+	Rooms := usr0.ShowRooms()
+
+	for x,y := range Rooms {
+		if RoomNames[x] != y {
+			t.Errorf("RoomNames are broken on index %v", x)
+		}
+	}
+
+	usr1 := AddNewUser("usr1", "pass1")
+	Rooms = usr1.ShowRooms()
+
+	if len(Rooms) != 0{
+		t.Errorf("length should be 0. Actual:%v",len(Rooms))
+	}
+
+	
+	FakeUsr := CreateUser("fakeusr", "fakepass")
+
+	Rooms = FakeUsr.ShowRooms()
+
+	if Rooms != nil{
+		t.Error("Should return nil")
 	}
 }
 
 func TestShowUsers(t *testing.T){
+	InitDBs() 
 
-	usr0 := GetUser("MainUser")
+	usrnames := []string{"usr1","usr2","usr3","usr4"}
+	
+	room1 := AddNewRoom("Room1")
 
-	rooms := usr0.ShowRooms()
+	usr1 := AddNewUser(usrnames[0], "pass1")
+ 	usr2 := AddNewUser(usrnames[1], "pass2")
+	usr3 := AddNewUser(usrnames[2], "pass3")
+	usr4 := AddNewUser(usrnames[3], "pass4")
+	
+	usr1.JoinRoom(room1)
+	usr2.JoinRoom(room1)
+	usr3.JoinRoom(room1)
+	usr4.JoinRoom(room1)
+	
+	names := ShowUsers(room1)
 
-	for x,y := range rooms{
-		fmt.Printf("%d,%s",x,y)
+	for x,y := range names {
+		if usrnames[x] != y {
+			t.Errorf("UserNames are broken on index %v", x)
+		}
 	}
+
+	
+	room2 := AddNewRoom("Room2")
+	names = ShowUsers(room2)
+
+	if len(names) != 0{
+		t.Errorf("length should be 0. Actual:%v",len(names))
+	}
+
+	RealFakeRoom := CreateRoom("fakeroom", -1)
+
+	names = ShowUsers(RealFakeRoom)
+
+	if names != nil{
+		t.Error("Should return nil")
+	}
+	
 }
-*/

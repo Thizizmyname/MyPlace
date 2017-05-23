@@ -34,8 +34,8 @@ ErrorCause string
 }
 
 type GetRoomsRequest struct {
-RequestID int
-UName string
+	RequestID int
+	UName string
 }
 
 type GetRoomsResponse struct {
@@ -44,8 +44,8 @@ type GetRoomsResponse struct {
 }
 
 type GetRoomUsersRequest struct {
-RequestID int
-RoomID int
+	RequestID int
+	RoomID int
 }
 
 type GetRoomUsersResponse struct {
@@ -55,9 +55,9 @@ type GetRoomUsersResponse struct {
 }
 
 type GetOlderMsgsRequest struct {
-  RequestID int
-  RoomID int
-  MsgID int
+	RequestID int
+	RoomID int
+	MsgID int
 }
 
 type GetOlderMsgsResponse struct {
@@ -77,9 +77,9 @@ type GetNewerMsgsResponse struct {
 }
 
 type JoinRoomRequest struct {
-  RequestID int
-  RoomID int
-  UName string
+	RequestID int
+	RoomID int
+	UName string
 }
 
 type JoinRoomResponse struct {
@@ -89,13 +89,13 @@ type JoinRoomResponse struct {
 }
 
 type LeaveRoomRequest struct {
-  RequestID int
-  RoomID int
-  UName string
+	RequestID int
+	RoomID int
+	UName string
 }
 
 type LeaveRoomResponse struct {
-  RequestID int
+	RequestID int
 }
 
 type CreateRoomRequest struct {
