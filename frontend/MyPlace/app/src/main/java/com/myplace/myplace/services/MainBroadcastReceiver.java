@@ -48,7 +48,11 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
                     break;
                 case RequestTypes.GET_ROOMS:
                     final ArrayList<RoomInfo> roomResponse = JSONParser.getRoomResponse(serverMessage);
-                    handleRoomList(roomResponse);
+                     if (roomResponse != null) {
+                         handleRoomList(roomResponse);
+                    } else {
+                         Log.e("MainBroadcastReceiver", "You have no Rooms");
+                     }
                     break;
                 case RequestTypes.GET_USERS:
 
@@ -62,7 +66,7 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
                     handleMessages(newerMsgs);
                     break;
                 case RequestTypes.CREATE_ROOM:
-                    Room room = JSONParser.createRoomResponse(serverMessage);
+                    RoomInfo room = JSONParser.createRoomResponse(serverMessage);
                     handleCreatedRoom(room);
                     break;
                 case RequestTypes.JOIN_ROOM:
@@ -99,7 +103,11 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
     }
 
     protected void handleRoomList(ArrayList<RoomInfo> roomResponse) {
-        throw new RuntimeException("No implementation");
+
+        for (RoomInfo r : roomResponse) {
+            roomDB.createRoomTable(r);
+        }
+        handleRoomListInActivity(roomResponse);
     }
 
 
@@ -110,13 +118,13 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
 
     }
 
-    private void handleCreatedRoom(final Room room) {
+    private void handleCreatedRoom(final RoomInfo room) {
         roomDB.createRoomTable(room);
         handleCreatedRoomInActivity(room);
     }
 
     private void handleJoinedRoom(final RoomInfo room) {
-        roomDB.createRoomTable(room.getRoom());
+        roomDB.createRoomTable(room);
         handleJoinedRoomInActivity(room);
     }
 
@@ -128,11 +136,13 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
 
     }
 
+    public void handleRoomListInActivity(final ArrayList<RoomInfo> roomlist) {}
+
     public void handleJoinedRoomInActivity(final RoomInfo roominfo) {}
 
     public void handleOlderMessagesInActivity(final ArrayList<Message> messages){}
 
-    public void handleCreatedRoomInActivity(final Room room){}
+    public void handleCreatedRoomInActivity(final RoomInfo roominfo){}
 
     public abstract void handleNewMessageInActivity(final Message msg);
 

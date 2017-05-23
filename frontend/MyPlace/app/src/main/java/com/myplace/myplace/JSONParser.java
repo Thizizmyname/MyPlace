@@ -35,7 +35,7 @@ public final class JSONParser {
     private static final String KEY_ROOM_ID = "RoomID";
     private static final String KEY_ROOM_NAME = "RoomName";
     private static final String KEY_ROOM_ID_ACCEPTED = "RoomIDAccepted";
-    private static final String KEY_ROOM_LIST = "Password";
+    private static final String KEY_ROOM_LIST = "Rooms";
     private static final String KEY_ROOM_JOINED = "JoinedRoom";
     private static final String KEY_USER_LIST = "Users";
     private static final String KEY_MSG_ID = "MsgID";
@@ -113,14 +113,17 @@ public final class JSONParser {
 
     public static ArrayList<RoomInfo> getRoomResponse(String rawString) throws JSONException {
         JSONObject json = makeProperJsonObject(rawString);
-        JSONArray jsonRooms = json.getJSONArray(KEY_ROOM_LIST);
-        ArrayList<RoomInfo> rooms = new ArrayList<>(jsonRooms.length());
-        for (int i = 0; i < jsonRooms.length(); i++) {
-            JSONObject r = jsonRooms.getJSONObject(i);
+        if (!json.isNull(KEY_ROOM_LIST)) {
+            JSONArray jsonRooms = json.getJSONArray(KEY_ROOM_LIST);
+            ArrayList<RoomInfo> rooms = new ArrayList<>(jsonRooms.length());
+            for (int i = 0; i < jsonRooms.length(); i++) {
+                JSONObject r = jsonRooms.getJSONObject(i);
 
-            rooms.add(constructRoom(r));
+                rooms.add(constructRoom(r));
+            }
+            return rooms;
         }
-        return rooms;
+        return null;
     }
 
     public static String getRoomUsersRequest(int roomID) throws JSONException {
@@ -211,11 +214,12 @@ public final class JSONParser {
         return String.format(TWO_CHAR_FORMAT, CREATE_ROOM) + json.toString();
     }
 
-    public static Room createRoomResponse(String rawString) throws JSONException {
+    public static RoomInfo createRoomResponse(String rawString) throws JSONException {
         JSONObject json = makeProperJsonObject(rawString);
         int _id = json.getInt(KEY_ROOM_ID);
         String _name = json.getString(KEY_ROOM_NAME);
-        return new Room(_id, _name);
+        Room room = new Room(_id, _name);
+        return new RoomInfo(room);
     }
 
     public static String postMsgRequest(Message msg) throws JSONException {

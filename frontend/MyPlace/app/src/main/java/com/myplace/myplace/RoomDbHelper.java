@@ -26,6 +26,7 @@ public class RoomDbHelper extends SQLiteOpenHelper {
     private static final String ROOMLIST_ROOMID = "roomid";
     private static final String ROOMLIST_ROOMNAME = "roomname";
     private static final String ROOMLIST_LASTMESSAGE = "lastmessage";
+    private static final String ROOMLIST_LM_NAME = "lmname";
     private static final String ROOMLIST_LM_TIMESTAMP = "lmtimestamp";
 
     // roomtables strings
@@ -53,6 +54,7 @@ public class RoomDbHelper extends SQLiteOpenHelper {
         String CREATE_ROOMLIST_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_ROOMS + "("
                 + ROOMLIST_ROOMID       +" INTEGER, "
                 + ROOMLIST_ROOMNAME     +" TEXT, "
+                + ROOMLIST_LM_NAME      +" TEXT, "
                 + ROOMLIST_LASTMESSAGE  +" TEXT, "
                 + ROOMLIST_LM_TIMESTAMP +" INTEGER);";
 
@@ -63,9 +65,9 @@ public class RoomDbHelper extends SQLiteOpenHelper {
         return "_"+roomID;
     }
 
-    public void createRoomTable(Room room) {
+    public void createRoomTable(RoomInfo roomInfo) {
         SQLiteDatabase db = this.getWritableDatabase();
-        String roomIDString = getRoomIdString(room.getRoomID());
+        String roomIDString = getRoomIdString(roomInfo.getRoomID());
 
         final String CREATE_ROOM_TABLE = "CREATE TABLE IF NOT EXISTS "+roomIDString+"("
                 +ROOM_MESSAGEID + " INTEGER, "
@@ -75,12 +77,12 @@ public class RoomDbHelper extends SQLiteOpenHelper {
 
         db.execSQL(CREATE_ROOM_TABLE);
         db.close();
-        if (!roomExists(room)) {
-            addRoom(room);
+        if (!roomExists(roomInfo)) {
+            addRoom(roomInfo);
         }
     }
 
-    private boolean roomExists(Room room) {
+    private boolean roomExists(RoomInfo roomInfo) {
         String query = "SELECT "+ROOMLIST_ROOMID+" FROM "+TABLE_ROOMS;
         SQLiteDatabase db = getReadableDatabase();
 
@@ -88,7 +90,7 @@ public class RoomDbHelper extends SQLiteOpenHelper {
         if (c.moveToFirst()) {
             do {
                 int selectedID = c.getInt(c.getColumnIndex(ROOMLIST_ROOMID));
-                if (selectedID == room.getRoomID()) {
+                if (selectedID == roomInfo.getRoomID()) {
                     return true;
                 }
             } while (c.moveToNext());
@@ -97,22 +99,19 @@ public class RoomDbHelper extends SQLiteOpenHelper {
         return false;
     }
 
-    private void addRoom(Room room) {
+    private void addRoom(RoomInfo roomInfo) {
         ContentValues insertValues = new ContentValues();
-        insertValues.put(ROOMLIST_ROOMID, room.getRoomID());
-        insertValues.put(ROOMLIST_ROOMNAME, room.getName());
-        Message lastmessage;
-        try {
-            lastmessage = getLastMessage(room.getRoomID());
-            insertValues.put(ROOMLIST_LASTMESSAGE, lastmessage.getText());
-            insertValues.put(ROOMLIST_LM_TIMESTAMP, lastmessage.getTimestamp());
-        } catch (Exception e) {
-            insertValues.put(ROOMLIST_LASTMESSAGE, "");
-            insertValues.put(ROOMLIST_LM_TIMESTAMP, 0);
-        } finally {
-            SQLiteDatabase db = this.getWritableDatabase();
-            db.insert(TABLE_ROOMS, null, insertValues);
-            db.close();
+        insertValues.put(ROOMLIST_ROOMID, roomInfo.getRoomID());
+        insertValues.put(ROOMLIST_ROOMNAME, roomInfo.getName());
+        insertValues.put(ROOMLIST_LM_NAME, roomInfo.getLastSender());
+        insertValues.put(ROOMLIST_LASTMESSAGE, roomInfo.getLastMessageText());
+        insertValues.put(ROOMLIST_LM_TIMESTAMP, roomInfo.getLastMessageTime());
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.insert(TABLE_ROOMS, null, insertValues);
+        db.close();
+
+        if (roomInfo.hasLastMessage()) {
+            addMessage(roomInfo.getRoomID(), roomInfo.getLastMessage());
         }
     }
 
