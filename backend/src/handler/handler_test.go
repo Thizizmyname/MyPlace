@@ -514,7 +514,7 @@ func TestJoinRoom(t *testing.T){
 	resp = requests_responses.JoinRoomResponse{12345,roomInfo,true}
 	executeAndTestResponse(t,req,resp)
 
-	// Test if a user joins a room which his is allready a member of
+	// Test if a user joins a room which he's is allready a member of
 	roomInfo = myplaceutils.CreateRoomInfo(room0,user1)
 	req = requests_responses.JoinRoomRequest{12345,room0.ID,user1.UName}
 	eresp = requests_responses.ErrorResponse{12345,requests_responses.JoinRoomIndex,"User is already a member of the room"}
@@ -555,56 +555,7 @@ func TestLeaveRoom(t *testing.T){
 	executeAndTestResponse(t,req,resp)
 }
 
-/*
-func TestGetNewerMsgs(t *testing.T){
-	myplaceutils.InitDBs()
-	u1 := myplaceutils.AddNewUser("ask", "embla")
-	u1_responseChan := make(chan requests_responses.Response, 1)
-	u2 := myplaceutils.AddNewUser("adam", "eva")
-	u2_responseChan := make(chan requests_responses.Response, 1)
-	r1 := myplaceutils.AddNewRoom("livingroom")
-	r2 := myplaceutils.AddNewRoom("bedroom")
-	u1.JoinRoom(r1)
-	u1.JoinRoom(r2)
-	u2.JoinRoom(r1)
 
-	//signin
-	lrq := requests_responses.SignInRequest{1234, u1.UName, u1.Pass}
-	lrp := requests_responses.SignInResponse{1234, true, ""}
-	executeAndTestResponse_chan(t, u1_responseChan, lrq, lrp)
-	lrq = requests_responses.SignInRequest{1234, u2.UName, u2.Pass}
-	lrp = requests_responses.SignInResponse{1234, true, ""}
-	executeAndTestResponse_chan(t, u2_responseChan, lrq, lrp)
-
-	//post msgs
-	str := "hello? who are you?"
-	req := requests_responses.PostMsgRequest{12345, u1.UName, r1.ID, str}
-	msgI := requests_responses.MsgInfo{0, r1.ID, u1.UName, -1, str}
-	resp := requests_responses.PostMsgResponse{12345, msgI}
-	executeAndTestResponse_chan(t, u1_responseChan, req, resp)
-
-	str = "anybody there?"
-	req = requests_responses.PostMsgRequest{12345, u1.UName, r1.ID, str}
-	msgI = requests_responses.MsgInfo{1, r1.ID, u1.UName, -1, str}
-	resp = requests_responses.PostMsgResponse{12345, msgI}
-	executeAndTestResponse_chan(t, u1_responseChan, req, resp)
-
-	str = "Yea, what's your name?"
-	req = requests_responses.PostMsgRequest{12345, u1.UName, r1.ID, str}
-	msgI = requests_responses.MsgInfo{2, r1.ID, u1.UName, -1, str}
-	resp = requests_responses.PostMsgResponse{12345, msgI}
-	executeAndTestResponse_chan(t, u1_responseChan, req, resp)
-
-	str = "My name is Alex"
-	req = requests_responses.PostMsgRequest{12345, u1.UName, r1.ID, str}
-	msgI = requests_responses.MsgInfo{3, r1.ID, u1.UName, -1, str}
-	resp = requests_responses.PostMsgResponse{12345, msgI}
-	executeAndTestResponse_chan(t, u1_responseChan, req, resp)
-
-//	req = requests_responses.
-//		resp =
-//		executeAndTestResponse()
-} */
 
 func TestGetRooms(t *testing.T){
 	myplaceutils.InitDBs()
@@ -672,7 +623,7 @@ func TestGetOlderMsgs(t *testing.T){
 	respMsg := []requests_responses.MsgInfo{}
 	
 	req1 := requests_responses.GetOlderMsgsRequest{12345, r1.ID,1}
-	erresp1 := requests_responses.ErrorResponse{12345,4,"MessageID does not exist"}
+	erresp1 := requests_responses.ErrorResponse{12345,requests_responses.GetOlderMsgsIndex,"MessageID does not exist"}
 	executeAndTestResponse(t, req1, erresp1)
 
 	req1 = requests_responses.GetOlderMsgsRequest{12345, r1.ID, -1}
@@ -704,7 +655,8 @@ func TestGetOlderMsgs(t *testing.T){
 	msgI = requests_responses.MsgInfo{3, r1.ID, u1.UName, -1, str}
 	resp = requests_responses.PostMsgResponse{12345, msgI}
 	executeAndTestResponse_chan(t, u1_responseChan, req, resp)
-	
+
+	// GetoldermsgsRequest
 	req1 = requests_responses.GetOlderMsgsRequest{12345, r1.ID, 2}
 	resp1 = requests_responses.GetOlderMsgsResponse{12345, respMsg}
 	executeAndTestResponse(t, req1, resp1)
@@ -749,7 +701,7 @@ func testGetNewerMsgsResponse(t *testing.T ,request requests_responses.GetNewerM
 			expectedResponse)
 	}
 }
-/*
+
 func TestGetNewerMsgs(t *testing.T){
 	myplaceutils.InitDBs()
 	u1 := myplaceutils.AddNewUser("ask", "embla")
@@ -760,17 +712,28 @@ func TestGetNewerMsgs(t *testing.T){
 	u2.JoinRoom(r1)
 
 	var respMsg []requests_responses.MsgInfo
+	var respMsg2 []requests_responses.MsgInfo
+	// Användarna är inte inloggade, spelar det någon roll?
 
+	//Test if the user tries to get msg in a empty room
+
+	req1 := requests_responses.GetNewerMsgsRequest{12345, r1.ID,1}
+	erresp1 := requests_responses.ErrorResponse{12345,requests_responses.GetNewerMsgsIndex,"MessageID does not exist"}
+	executeAndTestResponse(t, req1, erresp1)
+	
+	// PostMsg
 	str := "hello? who are you?"
 	req := requests_responses.PostMsgRequest{12345, u1.UName, r1.ID, str}
 	msgI := requests_responses.MsgInfo{0, r1.ID, u1.UName, -1, str}
 	resp := requests_responses.PostMsgResponse{12345, msgI}
+	respMsg2 = append(respMsg2, msgI)
 	executeAndTestResponse_chan(t, u1_responseChan, req, resp)
 
 	str = "anybody there?"
 	req = requests_responses.PostMsgRequest{12345, u1.UName, r1.ID, str}
 	msgI = requests_responses.MsgInfo{1, r1.ID, u1.UName, -1, str}
 	resp = requests_responses.PostMsgResponse{12345, msgI}
+	respMsg2 = append(respMsg2, msgI)
 	executeAndTestResponse_chan(t, u1_responseChan, req, resp)
 
 	str = "I am in Room X"
@@ -778,6 +741,7 @@ func TestGetNewerMsgs(t *testing.T){
 	msgI = requests_responses.MsgInfo{2, r1.ID, u1.UName, -1, str}
 	respMsg = append(respMsg, msgI)
 	resp = requests_responses.PostMsgResponse{12345, msgI}
+	respMsg2 = append(respMsg2, msgI)
 	executeAndTestResponse_chan(t, u1_responseChan, req, resp)
 
 	str = "And I am in Room Y"
@@ -785,10 +749,19 @@ func TestGetNewerMsgs(t *testing.T){
 	msgI = requests_responses.MsgInfo{3, r1.ID, u1.UName, -1, str}
 	respMsg = append(respMsg, msgI)
 	resp = requests_responses.PostMsgResponse{12345, msgI}
+	respMsg2 = append(respMsg2, msgI)
 	executeAndTestResponse_chan(t, u1_responseChan, req, resp)
 
-	req1 := requests_responses.GetNewerMsgsRequest{12345,r1.ID,1}
+	//Test if user1 which has msgID = 1 to get the two newer msgs 
+	req1 = requests_responses.GetNewerMsgsRequest{12345,r1.ID,1}
 	resp1 := requests_responses.GetNewerMsgsResponse{12345,respMsg}
 	executeAndTestResponse(t, req1, resp1)
+
+	// Test if user joins a room and dont have any of the msgs
+	req1 = requests_responses.GetNewerMsgsRequest{12345,r1.ID,-1}
+	resp1 = requests_responses.GetNewerMsgsResponse{12345,respMsg2}
+	executeAndTestResponse(t, req1, resp1)
+	
 }
-*/
+
+

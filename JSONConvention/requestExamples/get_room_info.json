@@ -1,0 +1,25 @@
+// Request
+{
+    "requestID": 286001,
+    "requestIndex": 3,
+    "requestName": "get_room_info",
+
+    "roomID": 1142
+}
+
+
+// Response
+{
+    "requestResponse": 286001,
+    "requestIndex": 3,
+    "requestName": "get_room_info",
+
+    "users": [
+        {"userName": "Rachel Green"}, 
+        {"userName": "Monica Geller"},
+        {"userName": "Phoebe Buffay"},
+        {"userName": "Joey Tribbiani"},
+        {"userName": "Chandler Bing"},
+        {"userName": "Ross Geller"}
+    ]
+}
