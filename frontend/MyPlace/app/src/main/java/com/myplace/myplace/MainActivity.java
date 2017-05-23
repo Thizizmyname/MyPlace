@@ -100,7 +100,9 @@ public class MainActivity extends AppCompatActivity {
         Log.d("Main_Activity", "I'm in onStart!");
         Intent intent = new Intent(this, ConnectionService.class);
         bindService(intent, mTConnection, Context.BIND_AUTO_CREATE);
+    }
 
+    private void updateRoomList() {
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -117,6 +119,15 @@ public class MainActivity extends AppCompatActivity {
                 } catch (JSONException e) {
                     Log.d("MainActivity", "Get room request error");
                     e.printStackTrace();
+                }
+                for (RoomInfo room : roomList) {
+                    try {
+                        mService.sendMessage(JSONParser.getNewerMsgsRequest(room.getRoomID(), room.getLastMessage().getId()));
+                    }
+                    catch (JSONException e){
+                        Log.d("MainActivity", "Cant get newer message");
+                        e.printStackTrace();
+                    }
                 }
             }
         });
@@ -233,6 +244,7 @@ public class MainActivity extends AppCompatActivity {
                 onAddRoomClick(R.string.join_room);
             }
         });
+        updateRoomList();
     }
 
 
