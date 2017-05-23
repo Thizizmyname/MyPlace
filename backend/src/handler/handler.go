@@ -244,39 +244,25 @@ func getOlderMsgs(request requests_responses.GetOlderMsgsRequest) requests_respo
 }
 
 func getNewerMsgs(request requests_responses.GetNewerMsgsRequest) requests_responses.Response {
-	/*
-	ID := request.RequestID
-	RoomID := request.RoomID
-	MsgID := request.MsgID
-	Room := myplaceutils.GetRoom(RoomID)
-	NoMsgs := 1 // Anger hur många meddelanden som ska hämtas
-	messages := []requests_responses.MsgInfo{}
-
-	for x := MsgID; x >=(MsgID+NoMsgs); x++{
-		msg := Room.Messages[x]
-		msgInfo := myplaceutils.CreateMsgInfo(msg,RoomID)
-		messages = append(messages,msgInfo)
-	}
-	response := requests_responses.GetNewerMsgsResponse{ID,messages}
-	return response
-*/
 	requestID := request.RequestID
 	roomID := request.RoomID
 	msgID := request.MsgID
 	getNoMsg := 10
-
+	msgInfos := []requests_responses.MsgInfo{}
+	
 	room := myplaceutils.GetRoom(roomID)
-
+	// Checks if the user has a msgID which is greater than the latestMsgID in the room
+	if msgID > len(room.Messages) {
+		return requests_responses.ErrorResponse{requestID,requests_responses.GetNewerMsgsIndex,"MessageID does not exist"}
+	}
+	
 	if (getNoMsg + msgID) > len(room.Messages) {
 		getNoMsg = len(room.Messages)
-
-		
 	}else{
 		getNoMsg = msgID+getNoMsg +1 // inkluderar det sista meddelandet i rangen av taket från msgId
 	}
-
-	var msgInfos = make([] requests_responses.MsgInfo,getNoMsg)
-	for x := (msgID+1) ; x <= getNoMsg; x++ {
+	
+	for x := (msgID+1) ; x < getNoMsg; x++ {
 		msg := room.Messages[x]
 		msgInfo := myplaceutils.CreateMsgInfo(msg,room.ID)
 		msgInfos = append(msgInfos,msgInfo)
