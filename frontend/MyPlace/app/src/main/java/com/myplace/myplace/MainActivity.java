@@ -122,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 for (RoomInfo room : roomList) {
                     try {
-                        mService.sendMessage(JSONParser.getNewerMsgsRequest(room.getRoomID(), room.getLatestMessage(context).getId()));
+                        mService.sendMessage(JSONParser.getNewerMsgsRequest(room.getRoomID(), room.getLastMessage().getId()));
                     }
                     catch (JSONException e){
                         Log.d("MainActivity", "Cant get newer message");
