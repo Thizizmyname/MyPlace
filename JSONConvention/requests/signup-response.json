@@ -1,0 +1,10 @@
+00{
+    "RequestID": 0000,
+
+    "Result": true/false,
+    "ErrorCause": "RESPONSE"
+}
+
+// Possible responses:
+// ""   - Username accepted and constructed
+// "takenUserName"  - Username taken and need to come up with a new

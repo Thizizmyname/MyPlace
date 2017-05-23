@@ -1,6 +1,7 @@
 package myplaceutils
 
 import (
+
   "fmt"
   "net"
   "time"
@@ -101,6 +102,7 @@ func (u *User) BindConnection(c net.Conn) bool {
 
 //Method for room to add a new message
 //func (r Room)NewMessage(u User, msgbody string)
+
 
 //Room method to add a user to the room
 func (r *Room) AddUser(u *User) {
@@ -487,6 +489,7 @@ func CreateMsgInfo(msg *Message, roomID int) requests_responses.MsgInfo {
 
 //Jävligt snyggt
 func PrintTitle() {
+
   fmt.Printf("                    ____  __            \n")
   fmt.Printf("   ____ ___  __  __/ __ \\/ /___ _________ \n")
   fmt.Printf("  / __ `__ \\/ / / / /_/ / / __ `/ ___/ _ \\\n")

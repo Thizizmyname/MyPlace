@@ -1,0 +1,11 @@
+01{
+    "RequestID": 0000,
+
+    "Result": true/false,
+    "errorCause": "RESPONSE"
+}
+
+// Possible responses:
+// ""   - No error
+// "NoUsername"     - Username not in use
+// "incorrectPass" - incorrect password given
