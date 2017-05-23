@@ -39,6 +39,7 @@ import org.w3c.dom.Text;
 import java.util.ArrayList;
 
 import static com.myplace.myplace.LoginActivity.LOGIN_PREFS;
+import static java.lang.Thread.sleep;
 
 public class MessageActivity extends AppCompatActivity {
     private String TAG = "MessageActivity";
@@ -248,16 +249,33 @@ public class MessageActivity extends AppCompatActivity {
         builder.show();
     }
 
-    private void getOlderIfNeeded(ArrayList<Message> msgList) {
+    private void getOlderIfNeeded(final ArrayList<Message> msgList) {
 
         int listLength = msgList.size();
-        if (listLength == 1 && msgList.get(0).getRoomID() != FIRST_MSGID_IN_CONVERSATION)
+        if (listLength == 1 && msgList.get(0).getRoomID() != FIRST_MSGID_IN_CONVERSATION) {
 
-            try {
-                mService.sendMessage(JSONParser.getOlderMsgsRequest(roomID, msgList.get(0).getId()));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while (!mBound) {
+                        Log.d("MainActivity", "Waiting for mBound");
+                        try {
+                            sleep(500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    try {
+                        mService.sendMessage(JSONParser.getOlderMsgsRequest(roomID, msgList.get(0).getId()));
+                    } catch (JSONException e) {
+                        Log.d("MainActivity", "Get room request error");
+                        e.printStackTrace();
+                    }
+                }
+            });
+
+            thread.start();
+        }
     }
 
     @Override
