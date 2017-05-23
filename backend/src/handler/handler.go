@@ -31,6 +31,10 @@ func ClientResponseHandler(conn net.Conn, clientResponseChannel chan requests_re
 
 func ClientHandler(conn net.Conn, clientChannel chan requests_responses.Response) {
 	myplaceutils.Info.Println("Connection sent to clientHandler in go routine")
+
+	handlerChan := make(chan myplaceutils.HandlerArgs, 5)
+	go ResponseHandler(handlerChan)
+
 	go ClientResponseHandler(conn, clientChannel)
 	readBuf := make([]byte, myplaceutils.ConnReadMaxLength + 1)
 	signedInUser := ""
@@ -46,7 +50,7 @@ func ClientHandler(conn net.Conn, clientChannel chan requests_responses.Response
 		if err != nil || n == 0 {
 			myplaceutils.Info.Println("User disconnected from the server")
 			if signedInUser != "" {
-				sendSignOutRequest(-1, signedInUser, clientChannel)
+				sendSignOutRequest(-1, signedInUser, clientChannel, handlerChan)
 			}
 			conn.Close()
 			return
@@ -73,7 +77,7 @@ func ClientHandler(conn net.Conn, clientChannel chan requests_responses.Response
 				} else {
 					//trying to sign in without signing out previous user.
 					//shouldn't happen.., still:
-					sendSignOutRequest(signInReq.RequestID, signInReq.UName, clientChannel)
+					sendSignOutRequest(signInReq.RequestID, signInReq.UName, clientChannel, handlerChan)
 				}
 			} else if _, ok := request.(requests_responses.SignOutRequest); ok {
 				signedInUser = ""
@@ -82,14 +86,14 @@ func ClientHandler(conn net.Conn, clientChannel chan requests_responses.Response
 			var requestParsed myplaceutils.HandlerArgs
 			requestParsed.IncomingRequest = request
 			requestParsed.ResponseChannel = clientChannel
-			myplaceutils.RequestChannel <- requestParsed
+			handlerChan <- requestParsed
 		}
 	}
 }
 
-func sendSignOutRequest(reqID int, uname string, c chan requests_responses.Response) {
+func sendSignOutRequest(reqID int, uname string, c chan requests_responses.Response, handlerChan chan myplaceutils.HandlerArgs) {
 	args := myplaceutils.HandlerArgs{requests_responses.SignOutRequest{reqID, uname}, c}
-	myplaceutils.RequestChannel <- args
+	handlerChan <- args
 }
 
 func ResponseHandler(incomingChannel chan myplaceutils.HandlerArgs) {
@@ -176,7 +180,11 @@ func signIn(request requests_responses.SignInRequest, responseChan chan requests
 		return requests_responses.SignInResponse{requestID, false, "pass"}
 	}
 
-	for e := user.Rooms.Front(); e != nil; e = e.Next() {
+	myplaceutils.Mutex.Lock()
+	rms := user.Rooms
+	myplaceutils.Mutex.Unlock()
+
+	for e := rms.Front(); e != nil; e = e.Next() {
 		room_ := e.Value.(myplaceutils.RoomIDAndLatestReadMsgID)
 		room := myplaceutils.GetRoom(room_.RoomID)
 		room.AddOutgoingChannel(responseChan)
@@ -344,6 +352,7 @@ func postMsg(request requests_responses.PostMsgRequest, responseChan chan reques
 	requestIDToAllButSender := -1
 	response := requests_responses.PostMsgResponse{requestIDToAllButSender, msgResp}
 
+	myplaceutils.Mutex.Lock()
 	for e := room.OutgoingChannels.Front(); e != nil; e = e.Next() {
 		roomChan := e.Value.(chan requests_responses.Response)
 
@@ -351,6 +360,7 @@ func postMsg(request requests_responses.PostMsgRequest, responseChan chan reques
 			roomChan <- response
 		}
 	}
+	myplaceutils.Mutex.Unlock()
 
 	response.RequestID = requestID
 

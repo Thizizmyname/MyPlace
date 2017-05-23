@@ -100,8 +100,8 @@ func main() {
 	//255 känns som en lämplig size så länge MAGIC NUMBER
 	myplaceutils.RequestChannel = make(chan myplaceutils.HandlerArgs, 255)
 
-	go handler.ResponseHandler(myplaceutils.RequestChannel)
-	myplaceutils.Info.Println("Creating a listener")
+	//go handler.ResponseHandler(myplaceutils.RequestChannel)
+	//myplaceutils.Info.Println("Creating a listener")
 
 	tcpAddress,_ := net.ResolveTCPAddr("tcp","127.0.0.1:1337")
 	listener, err := net.ListenTCP("tcp",tcpAddress)

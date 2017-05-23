@@ -13,7 +13,7 @@ import "io/ioutil"
 import "io"
 
 const (
-	noClientsToStartWith = 10000
+	noClientsToStartWith = 1000
 	maxSpawnDelay = 2
 	maxRequestDelay = 5000
 	noUsersPerRoom = 5
@@ -30,7 +30,6 @@ type clientWriterArgs struct {
 var noClients int = 0
 var noRooms int = 0
 var waitTimeChan chan time.Duration = make(chan time.Duration, 20)
-var handlerChan chan myplaceutils.HandlerArgs = make(chan myplaceutils.HandlerArgs)
 var dbg *log.Logger
 var out *log.Logger = log.New(os.Stdout, "\nOUTPUT: ", 0)
 
@@ -41,9 +40,9 @@ func main() {
 		dbg = log.New(ioutil.Discard, "\nEVENT:\n", 0)
 	}
 
+	rand.Seed(time.Now().Unix())
 	myplaceutils.InitDBs()
 	initLoggers(ioutil.Discard, ioutil.Discard, ioutil.Discard, ioutil.Discard)
-	go handler.ResponseHandler(handlerChan)
 	go gatherAndPrintStats()
 
 	for i := 0; i < noClientsToStartWith; i++ {
@@ -80,6 +79,9 @@ func startNewClient(index int) bool {
 
 
 func clientSender(responseChan chan requests_responses.Response, requestChan chan clientWriterArgs, index int, createRoom string) {
+	handlerChan := make(chan myplaceutils.HandlerArgs, 5)
+	go handler.ResponseHandler(handlerChan)
+
 	uname := fmt.Sprintf("user%v", index)
 	pass := "pass"
 	joinRooms := getRandomRoomIDs(noRooms)
@@ -87,38 +89,38 @@ func clientSender(responseChan chan requests_responses.Response, requestChan cha
 	requestID := 0
 	signUpReq := requests_responses.SignUpRequest{
 		requestID, uname, pass}
-	sendAndSleep(responseChan, requestChan, signUpReq, requestID)
+	sendAndSleep(responseChan, requestChan, signUpReq, requestID, handlerChan)
 
 	requestID++
 	signInReq := requests_responses.SignInRequest{
 		requestID, uname, pass}
-	sendAndSleep(responseChan, requestChan, signInReq, requestID)
+	sendAndSleep(responseChan, requestChan, signInReq, requestID, handlerChan)
 
 	requestID++
 	if createRoom != "" {
 		createRoomReq := requests_responses.CreateRoomRequest{
 			requestID, createRoom, uname}
-		sendAndSleep(responseChan, requestChan, createRoomReq, requestID)
+		sendAndSleep(responseChan, requestChan, createRoomReq, requestID, handlerChan)
 	}
 
 	for _, roomID := range joinRooms {
 		requestID++
 		joinRoomReq := requests_responses.JoinRoomRequest{
 			requestID, roomID, uname}
-		sendAndSleep(responseChan, requestChan, joinRoomReq, requestID)
+		sendAndSleep(responseChan, requestChan, joinRoomReq, requestID, handlerChan)
 	}
 
 	for ; ; {
 		requestID++
-		postRoom := -1//joinRooms[rand.Intn(len(joinRooms))]
+		postRoom := joinRooms[rand.Intn(len(joinRooms))]
 		body := getRandomMsgBody()
 		postMsgReq := requests_responses.PostMsgRequest{
 			requestID, uname, postRoom, body}
-		sendAndSleep(responseChan, requestChan, postMsgReq, requestID)
+		sendAndSleep(responseChan, requestChan, postMsgReq, requestID, handlerChan)
 	}
 }
 
-func sendAndSleep(responseChan chan requests_responses.Response, requestChan chan clientWriterArgs, request requests_responses.Request, requestID int) {
+func sendAndSleep(responseChan chan requests_responses.Response, requestChan chan clientWriterArgs, request requests_responses.Request, requestID int, handlerChan chan myplaceutils.HandlerArgs) {
 	reqJ, _ := requests_responses.ToRequestString(request)
 	dbg.Printf("Request sent: %v", reqJ)
 
@@ -127,7 +129,6 @@ func sendAndSleep(responseChan chan requests_responses.Response, requestChan cha
 
 	handlerArgs := myplaceutils.HandlerArgs{request, responseChan}
 	handlerChan <- handlerArgs
-
 
 	time.Sleep(time.Duration(rand.Intn(maxRequestDelay)) * time.Millisecond)
 }

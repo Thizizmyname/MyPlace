@@ -9,6 +9,7 @@ import (
   "container/list"
 	"requests_responses"
 	"strings"
+	"sync"
 )
 
 var (
@@ -20,7 +21,7 @@ var (
   //connections []net.Conn
   Users UserDB
   Rooms RoomDB
-  RequestChannel chan HandlerArgs
+  //RequestChannel chan HandlerArgs
 )
 
 const (
@@ -61,6 +62,8 @@ type HandlerArgs struct {
 
 type UserDB map[string]*User //UName is key
 type RoomDB map[int]*Room //ID is key
+
+var Mutex = &sync.Mutex{}
 
 func InitDBs() {
   Users = make(UserDB)
@@ -112,8 +115,10 @@ func (r *Room) AddUser(u *User) {
 func (user *User) JoinRoom(room *Room) {
 	if UserIsInRoom(user.UName, room) { return }
 
+	Mutex.Lock()
 	user.Rooms.PushBack(RoomIDAndLatestReadMsgID{room.ID, -1})
 	room.Users.PushBack(user.UName)
+	Mutex.Unlock()
 }
 
 
@@ -199,7 +204,9 @@ func AddNewUser(uname string, pass string) *User {
 		return nil
 	} else {
 		newUser := User{uname, pass, list.New()}
+		Mutex.Lock()
 		Users[uname] = &newUser
+		Mutex.Unlock()
 		return &newUser
 	}
 }
@@ -208,7 +215,11 @@ func AddNewUser(uname string, pass string) *User {
 func AddNewRoom(name string) *Room {
 	newRoomID := findFreeRoomID()
 	newRoom := Room{newRoomID, name, list.New(), make(map[int]*Message), list.New()}
+
+	Mutex.Lock()
 	Rooms[newRoomID] = &newRoom
+	Mutex.Unlock()
+
 	return &newRoom
 }
 
@@ -220,18 +231,24 @@ func AddNewMessage(uname string, room *Room, body string) *Message {
 
 	newMsgID := findFreeMsgID(room)
 	newMsg := Message{newMsgID, time.Now(), uname, body}
+
+	Mutex.Lock()
 	room.Messages[newMsg.ID] = &newMsg
+	Mutex.Unlock()
+
 	return &newMsg
 }
 
 func GetUser(uname string) *User{
-  user, exists := Users[uname]
+	Mutex.Lock()
+	user, exists := Users[uname]
+	Mutex.Unlock()
 
-  if exists {
-    return user
-  } else {
-    return nil
-  }
+	if exists {
+		return user
+	} else {
+		return nil
+	}
 }
 
 func UserExists(uname string) bool {
@@ -239,7 +256,9 @@ func UserExists(uname string) bool {
 }
 
 func GetRoom(id int) *Room {
+	Mutex.Lock()
 	room, exists := Rooms[id]
+	Mutex.Unlock()
 
   if exists {
     return room
@@ -277,14 +296,15 @@ func GetLatestMsg(room *Room) (*Message,int){
 
 // Returns true if the user is in the room
 func UserIsInRoom(uname string, room *Room) bool {
-	unameList := room.Users
-
-	for e := unameList.Front(); e != nil; e = e.Next() {
+	Mutex.Lock()
+	for e := room.Users.Front(); e != nil; e = e.Next() {
 		if strings.Compare (e.Value.(string), uname) == 0 {
+			Mutex.Unlock()
 			return true
 		}
 	}
 
+	Mutex.Unlock()
 	return false
 }
 
@@ -310,16 +330,22 @@ func RemoveUsersOutgoingChannels(uname string, uOutChan chan requests_responses.
 //in the list, does nothing.
 func (r *Room) AddOutgoingChannel(c chan requests_responses.Response) {
 	if !outChanInUse(c, r.OutgoingChannels) {
+		Mutex.Lock()
 		r.OutgoingChannels.PushBack(c)
+		Mutex.Unlock()
 	}
 }
 
 func outChanInUse(c chan requests_responses.Response, outChans *list.List) bool {
+	Mutex.Lock()
 	for e := outChans.Front(); e != nil; e = e.Next() {
 		outChan := e.Value.(chan requests_responses.Response)
-		if c == outChan { return true }
+		if c == outChan {
+			Mutex.Unlock()
+			return true }
 	}
 
+	Mutex.Unlock()
 	return false
 }
 
@@ -327,9 +353,11 @@ func outChanInUse(c chan requests_responses.Response, outChans *list.List) bool 
 func findFreeRoomID() int {
 	maxID := -1
 
+	Mutex.Lock()
 	for id, _ := range Rooms {
 		if id > maxID { maxID = id }
 	}
+	Mutex.Unlock()
 
 	return maxID + 1
 }
