@@ -294,7 +294,7 @@ func FromResponseString(responseString string) (Response, error) {
 		return nil, err
 	}
 
-	jsonResponse := responseString[2 : len(responseString) - 1]
+	jsonResponse := responseString[2:]
 
 	switch respType {
 	case 0:
@@ -363,29 +363,29 @@ func ToRequestString(request Request) (string, error) {
 
   switch request.(type) {
   case SignUpRequest:
-    return fmt.Sprintf("00%s\n", jsonRequest), nil
+    return fmt.Sprintf("00%s", jsonRequest), nil
   case SignInRequest:
-    return fmt.Sprintf("01%s\n", jsonRequest), nil
+    return fmt.Sprintf("01%s", jsonRequest), nil
   case GetRoomsRequest:
-    return fmt.Sprintf("02%s\n", jsonRequest), nil
+    return fmt.Sprintf("02%s", jsonRequest), nil
   case GetRoomUsersRequest:
-    return fmt.Sprintf("03%s\n", jsonRequest), nil
+    return fmt.Sprintf("03%s", jsonRequest), nil
   case GetOlderMsgsRequest:
-    return fmt.Sprintf("04%s\n", jsonRequest), nil
+    return fmt.Sprintf("04%s", jsonRequest), nil
   case GetNewerMsgsRequest:
-    return fmt.Sprintf("05%s\n", jsonRequest), nil
+    return fmt.Sprintf("05%s", jsonRequest), nil
   case JoinRoomRequest:
-    return fmt.Sprintf("06%s\n", jsonRequest), nil
+    return fmt.Sprintf("06%s", jsonRequest), nil
   case LeaveRoomRequest:
-    return fmt.Sprintf("07%s\n", jsonRequest), nil
+    return fmt.Sprintf("07%s", jsonRequest), nil
   case CreateRoomRequest:
-    return fmt.Sprintf("08%s\n", jsonRequest), nil
+    return fmt.Sprintf("08%s", jsonRequest), nil
   case PostMsgRequest:
-    return fmt.Sprintf("09%s\n", jsonRequest), nil
+    return fmt.Sprintf("09%s", jsonRequest), nil
   case MsgReadRequest:
-    return fmt.Sprintf("10%s\n", jsonRequest), nil
+    return fmt.Sprintf("10%s", jsonRequest), nil
   case SignOutRequest:
-    return fmt.Sprintf("11%s\n", jsonRequest), nil
+    return fmt.Sprintf("11%s", jsonRequest), nil
   default:
     return "", errors.New("illegal request type")
   }
