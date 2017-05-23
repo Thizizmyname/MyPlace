@@ -73,7 +73,7 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
                     handleJoinedRoom(joinroom);
                     break;
                 case RequestTypes.LEAVE_ROOM:
-
+                    handleLeaveRoomInActivity();
                     break;
                 case RequestTypes.MESSAGE:
                     final Message message = JSONParser.messageRecieved(serverMessage);
@@ -83,7 +83,7 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
 
                     break;
                 case RequestTypes.SIGN_OUT:
-
+                    handleLogoutInActivity();
                     break;
                 case RequestTypes.DELETE_USER:
 
@@ -134,6 +134,10 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
         handleOlderMessagesInActivity(messages);
 
     }
+
+    public void handleLogoutInActivity() {}
+
+    public void handleLeaveRoomInActivity(){}
 
     public void handleRoomListInActivity(final ArrayList<RoomInfo> roomlist) {}
 
