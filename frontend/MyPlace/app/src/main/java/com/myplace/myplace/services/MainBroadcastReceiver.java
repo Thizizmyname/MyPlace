@@ -48,7 +48,11 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
                     break;
                 case RequestTypes.GET_ROOMS:
                     final ArrayList<RoomInfo> roomResponse = JSONParser.getRoomResponse(serverMessage);
-                    handleRoomList(roomResponse);
+                     if (roomResponse != null) {
+                         handleRoomList(roomResponse);
+                    } else {
+                         Log.e("MainBroadcastReceiver", "You have no Rooms");
+                     }
                     break;
                 case RequestTypes.GET_USERS:
 
@@ -98,6 +102,7 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
     }
 
     protected void handleRoomList(ArrayList<RoomInfo> roomResponse) {
+
         for (RoomInfo r : roomResponse) {
             roomDB.createRoomTable(r);
         }

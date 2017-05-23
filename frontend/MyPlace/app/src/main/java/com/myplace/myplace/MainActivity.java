@@ -85,6 +85,8 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void handleNewMessageInActivity(Message msg) {
+            ArrayList<RoomInfo> updatedRoomList = roomDB.getRoomList();
+            roomAdapter.updateData(updatedRoomList);
             roomAdapter.notifyDataSetChanged();
         }
     };
@@ -130,6 +132,7 @@ public class MainActivity extends AppCompatActivity {
         // with actions named "custom-event-name".
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter(ConnectionService.BROADCAST_TAG));
+
         ArrayList<RoomInfo> updatedRoomList = roomDB.getRoomList();
         roomAdapter.updateData(updatedRoomList);
         roomAdapter.notifyDataSetChanged();

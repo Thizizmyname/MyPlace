@@ -12,6 +12,7 @@ public class RoomInfo {
     private int lastMsgRead;
 
     public final static String EMPTY_STRING = "";
+    public final static String EMPTY_MESSAGE_STRING = "This room has no messages.";
     public final static long EMPTY_TIMESTAMP = 0;
 
     public RoomInfo(Room _room, Message msg, int latestRead) {
@@ -56,7 +57,7 @@ public class RoomInfo {
         if (lastMsg != null) {
             return lastMsg.getText();
         }
-        return EMPTY_STRING;
+        return EMPTY_MESSAGE_STRING;
     }
 
     public long getLastMessageTime() {
@@ -67,6 +68,6 @@ public class RoomInfo {
     }
 
     public boolean hasLastMessage() {
-        return lastMsg != null;
+        return lastMsg != null && lastMsg.getId() != -1;
     }
 }

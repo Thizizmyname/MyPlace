@@ -174,32 +174,35 @@ public class MessageActivity extends AppCompatActivity {
 
         btnSend.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-
-                // Check if message is empty
-                String messageString = message.getText().toString();
-                if (messageString.matches(EMPTY_STRING)) {
-                    if (messageEmptyToast != null) messageEmptyToast.cancel();
-                    messageEmptyToast = Toast.makeText(MessageActivity.this, R.string.message_empty, Toast.LENGTH_SHORT);
-                    messageEmptyToast.show();
-                    return;
-                }
-
-                SharedPreferences loginInfo = getSharedPreferences(LOGIN_PREFS, 0);
-                final String username = loginInfo.getString("username", MainActivity.NO_USERNAME_FOUND);
-
-                long timestamp = System.currentTimeMillis();
-
-                Message newMessage = new Message(roomID, username, message.getText().toString(), timestamp);
-
-                try {
-                    mService.sendMessage(JSONParser.postMsgRequest(newMessage));
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                message.setText(null); // Reset input field
+                onSendButtonClick(message);
             }
         });
+    }
+
+    private void onSendButtonClick(EditText message) {
+        // Check if message is empty
+        String messageString = message.getText().toString();
+        if (messageString.matches(EMPTY_STRING)) {
+            if (messageEmptyToast != null) messageEmptyToast.cancel();
+            messageEmptyToast = Toast.makeText(MessageActivity.this, R.string.message_empty, Toast.LENGTH_SHORT);
+            messageEmptyToast.show();
+            return;
+        }
+
+        SharedPreferences loginInfo = getSharedPreferences(LOGIN_PREFS, 0);
+        final String username = loginInfo.getString("username", MainActivity.NO_USERNAME_FOUND);
+
+        long timestamp = System.currentTimeMillis();
+
+        Message newMessage = new Message(roomID, username, message.getText().toString(), timestamp);
+
+        try {
+            mService.sendMessage(JSONParser.postMsgRequest(newMessage));
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        message.setText(null); // Reset input field
     }
 
     private TextWatcher onTextChanged = new TextWatcher() {

@@ -32,9 +32,8 @@ public final class JSONParser {
     private static final String KEY_USERNAME = "UName";
     private static final String KEY_PASSWORD = "Pass";
     private static final String KEY_SIGN_ACCEPTANCE = "Result";
-    private static final String KEY_ROOM_ID = "ID";
-    private static final String KEY_MSG_ROOM_ID = "RoomID";
-    private static final String KEY_ROOM_NAME = "Name";
+    private static final String KEY_ROOM_ID = "RoomID";
+    private static final String KEY_ROOM_NAME = "RoomName";
     private static final String KEY_ROOM_ID_ACCEPTED = "RoomIDAccepted";
     private static final String KEY_ROOM_LIST = "Rooms";
     private static final String KEY_ROOM_JOINED = "JoinedRoom";
@@ -114,14 +113,17 @@ public final class JSONParser {
 
     public static ArrayList<RoomInfo> getRoomResponse(String rawString) throws JSONException {
         JSONObject json = makeProperJsonObject(rawString);
-        JSONArray jsonRooms = json.getJSONArray(KEY_ROOM_LIST);
-        ArrayList<RoomInfo> rooms = new ArrayList<>(jsonRooms.length());
-        for (int i = 0; i < jsonRooms.length(); i++) {
-            JSONObject r = jsonRooms.getJSONObject(i);
+        if (!json.isNull(KEY_ROOM_LIST)) {
+            JSONArray jsonRooms = json.getJSONArray(KEY_ROOM_LIST);
+            ArrayList<RoomInfo> rooms = new ArrayList<>(jsonRooms.length());
+            for (int i = 0; i < jsonRooms.length(); i++) {
+                JSONObject r = jsonRooms.getJSONObject(i);
 
-            rooms.add(constructRoom(r));
+                rooms.add(constructRoom(r));
+            }
+            return rooms;
         }
-        return rooms;
+        return null;
     }
 
     public static String getRoomUsersRequest(int roomID) throws JSONException {
@@ -293,7 +295,7 @@ public final class JSONParser {
 
     private static Message constructMessage(JSONObject json) throws JSONException {
         int id = json.getInt(KEY_MSG_ID);
-        int roomID = json.getInt(KEY_MSG_ROOM_ID);
+        int roomID = json.getInt(KEY_ROOM_ID);
         String fromUser = json.getString(KEY_USERNAME);
         long timestamp = json.getInt(KEY_MSG_TIME);
         String body = json.getString(KEY_MSG_BODY);
