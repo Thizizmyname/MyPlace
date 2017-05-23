@@ -1,29 +1,38 @@
 package com.myplace.myplace;
 
 import android.content.Context;
-import android.text.Layout;
+import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.myplace.myplace.models.Message;
+
 import java.util.ArrayList;
-import java.util.TreeSet;
+
+import static com.myplace.myplace.LoginActivity.LOGIN_PREFS;
 
 public class MessageAdapter extends ArrayAdapter<Message> {
     private static final int TYPE_INCOMING = 0;
     private static final int TYPE_OUTGOING = 1;
     private static final int TYPE_MAX_COUNT = TYPE_OUTGOING + 1;
 
+    ArrayList<Message> messages;
+
     public MessageAdapter(Context context, ArrayList<Message> messages) {
         super(context, 0, messages);
+        this.messages = messages;
     }
 
     @Override
     public int getItemViewType(int position) {
         Message message = getItem(position);
-        if(message.getName().equals("Anders")) { // TO TEST INCOMING AND OUTGOING
+
+        String username = "N/A";
+        SharedPreferences loginInfo = getContext().getSharedPreferences(LOGIN_PREFS, 0);
+        if(message.getName().equals(loginInfo.getString("username", username))) { // TO TEST INCOMING AND OUTGOING
             return TYPE_OUTGOING;
         } else {
             return TYPE_INCOMING;
@@ -53,9 +62,14 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         TextView text = (TextView) convertView.findViewById(R.id.textMessage);
         TextView date = (TextView) convertView.findViewById(R.id.textDate);
 
-        date.setText(message.date);
-        text.setText(message.text);
+        date.setText(message.getShortTime());
+        text.setText(message.getText());
 
         return convertView;
+    }
+
+    public void updateData(ArrayList<Message> list) {
+        this.messages.clear();
+        messages.addAll(list);
     }
 }

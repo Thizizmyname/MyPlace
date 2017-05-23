@@ -16,12 +16,19 @@
         android:layout_marginTop="8dp"
         android:textAppearance="?attr/textAppearanceListItem" />
 
-    <TextView android:id="@+id/r_subtitle"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/r_title"
-        android:paddingStart="10dp"
-        android:paddingLeft="10dp"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+        android:orientation="horizontal"
+        android:layout_below="@id/r_title">
+        <TextView
+            android:id="@+id/r_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView android:id="@+id/r_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+    </LinearLayout>
 
 </RelativeLayout>

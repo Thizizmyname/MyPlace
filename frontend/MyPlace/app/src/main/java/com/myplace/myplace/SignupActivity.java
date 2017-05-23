@@ -1,33 +1,53 @@
 package com.myplace.myplace;
 
 import android.app.ProgressDialog;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.util.Patterns;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.myplace.myplace.services.ConnectionService;
+import com.myplace.myplace.services.LoginBroadcastReceiver;
+
+import org.json.JSONException;
 
 import butterknife.ButterKnife;
 import butterknife.Bind;
 
 public class SignupActivity extends AppCompatActivity {
     private static final String TAG = "SignupActivity";
+    private ConnectionService mService;
+    private boolean mBound = false;
+    private String username;
+    private ProgressDialog progressDialog;
+    private Handler signupHandler = new Handler();
 
-    @Bind(R.id.sign_email) EditText _emailSign;
+    @Bind(R.id.sign_retype) EditText _passRetype;
     @Bind(R.id.sign_username) EditText _userSign;
     @Bind(R.id.sign_password) EditText _passSign;
     @Bind(R.id.sign_btn) Button _btnSign;
     @Bind(R.id.link_login) TextView _linkLogin;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         setContentView(R.layout.activity_signup);
         ButterKnife.bind(this);
+        progressDialog = new ProgressDialog(SignupActivity.this);
 
         _btnSign.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -39,10 +59,7 @@ public class SignupActivity extends AppCompatActivity {
         _linkLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-                startActivity(intent);
-                finish();
-                overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+                onBackPressed();
             }
         });
     }
@@ -57,32 +74,43 @@ public class SignupActivity extends AppCompatActivity {
 
         _btnSign.setEnabled(false);
 
-        final ProgressDialog progressDialog = new ProgressDialog(SignupActivity.this);
         progressDialog.setIndeterminate(true);
         progressDialog.setMessage("Creating Account...");
         progressDialog.show();
 
-        String user = _userSign.getText().toString();
-        String email = _emailSign.getText().toString();
-        String password = _passSign.getText().toString();
+        username = _userSign.getText().toString();
+        final String password = _passSign.getText().toString();
 
-        new android.os.Handler().postDelayed(
-                new Runnable() {
-                    public void run() {
-                        onSignUpSucces();
-                        progressDialog.dismiss();
-                    }
-                }, 3000);
+        LocalBroadcastManager.getInstance(this).registerReceiver(loginBroadcastReceiver,
+                new IntentFilter(ConnectionService.BROADCAST_TAG));
+
+        signupHandler.postDelayed(SignUpRun, 10000);
+
+        try {
+            mService.sendMessage(JSONParser.signupRequest(username, password));
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
     }
 
-    public void onSignUpSucces() {
+    public void onSignUpSuccess(String username) {
         _btnSign.setEnabled(true);
-        setResult(RESULT_OK, null);
+        Intent result = new Intent();
+        result.putExtra("username", username);
+        setResult(RESULT_OK, result);
         finish();
     }
 
     public void onSignUpFailed() {
-        Toast.makeText(getBaseContext(), "Login Failed",  Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "Login Failed",  Toast.LENGTH_LONG).show();
+
+        _btnSign.setEnabled(true);
+    }
+
+    public void signUpConnectionFailed() {
+        Toast.makeText(getApplicationContext(), "Connection Failed", Toast.LENGTH_LONG).show();
 
         _btnSign.setEnabled(true);
     }
@@ -90,20 +118,20 @@ public class SignupActivity extends AppCompatActivity {
     public boolean validate() {
         Boolean valid = true;
 
-        String email = _emailSign.getText().toString();
         String username = _userSign.getText().toString();
         String password = _passSign.getText().toString();
+        String reType = _passRetype.getText().toString();
 
-        if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            _emailSign.setText("Enter a vaild Email");
+        if(!(reType.equals(password))){
+            _passRetype.setError(getResources().getString(R.string.error_incorrect_password));
             valid = false;
         }
-        else{
-            _emailSign.setError(null);
+        else {
+            _passRetype.setError(null);
         }
 
         if(username.isEmpty() || username.length() <= 3) {
-            _userSign.setText("Username must be longer than 3 characters");
+            _userSign.setError(getResources().getString(R.string.error_incorrect_username));
             valid = false;
         }
         else {
@@ -111,7 +139,7 @@ public class SignupActivity extends AppCompatActivity {
         }
 
         if(password.isEmpty() || password.length() <= 5){
-            _passSign.setText("Password must be atleast 6 characters");
+            _passSign.setError(getResources().getString(R.string.error_incorrect_password));
             valid = false;
         }
         else {
@@ -120,4 +148,72 @@ public class SignupActivity extends AppCompatActivity {
 
         return valid;
     }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+    }
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // Bind to LocalService
+        Log.d(TAG, "Activity onStart!");
+        Intent intent = new Intent(this, ConnectionService.class);
+        bindService(intent, mTConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // Unbind from the service
+        if (mBound) {
+            unbindService(mTConnection);
+            mBound = false;
+        }
+    }
+
+    private Runnable SignUpRun = new Runnable() {
+        @Override
+        public void run() {
+            progressDialog.dismiss();
+            LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(loginBroadcastReceiver);
+            signUpConnectionFailed();
+        }
+    };
+
+
+    private LoginBroadcastReceiver loginBroadcastReceiver = new LoginBroadcastReceiver() {
+        @Override
+        public void handleBooleanResponse(boolean serverResponse) {
+            Log.d(TAG, "Response Received: " + serverResponse);
+            progressDialog.dismiss();
+            signupHandler.removeCallbacks(SignUpRun);
+            if (serverResponse) {
+                onSignUpSuccess(username);
+            } else {
+                onSignUpFailed();
+            }
+        }
+    };
+
+    /** Defines callbacks for service binding, passed to bindService() */
+    private ServiceConnection mTConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            ConnectionService.ConnectionBinder binder = (ConnectionService.ConnectionBinder) service;
+            mService = binder.getService();
+            mBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
 }
