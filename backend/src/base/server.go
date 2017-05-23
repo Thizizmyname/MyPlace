@@ -43,7 +43,8 @@ func main() {
       connections = append(connections, connection)
       newUser := myplaceutils.CreateUser("TODO RANDOM NAME", "leet1337", connection)
       fmt.Printf("Connection established: %v\n", connection)
-      globalRoom.AddUser(&newUser)
+
+      globalRoom.AddUser(newUser)
       fmt.Println("Added user to room")
       fmt.Printf("Amount of users in globalRoom(should>=1): %d\n",len(myplaceutils.ShowUsers(globalRoom)))
       go handleConnection(connection)
@@ -72,9 +73,7 @@ func readMsg(conn net.Conn){
       
       fmt.Printf("Message recieved from %v: %v",conn, msg)
       for _, cons := range connections{
-        //if cons != conn {
-          sendMsg(cons,msg)
-        //}
+        sendMsg(cons,msg)
       }
     }else{
 

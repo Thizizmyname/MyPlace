@@ -3,6 +3,10 @@
 *.a
 *.so
 
+#temporaryfiles
+*.go~
+\#*\#
+
 # Folders
 _obj
 _test
