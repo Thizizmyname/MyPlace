@@ -289,6 +289,13 @@ func joinRoom(request requests_responses.JoinRoomRequest, responseChan chan requ
 			false}
 	}
 
+	if myplaceutils.UserIsInRoom(username,room) {
+		return requests_responses.ErrorResponse{
+			requestID,
+			requests_responses.JoinRoomIndex,
+			"User is already a member of the room"}
+	}
+	
 	user.JoinRoom(room)
 	room.AddOutgoingChannel(responseChan)
 
