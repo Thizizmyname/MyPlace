@@ -45,7 +45,7 @@ func InitLoggers(
         log.Ldate|log.Ltime|log.Lshortfile)
 
     myplaceutils.Info = log.New(infoHandle,
-        "INFO: ",
+        "DEBUG: ",
         log.Ldate|log.Ltime|log.Lshortfile)
 
     myplaceutils.Warning = log.New(warningHandle,
