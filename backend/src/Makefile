@@ -3,4 +3,4 @@ test:
 	make clean
 
 clean:
-	rm -f data/rooms data/users rooms users
+	rm -f data/rooms data/users rooms users server clients_simulator/clients_simulator

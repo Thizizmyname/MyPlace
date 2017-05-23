@@ -13,8 +13,8 @@ import "io/ioutil"
 import "io"
 
 const (
-	noClientsToStartWith = 200
-	maxSpawnDelay = 1000000000
+	noClientsToStartWith = 10000
+	maxSpawnDelay = 2
 	maxRequestDelay = 5000
 	noUsersPerRoom = 5
 	noJoinedRoomsPerUser = 7
@@ -30,7 +30,7 @@ type clientWriterArgs struct {
 var noClients int = 0
 var noRooms int = 0
 var waitTimeChan chan time.Duration = make(chan time.Duration, 20)
-var requestChan chan myplaceutils.HandlerArgs = make(chan myplaceutils.HandlerArgs)
+var handlerChan chan myplaceutils.HandlerArgs = make(chan myplaceutils.HandlerArgs)
 var dbg *log.Logger
 var out *log.Logger = log.New(os.Stdout, "\nOUTPUT: ", 0)
 
@@ -42,8 +42,8 @@ func main() {
 	}
 
 	myplaceutils.InitDBs()
-	initLoggers(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
-	go handler.ResponseHandler(requestChan)
+	initLoggers(ioutil.Discard, ioutil.Discard, ioutil.Discard, ioutil.Discard)
+	go handler.ResponseHandler(handlerChan)
 	go gatherAndPrintStats()
 
 	for i := 0; i < noClientsToStartWith; i++ {
@@ -119,17 +119,15 @@ func clientSender(responseChan chan requests_responses.Response, requestChan cha
 }
 
 func sendAndSleep(responseChan chan requests_responses.Response, requestChan chan clientWriterArgs, request requests_responses.Request, requestID int) {
-	jstr, err := requests_responses.ToRequestString(request)
-	if err != nil {
-		panic("error when parsing request")
-	}
+	reqJ, _ := requests_responses.ToRequestString(request)
+	dbg.Printf("Request sent: %v", reqJ)
 
 	clientWriterArgs := clientWriterArgs{requestID, time.Now()}
 	requestChan <- clientWriterArgs
 
 	handlerArgs := myplaceutils.HandlerArgs{request, responseChan}
-	responseChan <- handlerArgs
-	dbg.Printf("Request sent: %v", jstr)
+	handlerChan <- handlerArgs
+
 
 	time.Sleep(time.Duration(rand.Intn(maxRequestDelay)) * time.Millisecond)
 }
@@ -138,13 +136,11 @@ func clientReceiver(responseChan chan requests_responses.Response, requestChan c
 	requests := []clientWriterArgs{}
 
 	for {
+		response := <-responseChan
 		newReqs := newRequests(requestChan)
 		requests = append(requests, newReqs...)
 
-		response := <-responseChan
-		respJ, e := requests_responses.ToResponseString(response)
-
-		fmt.Printf(".......%v\n", e)
+		respJ, _ := requests_responses.ToResponseString(response)
 		responseID := extractResponseID(respJ)
 		if responseID == -1 { continue }
 
