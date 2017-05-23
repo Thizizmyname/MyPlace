@@ -238,9 +238,11 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void onThreadClick(int position) {
+        final RoomInfo roomInfo = roomList.get(position);
+
         Intent intent = new Intent(MainActivity.this, MessageActivity.class);
-        intent.putExtra(ROOM_NAME, roomList.get(position).getName());
-        intent.putExtra("roomID", roomList.get(position).getRoomID());
+        intent.putExtra(ROOM_NAME, roomInfo.getName());
+        intent.putExtra("roomID", roomInfo.getRoomID());
         startActivity(intent);
         overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
     }
