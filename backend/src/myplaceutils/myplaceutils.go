@@ -60,7 +60,7 @@ type HandlerArgs struct {
   ResponseChannel chan requests_responses.Response
 }
 
-type UserDB map[string]*User //UName is key
+type UserDB map[string]*User //UName is keyx
 type RoomDB map[int]*Room //ID is key
 
 func InitDBs() {
