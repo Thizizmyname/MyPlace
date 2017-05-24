@@ -42,7 +42,7 @@ public class ConnectionService extends Service {
 
     //private String serverMessage;
 
-    public static final String SERVERIP = "192.168.43.35";
+    public static final String SERVERIP = "10.0.2.2";
     public static final int SERVERPORT = 1337;
     private static Socket socket;
     private static PrintWriter out;
