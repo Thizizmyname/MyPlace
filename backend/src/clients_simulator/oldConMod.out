@@ -1,0 +1,48 @@
+
+OUTPUT: no_clients:4330  no_responses:5595  max_wait:0.01
+
+OUTPUT: no_clients:7718  no_responses:12537  max_wait:0.01
+
+OUTPUT: no_clients:11190  no_responses:22449  max_wait:0.03
+
+OUTPUT: no_clients:14576  no_responses:34910  max_wait:0.05
+
+OUTPUT: no_clients:17895  no_responses:49581  max_wait:0.05
+
+OUTPUT: no_clients:21420  no_responses:68165  max_wait:0.10
+
+OUTPUT: no_clients:24801  no_responses:88823  max_wait:0.10
+
+OUTPUT: no_clients:28068  no_responses:112048  max_wait:0.18
+
+OUTPUT: no_clients:31004  no_responses:136140  max_wait:0.24
+
+OUTPUT: no_clients:33994  no_responses:165512  max_wait:0.37
+
+OUTPUT: no_clients:36391  no_responses:194218  max_wait:0.53
+
+OUTPUT: no_clients:37940  no_responses:220606  max_wait:0.72
+
+OUTPUT: no_clients:39445  no_responses:245602  max_wait:2.46
+
+OUTPUT: no_clients:40399  no_responses:261544  max_wait:3.50
+
+OUTPUT: no_clients:41508  no_responses:278298  max_wait:5.34
+
+OUTPUT: no_clients:42129  no_responses:291874  max_wait:7.41
+
+OUTPUT: no_clients:42790  no_responses:305047  max_wait:9.49
+
+OUTPUT: no_clients:43100  no_responses:315465  max_wait:11.66
+
+OUTPUT: no_clients:43470  no_responses:327411  max_wait:13.75
+
+OUTPUT: no_clients:43664  no_responses:335843  max_wait:14.92
+
+OUTPUT: no_clients:43905  no_responses:347088  max_wait:15.72
+
+OUTPUT: no_clients:44123  no_responses:356317  max_wait:19.17
+
+OUTPUT: no_clients:44251  no_responses:364580  max_wait:20.51
+
+OUTPUT: no_clients:44447  no_responses:374835  max_wait:23.31
