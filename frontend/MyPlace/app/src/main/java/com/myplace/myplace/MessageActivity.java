@@ -83,6 +83,16 @@ public class MessageActivity extends AppCompatActivity {
                 swipeContainer.setRefreshing(false);
             }
         }
+
+//        @Override
+//        public void handleUpdatedMessageListInActivity(ArrayList<Message> messages) {
+//            if (messages.size() != 0 && roomID == messages.get(0).getRoomID()) {
+//                messageAdapter.updateData(roomDB.getMessages(roomID));
+//
+//                scrollMyListView(messages.size());
+//                swipeContainer.setRefreshing(false);
+//            }
+//        }
     };
 
     private void scrollMyListView(final int position) {
