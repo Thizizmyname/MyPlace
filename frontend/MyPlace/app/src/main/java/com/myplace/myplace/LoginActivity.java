@@ -9,7 +9,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.StrictMode;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -90,6 +89,8 @@ public class LoginActivity extends AppCompatActivity {
         progressDialog.setIndeterminate(true);
         progressDialog.setMessage("Authenticating");
         progressDialog.show();
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(loginBroadcastReceiver,
+                new IntentFilter(ConnectionService.BROADCAST_TAG));
 
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -104,10 +105,9 @@ public class LoginActivity extends AppCompatActivity {
 
                 username = loginInfo.getString("username", "No_username_found");
                 password = loginInfo.getString("password", "No_password_found");
-                LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(loginBroadcastReceiver,
-                        new IntentFilter(ConnectionService.BROADCAST_TAG));
 
-                loginHandler.postDelayed(LoginRun, 10000);
+
+                loginHandler.postDelayed(failLoginAfterDelay, 10000);
 
                 try {
                     mService.sendMessage(JSONParser.signinRequest(username, password));
@@ -141,7 +141,7 @@ public class LoginActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(loginBroadcastReceiver,
                 new IntentFilter(ConnectionService.BROADCAST_TAG));
 
-        loginHandler.postDelayed(LoginRun, 10000);
+        loginHandler.postDelayed(failLoginAfterDelay, 10000);
 
         try {
             mService.sendMessage(JSONParser.signinRequest(username, password));
@@ -168,6 +168,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void onLoginSuccess() {
+        Log.e("onLoginSuccess", "Starting mainActivity");
         _login.setEnabled(true);
         SharedPreferences loginInfo = getSharedPreferences(LOGIN_PREFS, 0);
         SharedPreferences.Editor loginEdit = loginInfo.edit();
@@ -233,7 +234,7 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    private Runnable LoginRun = new Runnable() {
+    private Runnable failLoginAfterDelay = new Runnable() {
         @Override
         public void run() {
             progressDialog.dismiss();
@@ -246,7 +247,8 @@ public class LoginActivity extends AppCompatActivity {
         public void handleBooleanResponse(boolean serverResponse) {
             Log.d("Login Activity", "Response Received: " + serverResponse);
             progressDialog.dismiss();
-            loginHandler.removeCallbacks(LoginRun);
+            loginHandler.removeCallbacks(failLoginAfterDelay);
+            LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(loginBroadcastReceiver);
             if (serverResponse) {
                 onLoginSuccess();
             } else {
@@ -265,7 +267,6 @@ public class LoginActivity extends AppCompatActivity {
             ConnectionService.ConnectionBinder binder = (ConnectionService.ConnectionBinder) service;
             mService = binder.getService();
             mBound = true;
-            //mService.setUpConnection();
         }
 
         @Override
@@ -274,16 +275,4 @@ public class LoginActivity extends AppCompatActivity {
         }
     };
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(loginBroadcastReceiver);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        LocalBroadcastManager.getInstance(this).registerReceiver(loginBroadcastReceiver,
-                new IntentFilter(ConnectionService.BROADCAST_TAG));
-    }
 }

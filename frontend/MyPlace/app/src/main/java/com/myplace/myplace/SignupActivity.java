@@ -85,7 +85,7 @@ public class SignupActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(loginBroadcastReceiver,
                 new IntentFilter(ConnectionService.BROADCAST_TAG));
 
-        signupHandler.postDelayed(SignUpRun, 10000);
+        signupHandler.postDelayed(failSignUpAfterDelay, 10000);
 
         try {
             mService.sendMessage(JSONParser.signupRequest(username, password));
@@ -177,7 +177,7 @@ public class SignupActivity extends AppCompatActivity {
         }
     }
 
-    private Runnable SignUpRun = new Runnable() {
+    private Runnable failSignUpAfterDelay = new Runnable() {
         @Override
         public void run() {
             progressDialog.dismiss();
@@ -192,7 +192,8 @@ public class SignupActivity extends AppCompatActivity {
         public void handleBooleanResponse(boolean serverResponse) {
             Log.d(TAG, "Response Received: " + serverResponse);
             progressDialog.dismiss();
-            signupHandler.removeCallbacks(SignUpRun);
+            signupHandler.removeCallbacks(failSignUpAfterDelay);
+            LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(loginBroadcastReceiver);
             if (serverResponse) {
                 onSignUpSuccess();
             } else {
