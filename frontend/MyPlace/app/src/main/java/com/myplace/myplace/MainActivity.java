@@ -78,6 +78,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
+        public void handleUpdatedMessageListInActivity(ArrayList<Message> messages) {
+            roomAdapter.notifyDataSetChanged();
+        }
+
+        @Override
         public void handleCreatedRoomInActivity(RoomInfo roominfo) {
             roomAdapter.add(roominfo);
             roomAdapter.notifyDataSetChanged();

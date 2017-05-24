@@ -71,5 +71,6 @@ public class MessageAdapter extends ArrayAdapter<Message> {
     public void updateData(ArrayList<Message> list) {
         this.messages.clear();
         messages.addAll(list);
+        this.notifyDataSetChanged();
     }
 }
