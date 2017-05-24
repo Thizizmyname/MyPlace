@@ -43,6 +43,7 @@ func main() {
       connections = append(connections, connection)
       newUser := myplaceutils.CreateUser("TODO RANDOM NAME", "leet1337", connection)
       fmt.Printf("Connection established: %v\n", connection)
+
       globalRoom.AddUser(newUser)
       fmt.Println("Added user to room")
       fmt.Printf("Amount of users in globalRoom(should>=1): %d\n",len(myplaceutils.ShowUsers(globalRoom)))

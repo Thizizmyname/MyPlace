@@ -191,7 +191,7 @@ func getRooms(request requests_responses.GetRoomsRequest) requests_responses.Res
     2) loopa över listan, ta e.Value.(typen)
     3)
   */
-	var userRoomArray []requests_responses.RoomInfo
+	userRoomArray := []requests_responses.RoomInfo{}
 	user := myplaceutils.GetUser(request.UName)
 	if user==nil{
 		return requests_responses.ErrorResponse{request.RequestID, requests_responses.GetRoomsIndex, "User not found"}//TODO ändra denna till lämplig rad
@@ -203,19 +203,75 @@ func getRooms(request requests_responses.GetRoomsRequest) requests_responses.Res
 		userRoomArray = append(userRoomArray, myplaceutils.CreateRoomInfo(userRoom,user))
 	}
 	return requests_responses.GetRoomsResponse{request.RequestID, userRoomArray}
-
 }
 
 func getRoomUsers(request requests_responses.GetRoomUsersRequest) requests_responses.Response {
-	return requests_responses.ErrorResponse{request.RequestID, requests_responses.GetRoomUsersIndex, "not implemented yet"}
+	id := request.RequestID
+	roomId := request.RoomID
+
+	room := myplaceutils.GetRoom(roomId)
+	users := myplaceutils.ShowUsers(room)
+
+	response := requests_responses.GetRoomUsersResponse{id, roomId, users }
+	
+	return response
 }
 
 func getOlderMsgs(request requests_responses.GetOlderMsgsRequest) requests_responses.Response {
-	return requests_responses.ErrorResponse{request.RequestID, requests_responses.GetOlderMsgsIndex, "not implemented yet"}
+	// Denna returenerar även det senaste lästa meddelandet
+	id := request.RequestID 
+	roomID := request.RoomID
+	msgID := request.MsgID // Senaste meddelandet som lästs
+	NoMsgs := 20  // Anger hur många meddelande som ska hämtas
+	room := myplaceutils.GetRoom(roomID)
+	messages := []requests_responses.MsgInfo{}
+
+	if msgID > len(room.Messages) {
+		return requests_responses.ErrorResponse{id,4,"MessageID does not exist"}	
+	}
+	
+	if NoMsgs > msgID {
+		NoMsgs = msgID
+	}
+	
+	for x := (msgID - NoMsgs); x < msgID; x++ {
+		msg := room.Messages[x] // Meddelande x i rummet
+		msginfo := myplaceutils.CreateMsgInfo(msg, roomID) // Skapar ett MsgInfo
+		messages = append(messages,msginfo) // Lägger till MsgInfo till messages
+	}
+	response := requests_responses.GetOlderMsgsResponse{id,messages}
+	return response
 }
 
 func getNewerMsgs(request requests_responses.GetNewerMsgsRequest) requests_responses.Response {
-	return requests_responses.ErrorResponse{request.RequestID, requests_responses.GetNewerMsgsIndex, "not implemented yet"}
+
+	requestID := request.RequestID
+	roomID := request.RoomID
+	msgID := request.MsgID
+	getNoMsg := 10
+	msgInfos := []requests_responses.MsgInfo{}
+	
+	room := myplaceutils.GetRoom(roomID)
+	// Checks if the user has a msgID which is greater than the latestMsgID in the room
+	if msgID > len(room.Messages) {
+		return requests_responses.ErrorResponse{requestID,requests_responses.GetNewerMsgsIndex,"MessageID does not exist"}
+	}
+	
+	if (getNoMsg + msgID) > len(room.Messages) {
+		getNoMsg = len(room.Messages)
+	}else{
+		getNoMsg = msgID+getNoMsg +1 // inkluderar det sista meddelandet i rangen av taket från msgId
+	}
+	
+	for x := (msgID+1) ; x < getNoMsg; x++ {
+		msg := room.Messages[x]
+		msgInfo := myplaceutils.CreateMsgInfo(msg,room.ID)
+		msgInfos = append(msgInfos,msgInfo)
+	}
+	
+	
+	return requests_responses.GetNewerMsgsResponse{requestID,msgInfos}
+
 }
 
 func joinRoom(request requests_responses.JoinRoomRequest, responseChan chan requests_responses.Response) requests_responses.Response {
@@ -244,6 +300,13 @@ func joinRoom(request requests_responses.JoinRoomRequest, responseChan chan requ
 			false}
 	}
 
+	if myplaceutils.UserIsInRoom(username,room) {
+		return requests_responses.ErrorResponse{
+			requestID,
+			requests_responses.JoinRoomIndex,
+			"User is already a member of the room"}
+	}
+	
 	user.JoinRoom(room)
 	room.AddOutgoingChannel(responseChan)
 

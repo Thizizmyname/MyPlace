@@ -1,0 +1,23 @@
+// Request
+01{
+    "requestID": 286001,
+    "requestIndex": 1,
+    "requestName": "signin",
+
+    "content": {
+
+        "userName": "JohnDoe",
+        "password": "asdf"
+    }
+}
+
+
+// Response
+01{
+    "requestResponse": 286001,
+    "requestIndex": 1,
+    "requestName": "signin",
+
+    "signinResponse": false,
+    "errorReason": "incorrPass"
+}

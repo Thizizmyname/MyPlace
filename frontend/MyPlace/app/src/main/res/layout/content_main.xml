@@ -13,4 +13,13 @@
     tools:context="com.myplace.myplace.MainActivity"
     tools:showIn="@layout/activity_main">
 
+
+    <ListView
+        android:id="@+id/roomList"
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+
+
 </RelativeLayout>

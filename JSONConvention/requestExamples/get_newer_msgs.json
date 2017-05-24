@@ -1,0 +1,33 @@
+// Request
+{
+    "requestID": 286001,
+    "requestIndex": 5,
+    "requestName": "get_newer_msgs",
+
+    "roomID": 1142,
+    "msgID": 123
+}
+
+
+// Response
+{
+    "requestResponse": 286001,
+    "requestIndex": 5,
+    "requestName": "get_newer_msgs",
+
+    "messages": [
+        {
+            "id": 124,
+            "date": "2017-04-27-17-24-15-00",
+            "from": "JohnDoe",
+            "content": "This is yet another message"
+        },
+        {
+            "id": 125,
+            "date": "2017-04-27-17-26-34-00",
+            "from": "JaneDoe",
+            "content": "This is a reply for message"
+        }
+    ]
+}
+

@@ -1,0 +1,12 @@
+09{
+    "requestResponse": 0000, // requestID to poster, -1 to all other in room
+    
+    "message":  // Message.json
+            {
+                "MsgID": 0000,
+                "roomID": 0000,
+                "fromUser": "POSTERNAME",
+                "Time": int64, // UnixTime
+                "body": "MESSAGE"
+            }
+}

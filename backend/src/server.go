@@ -12,6 +12,8 @@ import (
 	"requests_responses"
 	"data"
 	"handler"
+	"time"
+	"fmt"
 )
 
 
@@ -37,6 +39,7 @@ func listenLoop(listener net.Listener) {
 
 //Initialize loggers
 func InitLoggers(
+
 	traceHandle io.Writer,
 	infoHandle io.Writer,
 	warningHandle io.Writer,
@@ -47,7 +50,7 @@ func InitLoggers(
 		log.Ldate|log.Ltime|log.Lshortfile)
 
 	myplaceutils.Info = log.New(infoHandle,
-		"INFO: ",
+		"DEBUG: ",
 		log.Ldate|log.Ltime|log.Lshortfile)
 
 	myplaceutils.Warning = log.New(warningHandle,
@@ -66,13 +69,31 @@ func disconnectAll() {
 	}
 }
 
+func logFileInit() io.Writer{
+  logName := fmt.Sprintf("logfiles/logfile%v-%v-%v-%v-%v-%v.log",
+              time.Now().Year(),
+              time.Now().Month(),
+              time.Now().Day(),
+              time.Now().Hour(),
+              time.Now().Minute(),
+              time.Now().Second())
+  fmt.Println(logName)
+  logFile, err := os.Create(logName)
+  if err==nil{
+    return io.MultiWriter(os.Stdout, logFile)
+  }
+  log.Println("Failed to create log file, proceeding with terminal logging")
+  return os.Stdout
+}
+
 func main() {
 	//Title
 	myplaceutils.PrintTitle()
 	//Initializing
 	//Loggers
 	log.Println("Initializing loggers")
-	InitLoggers(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
+  logWriter := logFileInit()
+	InitLoggers(ioutil.Discard, logWriter, logWriter, io.MultiWriter(logWriter,os.Stderr))
 	//Users and Rooms
 	myplaceutils.Info.Println("Loading database..")
 	var loadError error
@@ -88,13 +109,13 @@ func main() {
 		<-c
 		err := data.StoreDBs(myplaceutils.Users, myplaceutils.Rooms)
 		if err!=nil {
-
 			myplaceutils.Error.Printf("Error storing DBs upon exit: %v\n", err)
 		} else {
 			myplaceutils.Info.Println("DBs successfully stored to file")
 		}
 		os.Exit(1)
 	}()
+
 
 	log.Println("Initialization complete\n-------------------------")
 	//255 känns som en lämplig size så länge MAGIC NUMBER
@@ -103,7 +124,7 @@ func main() {
 	go handler.ResponseHandler(myplaceutils.RequestChannel)
 	myplaceutils.Info.Println("Creating a listener")
 
-	tcpAddress,_ := net.ResolveTCPAddr("tcp","127.0.0.1:1337")
+	tcpAddress,_ := net.ResolveTCPAddr("tcp",":1337")
 	listener, err := net.ListenTCP("tcp",tcpAddress)
 
 	if err != nil {

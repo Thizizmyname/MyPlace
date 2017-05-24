@@ -1,0 +1,17 @@
+// Request
+00{
+    "requestID": 286001,
+
+    "userName": "JohnDoe",
+    "password": "qwerty"
+}
+
+
+// Response
+00{
+    "requestID": 286001,
+
+    "result": true,
+    "errorCause": ""
+}
+
