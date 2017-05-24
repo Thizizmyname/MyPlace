@@ -98,6 +98,7 @@ public class RoomDbHelper extends SQLiteOpenHelper {
             } while (c.moveToNext());
             c.close();
         }
+        db.close();
         return false;
     }
 
@@ -179,6 +180,7 @@ public class RoomDbHelper extends SQLiteOpenHelper {
             } while (c.moveToNext());
             c.close();
         }
+        db.close();
         return false;
     }
 
