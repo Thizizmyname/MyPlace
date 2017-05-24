@@ -56,6 +56,7 @@ public class MessageActivity extends AppCompatActivity {
     boolean mBound = false;
     private int roomID;
     private SwipeRefreshLayout swipeContainer;
+    private int lastMsgReadId;
 
 
     // Our handler for received Intents. This will be called whenever an Intent
@@ -164,12 +165,14 @@ public class MessageActivity extends AppCompatActivity {
     }
 
     private void sendMessageReadRequest(int lastMsgID) {
-        try {
-            mService.sendMessage(JSONParser.messageReadRequest(username, roomID, lastMsgID));
-        } catch (JSONException e) {
-            e.printStackTrace();
+        if (lastMsgReadId != lastMsgID) {
+            try {
+                mService.sendMessage(JSONParser.messageReadRequest(username, roomID, lastMsgID));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            roomDB.updateMessageRead(roomID, lastMsgID);
         }
-        roomDB.updateMessageRead(roomID, lastMsgID);
     }
 
     @Override
@@ -185,6 +188,7 @@ public class MessageActivity extends AppCompatActivity {
 
         final String roomName = getIntent().getExtras().getString(MainActivity.ROOM_NAME);
         roomID = getIntent().getExtras().getInt("roomID");
+        lastMsgReadId = getIntent().getExtras().getInt("lastMsgReadId");
 
         //noinspection ConstantConditions
         getSupportActionBar().setTitle(roomName);

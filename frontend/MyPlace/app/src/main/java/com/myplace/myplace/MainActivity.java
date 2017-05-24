@@ -291,6 +291,7 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(MainActivity.this, MessageActivity.class);
         intent.putExtra(ROOM_NAME, roomInfo.getName());
         intent.putExtra("roomID", roomInfo.getRoomID());
+        intent.putExtra("lastMsgReadId", roomInfo.getLastMsgRead());
         startActivity(intent);
         overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
     }
