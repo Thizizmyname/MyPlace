@@ -9,7 +9,6 @@ import com.myplace.myplace.JSONParser;
 import com.myplace.myplace.RoomDbHelper;
 import com.myplace.myplace.models.Message;
 import com.myplace.myplace.models.RequestTypes;
-import com.myplace.myplace.models.Room;
 import com.myplace.myplace.models.RoomInfo;
 
 import org.json.JSONException;
@@ -132,7 +131,7 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
         for (Message message : messages) {
             roomDB.addMessage(message.getRoomID(), message);
         }
-        handleOlderMessagesInActivity(messages);
+        handleUpdatedMessageListInActivity(messages);
 
     }
 
@@ -146,7 +145,7 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
 
     public void handleJoinedRoomInActivity(final RoomInfo roominfo) {}
 
-    public void handleOlderMessagesInActivity(final ArrayList<Message> messages){}
+    public abstract void handleUpdatedMessageListInActivity(final ArrayList<Message> messages);
 
     public void handleCreatedRoomInActivity(final RoomInfo roominfo){}
 
