@@ -21,8 +21,14 @@ import java.util.ArrayList;
 
 public abstract class MainBroadcastReceiver extends BroadcastReceiver {
 
+    public String ReceiverTAG = "MainBroadcastReceiver";
+
 
     RoomDbHelper roomDB = null;
+
+    public MainBroadcastReceiver(String receiverTAG) {
+        ReceiverTAG = receiverTAG;
+    }
 
 
     @Override
@@ -34,9 +40,9 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
         // Get extra data included in the Intent
         String serverMessage = intent.getStringExtra(ConnectionService.REPLY_PACKAGE);
 
-        Log.d("MainBroadcastReceiver", "Received: " + serverMessage);
+        Log.d(ReceiverTAG, "Received: " + serverMessage);
         int i = JSONParser.determineJSONType(serverMessage);
-        Log.d("MainBroadcastReceiver", "JSONType: " + i);
+        Log.d(ReceiverTAG, "JSONType: " + i);
 
         try {
 
