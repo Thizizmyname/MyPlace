@@ -164,7 +164,7 @@ public class RoomDbHelper extends SQLiteOpenHelper {
 
     public Message getLastMessage(int roomID) throws Exception {
         String roomIDString = getRoomIdString(roomID);
-        String query = "SELECT * FROM "+roomIDString;
+        String query = "SELECT * FROM "+roomIDString+" ORDER BY "+ROOM_TIMESTAMP+" ASC";
         SQLiteDatabase db = getWritableDatabase();
 
         Cursor c = db.rawQuery(query, null);

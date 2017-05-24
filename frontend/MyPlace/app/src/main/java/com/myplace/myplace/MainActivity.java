@@ -112,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void handleMessageReadInActivity() {
-            MainActivity.roomAdapter.notifyDataSetChanged();
+            roomAdapter.notifyDataSetChanged();
         }
     };
 
