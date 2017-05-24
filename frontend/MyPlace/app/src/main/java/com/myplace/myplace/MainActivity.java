@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void handleUpdatedMessageListInActivity(ArrayList<Message> messages) {
-            roomAdapter.notifyDataSetChanged();
+            roomAdapter.updateData(roomDB.getRoomList());
         }
 
         @Override
@@ -111,15 +111,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public void handleOlderMessagesInActivity(ArrayList<Message> messages) {
-            roomAdapter.updateData(roomDB.getRoomList());
-            roomAdapter.notifyDataSetChanged();
-        }
-
-        @Override
         public void handleMessageReadInActivity() {
-            ArrayList<RoomInfo> updatedRoomList = roomDB.getRoomList();
-            roomAdapter.updateData(updatedRoomList);
             roomAdapter.notifyDataSetChanged();
         }
     };
