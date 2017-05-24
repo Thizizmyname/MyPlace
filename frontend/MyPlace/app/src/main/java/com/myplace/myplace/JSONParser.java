@@ -295,6 +295,9 @@ public final class JSONParser {
 
     private static Message constructMessage(JSONObject json) throws JSONException {
         int id = json.getInt(KEY_MSG_ID);
+        if (id == -1) {
+            return null;
+        }
         int roomID = json.getInt(KEY_ROOM_ID);
         String fromUser = json.getString(KEY_USERNAME);
         long timestamp = json.getInt(KEY_MSG_TIME);

@@ -52,11 +52,14 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         if (convertView == null) {
             if (itemType == TYPE_INCOMING) {
                 convertView = LayoutInflater.from(getContext()).inflate(R.layout.message_bubble_left, parent, false);
-                TextView name = (TextView) convertView.findViewById(R.id.textName);
-                name.setText(message.getName());
             } else {
                 convertView = LayoutInflater.from(getContext()).inflate(R.layout.message_bubble_right, parent, false);
             }
+        }
+
+        if (itemType == TYPE_INCOMING) {
+            TextView name = (TextView) convertView.findViewById(R.id.textName);
+            name.setText(message.getName());
         }
 
         TextView text = (TextView) convertView.findViewById(R.id.textMessage);
