@@ -60,7 +60,7 @@ public class Message {
     }
 
     public String getShortTime() {
-        Date date = new Date(timestamp);
+        Date date = new Date(timestamp * 1000);
         return df.format(date);
     }
 

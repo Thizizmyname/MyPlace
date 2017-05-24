@@ -39,19 +39,24 @@ import org.w3c.dom.Text;
 import java.util.ArrayList;
 
 import static com.myplace.myplace.LoginActivity.LOGIN_PREFS;
+import static java.lang.Thread.sleep;
 
 public class MessageActivity extends AppCompatActivity {
+    private String TAG = "MessageActivity";
     final Context context = this;
     private static final String EMPTY_STRING = "";
+    private static final int FIRST_MSGID_IN_CONVERSATION = 0;
 
     MessageAdapter messageAdapter;
     private Toast messageEmptyToast = null;
     RoomDbHelper roomDB = null;
+    private static String username;
 
     ConnectionService mService;
     boolean mBound = false;
     private int roomID;
     private SwipeRefreshLayout swipeContainer;
+    private int lastMsgReadId;
 
 
     // Our handler for received Intents. This will be called whenever an Intent
@@ -62,21 +67,40 @@ public class MessageActivity extends AppCompatActivity {
         public void handleNewMessageInActivity(Message msg) {
             if (roomID == msg.getRoomID()) {
                 messageAdapter.add(msg);
+                scrollMyListView(messageAdapter.getCount() - 1);
+                sendMessageReadRequest(msg.getId());
             }
         }
 
         @Override
-        public void handleOlderMessagesInActivity(ArrayList<Message> messages) {
-            messageAdapter.updateData(roomDB.getMessages(roomID));
-            swipeContainer.setRefreshing(false);
+        public void handleUpdatedMessageListInActivity(ArrayList<Message> messages) {
+            if (roomID == messages.get(0).getRoomID()) {
+                int firstmessageID = messages.get(0).getId();
+                int lastmessageID = messages.get(messages.size() -1).getId();
+                messageAdapter.updateData(roomDB.getMessages(roomID));
+
+                scrollMyListView(lastmessageID - firstmessageID);
+                swipeContainer.setRefreshing(false);
+            }
         }
     };
+
+    private void scrollMyListView(final int position) {
+        final ListView myListView = (ListView) findViewById(R.id.listMessages);
+        myListView.post(new Runnable() {
+            @Override
+            public void run() {
+                // Select the last row so it will scroll into view...
+                myListView.setSelection(position);
+            }
+        });
+    }
 
     @Override
     protected void onStart() {
         super.onStart();
         // Bind to LocalService
-        Log.d("MessageActivity", "I'm in onStart!");
+        Log.d(TAG, "I'm in onStart!");
         Intent intent = new Intent(this, ConnectionService.class);
         bindService(intent, mTConnection, Context.BIND_AUTO_CREATE);
     }
@@ -86,7 +110,7 @@ public class MessageActivity extends AppCompatActivity {
         super.onStop();
         // Unbind from the service
         if (mBound) {
-            Log.d("MessageActivity", "Stopping event");
+            Log.d(TAG, "Stopping event");
             unbindService(mTConnection);
             mBound = false;
         }
@@ -118,6 +142,37 @@ public class MessageActivity extends AppCompatActivity {
         // with actions named "custom-event-name".
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter(ConnectionService.BROADCAST_TAG));
+
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(!mBound) {
+                    Log.d("MainActivity", "Waiting for mBound");
+                    try {
+                        sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (messageAdapter.getCount() > 0) {
+                    int lastMsgID = messageAdapter.getItem(messageAdapter.getCount() - 1).getId();
+                    sendMessageReadRequest(lastMsgID);
+                }
+            }
+        });
+
+        thread.start();
+    }
+
+    private void sendMessageReadRequest(int lastMsgID) {
+        if (lastMsgReadId != lastMsgID) {
+            try {
+                mService.sendMessage(JSONParser.messageReadRequest(username, roomID, lastMsgID));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            roomDB.updateMessageRead(roomID, lastMsgID);
+        }
     }
 
     @Override
@@ -133,10 +188,14 @@ public class MessageActivity extends AppCompatActivity {
 
         final String roomName = getIntent().getExtras().getString(MainActivity.ROOM_NAME);
         roomID = getIntent().getExtras().getInt("roomID");
+        lastMsgReadId = getIntent().getExtras().getInt("lastMsgReadId");
 
         //noinspection ConstantConditions
         getSupportActionBar().setTitle(roomName);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        SharedPreferences loginInfo = getSharedPreferences(LOGIN_PREFS, 0);
+        username = loginInfo.getString("username", MainActivity.NO_USERNAME_FOUND);
 
         roomDB = new RoomDbHelper(this);
 
@@ -146,9 +205,12 @@ public class MessageActivity extends AppCompatActivity {
             @Override
             public void onRefresh() {
                 try {
-                    if (!messageAdapter.isEmpty()) {
+                    if (!messageAdapter.isEmpty() && messageAdapter.getItem(0).getId() != 0) {
                         Message oldestMessage = messageAdapter.getItem(0);
                         mService.sendMessage(JSONParser.getOlderMsgsRequest(roomID, oldestMessage.getId()));
+                    } else {
+                        Toast.makeText(context, "No more messages in this room.", Toast.LENGTH_SHORT).show();
+                        swipeContainer.setRefreshing(false);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -157,6 +219,7 @@ public class MessageActivity extends AppCompatActivity {
         });
 
         ArrayList<Message> messageList = roomDB.getMessages(roomID);
+        getOlderIfNeeded(messageList);
         messageAdapter = new MessageAdapter(this, messageList);
 
         // Finds the listview and specifies the adapter to use
@@ -173,32 +236,32 @@ public class MessageActivity extends AppCompatActivity {
 
         btnSend.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-
-                // Check if message is empty
-                String messageString = message.getText().toString();
-                if (messageString.matches(EMPTY_STRING)) {
-                    if (messageEmptyToast != null) messageEmptyToast.cancel();
-                    messageEmptyToast = Toast.makeText(MessageActivity.this, R.string.message_empty, Toast.LENGTH_SHORT);
-                    messageEmptyToast.show();
-                    return;
-                }
-
-                SharedPreferences loginInfo = getSharedPreferences(LOGIN_PREFS, 0);
-                final String username = loginInfo.getString("username", MainActivity.NO_USERNAME_FOUND);
-
-                long timestamp = System.currentTimeMillis();
-
-                Message newMessage = new Message(roomID, username, message.getText().toString(), timestamp);
-
-                try {
-                    mService.sendMessage(JSONParser.postMsgRequest(newMessage));
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                message.setText(null); // Reset input field
+                onSendButtonClick(message);
             }
         });
+    }
+
+    private void onSendButtonClick(EditText message) {
+        // Check if message is empty
+        String messageString = message.getText().toString();
+        if (messageString.matches(EMPTY_STRING)) {
+            if (messageEmptyToast != null) messageEmptyToast.cancel();
+            messageEmptyToast = Toast.makeText(MessageActivity.this, R.string.message_empty, Toast.LENGTH_SHORT);
+            messageEmptyToast.show();
+            return;
+        }
+
+        long timestamp = System.currentTimeMillis();
+
+        Message newMessage = new Message(roomID, username, message.getText().toString(), timestamp);
+
+        try {
+            mService.sendMessage(JSONParser.postMsgRequest(newMessage));
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        message.setText(null); // Reset input field
     }
 
     private TextWatcher onTextChanged = new TextWatcher() {
@@ -240,6 +303,35 @@ public class MessageActivity extends AppCompatActivity {
         });
         builder.create();
         builder.show();
+    }
+
+    private void getOlderIfNeeded(final ArrayList<Message> msgList) {
+
+        int listLength = msgList.size();
+        if (listLength == 1 && msgList.get(0).getId() != FIRST_MSGID_IN_CONVERSATION) {
+
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while (!mBound) {
+                        Log.d("MainActivity", "Waiting for mBound");
+                        try {
+                            sleep(500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    try {
+                        mService.sendMessage(JSONParser.getOlderMsgsRequest(roomID, msgList.get(0).getId()));
+                    } catch (JSONException e) {
+                        Log.d("MainActivity", "Get room request error");
+                        e.printStackTrace();
+                    }
+                }
+            });
+
+            thread.start();
+        }
     }
 
     @Override

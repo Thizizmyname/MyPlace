@@ -1,6 +1,7 @@
 package com.myplace.myplace;
 
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -33,7 +34,7 @@ class RoomAdapter extends ArrayAdapter<RoomInfo> {
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        RoomInfo room = getItem(position);
+        RoomInfo roomInfo = getItem(position);
 
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.custom_room_list_item, parent, false);
@@ -43,9 +44,19 @@ class RoomAdapter extends ArrayAdapter<RoomInfo> {
         TextView text2 =  (TextView) convertView.findViewById(R.id.r_name);
         TextView text3 =  (TextView) convertView.findViewById(R.id.r_subtitle);
 
-        if (room != null) {
-            text1.setText(room.getName());
-            String sender = room.getLastSender(getContext());
+        if (roomInfo != null) {
+            if (roomInfo.getLastMessage() != null && roomInfo.getLastMessage().getId() != roomInfo.getLastMsgRead()) {
+                text1.setTypeface(Typeface.DEFAULT_BOLD);
+                text2.setTypeface(Typeface.DEFAULT_BOLD);
+                text3.setTypeface(Typeface.DEFAULT_BOLD);
+            } else {
+                text1.setTypeface(Typeface.DEFAULT);
+                text2.setTypeface(Typeface.DEFAULT);
+                text3.setTypeface(Typeface.DEFAULT);
+            }
+
+            text1.setText(roomInfo.getName());
+            String sender = roomInfo.getLastSender();
 
             String username = "N/A";
             SharedPreferences loginInfo = getContext().getSharedPreferences(LOGIN_PREFS, 0);
@@ -58,7 +69,7 @@ class RoomAdapter extends ArrayAdapter<RoomInfo> {
             } else {
                 text2.setText(sender);
             }
-            text3.setText(room.getLastMessageText(getContext()));
+            text3.setText(roomInfo.getLastMessageText());
         }
 
         return convertView;

@@ -32,6 +32,7 @@ public class SignupActivity extends AppCompatActivity {
     private ConnectionService mService;
     private boolean mBound = false;
     private String username;
+    private String password;
     private ProgressDialog progressDialog;
     private Handler signupHandler = new Handler();
 
@@ -79,7 +80,7 @@ public class SignupActivity extends AppCompatActivity {
         progressDialog.show();
 
         username = _userSign.getText().toString();
-        final String password = _passSign.getText().toString();
+        password = _passSign.getText().toString();
 
         LocalBroadcastManager.getInstance(this).registerReceiver(loginBroadcastReceiver,
                 new IntentFilter(ConnectionService.BROADCAST_TAG));
@@ -95,10 +96,11 @@ public class SignupActivity extends AppCompatActivity {
 
     }
 
-    public void onSignUpSuccess(String username) {
+    public void onSignUpSuccess() {
         _btnSign.setEnabled(true);
         Intent result = new Intent();
         result.putExtra("username", username);
+        result.putExtra("password", password);
         setResult(RESULT_OK, result);
         finish();
     }
@@ -118,11 +120,11 @@ public class SignupActivity extends AppCompatActivity {
     public boolean validate() {
         Boolean valid = true;
 
-        String username = _userSign.getText().toString();
-        String password = _passSign.getText().toString();
+        String valiUsername = _userSign.getText().toString();
+        String valiPassword = _passSign.getText().toString();
         String reType = _passRetype.getText().toString();
 
-        if(!(reType.equals(password))){
+        if(!(reType.equals(valiPassword))){
             _passRetype.setError(getResources().getString(R.string.error_incorrect_password));
             valid = false;
         }
@@ -130,7 +132,7 @@ public class SignupActivity extends AppCompatActivity {
             _passRetype.setError(null);
         }
 
-        if(username.isEmpty() || username.length() <= 3) {
+        if(valiUsername.isEmpty() || valiUsername.length() <= 3) {
             _userSign.setError(getResources().getString(R.string.error_incorrect_username));
             valid = false;
         }
@@ -138,7 +140,7 @@ public class SignupActivity extends AppCompatActivity {
             _userSign.setError(null);
         }
 
-        if(password.isEmpty() || password.length() <= 5){
+        if(valiPassword.isEmpty() || valiPassword.length() <= 5){
             _passSign.setError(getResources().getString(R.string.error_incorrect_password));
             valid = false;
         }
@@ -192,7 +194,7 @@ public class SignupActivity extends AppCompatActivity {
             progressDialog.dismiss();
             signupHandler.removeCallbacks(SignUpRun);
             if (serverResponse) {
-                onSignUpSuccess(username);
+                onSignUpSuccess();
             } else {
                 onSignUpFailed();
             }

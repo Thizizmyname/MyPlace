@@ -1,12 +1,17 @@
 package com.myplace.myplace.services;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+
+import com.myplace.myplace.models.RoomInfo;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -18,6 +23,8 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.concurrent.Future;
+
+import static java.lang.Thread.sleep;
 
 /**
  * Created by alexis on 2017-05-10.
@@ -33,15 +40,14 @@ public class ConnectionService extends Service {
     private final IBinder mBinder = new ConnectionBinder();
 
 
-    private String serverMessage;
+    //private String serverMessage;
 
-    public static final String SERVERIP = "10.0.2.2";
+    public static final String SERVERIP = "130.242.107.87"; // "10.0.2.2";
     public static final int SERVERPORT = 1337;
     private static Socket socket;
     private static PrintWriter out;
     BufferedReader in;
 
-    private OnMessageReceived mMessageListener = null;
     private boolean mRun = false;
     private boolean pauseListener = false;
 
@@ -64,45 +70,6 @@ public class ConnectionService extends Service {
         return mBinder;
     }
 
-    // Work in progress, do not use as of now
-    public Future<String> sendWithExpectedResult(final String message) {
-        AsyncTask<Void, Void, Boolean> sendThread = new AsyncTask<Void, Void, Boolean>() {
-            @Override
-            protected Boolean doInBackground(Void... params) {
-
-                String reply = null;
-                try {
-
-                    Log.e("TCP Service", "Sending: " + message);
-                    if (out != null && !out.checkError()) {
-                        out.println(message);
-                        Log.d("TCP Client", "Message: " + message);
-                        out.flush();
-                    }
-
-
-                    reply = in.readLine();
-
-
-                    sendToActivity(reply);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                return null;
-
-            }
-
-
-
-            @Override
-            protected void onProgressUpdate(Void... values) {
-                super.onProgressUpdate(values);
-            }
-        };
-        sendThread.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
-        return null;
-    }
 
     // For the moment it sends to all active activities that subscribe
     // to NEW_MESSAGE broadcasts, should be implementing a dynamic broadcast-system
@@ -115,51 +82,44 @@ public class ConnectionService extends Service {
 
     public void sendMessage(final String message){
 
-        AsyncTask<Void, Void, Boolean> sendThread = new AsyncTask<Void, Void, Boolean>() {
-            @Override
-            protected Boolean doInBackground(Void... params) {
+        if (mRun) {
 
-                //pauseListener = true;
+            AsyncTask<Void, Void, Boolean> sendThread = new AsyncTask<Void, Void, Boolean>() {
+                @Override
+                protected Boolean doInBackground(Void... params) {
 
-                Log.e("TCP Service", "Sending: " + message);
-                if (out != null && !out.checkError()) {
-                    out.println(message);
-                    Log.d("TCP Client", "Message: " + message);
-                    out.flush();
-                    //out.close();
+                    Log.d("ConnectionService", "Sending: " + message);
+                    if (out != null && !out.checkError()) {
+                        out.println(message);
+                        out.flush();
+                    }
+
+
+
+                    return null;
                 }
-
-                //pauseListener = false;
-
-
-
-                return null;
-            }
-        };
-        sendThread.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
-
+            };
+            sendThread.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
     }
 
     private void runListener() {
         while (mRun) {
-            //Log.e("TCP Client", "C: I got to the while loop!");
             if (!pauseListener) {
                 try {
-                    final String dserverMessage = in.readLine();
+                    final String serverMessage = in.readLine();
 
-                    if (dserverMessage.equals("")) {continue;}
 
-                    Log.e("TCP Service", "C: serverMessage = " + dserverMessage);
 
-                    sendToActivity(dserverMessage);
 
-                    if (dserverMessage != null && mMessageListener != null) {
-                        Log.e("TCP Client", "C: serverMessage = " + dserverMessage);
+                    if (serverMessage != null) {
+                        if (serverMessage.equals("")) {continue;}
+                        Log.d("TCP Service", "C: serverMessage = " + serverMessage);
                         //call the method messageReceived from MyActivity class
-                        mMessageListener.messageReceived(dserverMessage);
+                        sendToActivity(serverMessage);
                     } else {
-                        serverMessage = null;
+                        Log.e("ConnectionService", "serverMessage null, stopping listener");
+                        break;
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -169,7 +129,7 @@ public class ConnectionService extends Service {
 
         Log.e("TCP Client", "C: run = " + mRun);
 
-        Log.e("RESPONSE FROM SERVER", "S: Received Message: '" + serverMessage + "'");
+        //Log.e("RESPONSE FROM SERVER", "S: Received Message: '" + serverMessage + "'");
 
     }
 
@@ -192,7 +152,14 @@ public class ConnectionService extends Service {
             @Override
             protected Boolean doInBackground(Void... arg0) {
 
-                mRun = true;
+                while (!isNetworkAvailable()) {
+                    try {
+                        sleep(1000);
+                    } catch (InterruptedException e) {
+                        return false;
+                    }
+                }
+
 
                 try {
                     //here you must put your computer's IP address.
@@ -215,6 +182,8 @@ public class ConnectionService extends Service {
                         Log.e("TCP Client", "C: run = " + mRun);
                         //in this while the client listens for the messages sent by the server
 
+                        mRun = true;
+
                         runListener();
 
                     } catch(Exception e){
@@ -222,9 +191,12 @@ public class ConnectionService extends Service {
                     } finally{
                         //the socket must be closed. It is not possible to reconnect to this socket
                         // after it is closed, which means a new socket instance has to be created.
+                        mRun = false;
+                        in.close();
+                        out.close();
                         socket.close();
                         Log.d("TCP Client", "Socket closed.");
-                        serverMessage = null;
+                        //serverMessage = null;
                     }
 
 
@@ -245,9 +217,15 @@ public class ConnectionService extends Service {
         connectionThread.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    //Declare the interface. The method messageReceived(String message) will must be implemented in the MyActivity
-    //class at on asynckTask doInBackground
-    public interface OnMessageReceived {
-        void messageReceived(String message);
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
     }
 }

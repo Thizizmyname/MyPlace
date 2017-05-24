@@ -9,7 +9,6 @@ import com.myplace.myplace.JSONParser;
 import com.myplace.myplace.RoomDbHelper;
 import com.myplace.myplace.models.Message;
 import com.myplace.myplace.models.RequestTypes;
-import com.myplace.myplace.models.Room;
 import com.myplace.myplace.models.RoomInfo;
 
 import org.json.JSONException;
@@ -48,20 +47,25 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
                     break;
                 case RequestTypes.GET_ROOMS:
                     final ArrayList<RoomInfo> roomResponse = JSONParser.getRoomResponse(serverMessage);
-                    handleRoomList(roomResponse);
+                     if (roomResponse != null) {
+                         handleRoomList(roomResponse);
+                    } else {
+                         Log.e("MainBroadcastReceiver", "You have no Rooms");
+                     }
                     break;
                 case RequestTypes.GET_USERS:
 
                     break;
                 case RequestTypes.GET_OLDER:
                     ArrayList<Message> messages = JSONParser.getOlderMsgsResponse(serverMessage);
-                    handleOlderMessages(messages);
+                    handleMessages(messages);
                     break;
                 case RequestTypes.GET_NEWER:
-
+                    ArrayList<Message> newerMsgs = JSONParser.getNewerMsgsResponse(serverMessage);
+                    handleMessages(newerMsgs);
                     break;
                 case RequestTypes.CREATE_ROOM:
-                    Room room = JSONParser.createRoomResponse(serverMessage);
+                    RoomInfo room = JSONParser.createRoomResponse(serverMessage);
                     handleCreatedRoom(room);
                     break;
                 case RequestTypes.JOIN_ROOM:
@@ -69,17 +73,17 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
                     handleJoinedRoom(joinroom);
                     break;
                 case RequestTypes.LEAVE_ROOM:
-
+                    handleLeaveRoomInActivity();
                     break;
                 case RequestTypes.MESSAGE:
                     final Message message = JSONParser.messageRecieved(serverMessage);
                     newMessageReceived(message);
                     break;
                 case RequestTypes.MSG_READ:
-
+                    handleMessageReadInActivity();
                     break;
                 case RequestTypes.SIGN_OUT:
-
+                    handleLogoutInActivity();
                     break;
                 case RequestTypes.DELETE_USER:
 
@@ -98,7 +102,11 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
     }
 
     protected void handleRoomList(ArrayList<RoomInfo> roomResponse) {
-        throw new RuntimeException("No implementation");
+
+        for (RoomInfo r : roomResponse) {
+            roomDB.createRoomTable(r);
+        }
+        handleRoomListInActivity(roomResponse);
     }
 
 
@@ -109,29 +117,37 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
 
     }
 
-    private void handleCreatedRoom(final Room room) {
+    private void handleCreatedRoom(final RoomInfo room) {
         roomDB.createRoomTable(room);
         handleCreatedRoomInActivity(room);
     }
 
     private void handleJoinedRoom(final RoomInfo room) {
-        roomDB.createRoomTable(room.getRoom());
+        roomDB.createRoomTable(room);
         handleJoinedRoomInActivity(room);
     }
 
-    private void handleOlderMessages(final ArrayList<Message> messages) {
+    private void handleMessages(final ArrayList<Message> messages) {
         for (Message message : messages) {
             roomDB.addMessage(message.getRoomID(), message);
         }
-        handleOlderMessagesInActivity(messages);
+        handleUpdatedMessageListInActivity(messages);
 
     }
 
+    public void handleMessageReadInActivity() {}
+
+    public void handleLogoutInActivity() {}
+
+    public void handleLeaveRoomInActivity(){}
+
+    public void handleRoomListInActivity(final ArrayList<RoomInfo> roomlist) {}
+
     public void handleJoinedRoomInActivity(final RoomInfo roominfo) {}
 
-    public void handleOlderMessagesInActivity(final ArrayList<Message> messages){}
+    public abstract void handleUpdatedMessageListInActivity(final ArrayList<Message> messages);
 
-    public void handleCreatedRoomInActivity(final Room room){}
+    public void handleCreatedRoomInActivity(final RoomInfo roominfo){}
 
     public abstract void handleNewMessageInActivity(final Message msg);
 

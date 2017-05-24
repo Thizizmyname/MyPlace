@@ -26,7 +26,9 @@ public class RoomDbHelper extends SQLiteOpenHelper {
     private static final String ROOMLIST_ROOMID = "roomid";
     private static final String ROOMLIST_ROOMNAME = "roomname";
     private static final String ROOMLIST_LASTMESSAGE = "lastmessage";
+    private static final String ROOMLIST_LM_NAME = "lmname";
     private static final String ROOMLIST_LM_TIMESTAMP = "lmtimestamp";
+    private static final String ROOMLIST_LM_READ = "lmread";
 
     // roomtables strings
     private static final String ROOM_MESSAGEID = "messageid";
@@ -53,8 +55,10 @@ public class RoomDbHelper extends SQLiteOpenHelper {
         String CREATE_ROOMLIST_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_ROOMS + "("
                 + ROOMLIST_ROOMID       +" INTEGER, "
                 + ROOMLIST_ROOMNAME     +" TEXT, "
+                + ROOMLIST_LM_NAME      +" TEXT, "
                 + ROOMLIST_LASTMESSAGE  +" TEXT, "
-                + ROOMLIST_LM_TIMESTAMP +" INTEGER);";
+                + ROOMLIST_LM_TIMESTAMP +" INTEGER, "
+                + ROOMLIST_LM_READ      +" INTEGER);";
 
         db.execSQL(CREATE_ROOMLIST_TABLE);
     }
@@ -63,9 +67,9 @@ public class RoomDbHelper extends SQLiteOpenHelper {
         return "_"+roomID;
     }
 
-    public void createRoomTable(Room room) {
+    public void createRoomTable(RoomInfo roomInfo) {
         SQLiteDatabase db = this.getWritableDatabase();
-        String roomIDString = getRoomIdString(room.getRoomID());
+        String roomIDString = getRoomIdString(roomInfo.getRoomID());
 
         final String CREATE_ROOM_TABLE = "CREATE TABLE IF NOT EXISTS "+roomIDString+"("
                 +ROOM_MESSAGEID + " INTEGER, "
@@ -75,12 +79,12 @@ public class RoomDbHelper extends SQLiteOpenHelper {
 
         db.execSQL(CREATE_ROOM_TABLE);
         db.close();
-        if (!roomExists(room)) {
-            addRoom(room);
+        if (!roomExists(roomInfo)) {
+            addRoom(roomInfo);
         }
     }
 
-    private boolean roomExists(Room room) {
+    private boolean roomExists(RoomInfo roomInfo) {
         String query = "SELECT "+ROOMLIST_ROOMID+" FROM "+TABLE_ROOMS;
         SQLiteDatabase db = getReadableDatabase();
 
@@ -88,7 +92,7 @@ public class RoomDbHelper extends SQLiteOpenHelper {
         if (c.moveToFirst()) {
             do {
                 int selectedID = c.getInt(c.getColumnIndex(ROOMLIST_ROOMID));
-                if (selectedID == room.getRoomID()) {
+                if (selectedID == roomInfo.getRoomID()) {
                     return true;
                 }
             } while (c.moveToNext());
@@ -97,23 +101,30 @@ public class RoomDbHelper extends SQLiteOpenHelper {
         return false;
     }
 
-    private void addRoom(Room room) {
+    private void addRoom(RoomInfo roomInfo) {
         ContentValues insertValues = new ContentValues();
-        insertValues.put(ROOMLIST_ROOMID, room.getRoomID());
-        insertValues.put(ROOMLIST_ROOMNAME, room.getName());
-        Message lastmessage;
-        try {
-            lastmessage = getLastMessage(room.getRoomID());
-            insertValues.put(ROOMLIST_LASTMESSAGE, lastmessage.getText());
-            insertValues.put(ROOMLIST_LM_TIMESTAMP, lastmessage.getTimestamp());
-        } catch (Exception e) {
-            insertValues.put(ROOMLIST_LASTMESSAGE, "");
-            insertValues.put(ROOMLIST_LM_TIMESTAMP, 0);
-        } finally {
-            SQLiteDatabase db = this.getWritableDatabase();
-            db.insert(TABLE_ROOMS, null, insertValues);
-            db.close();
+        insertValues.put(ROOMLIST_ROOMID, roomInfo.getRoomID());
+        insertValues.put(ROOMLIST_ROOMNAME, roomInfo.getName());
+        insertValues.put(ROOMLIST_LM_NAME, roomInfo.getLastSender());
+        insertValues.put(ROOMLIST_LASTMESSAGE, roomInfo.getLastMessageText());
+        insertValues.put(ROOMLIST_LM_TIMESTAMP, roomInfo.getLastMessageTime());
+        insertValues.put(ROOMLIST_LM_READ, roomInfo.getLastMsgRead());
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.insert(TABLE_ROOMS, null, insertValues);
+        db.close();
+
+        if (roomInfo.hasLastMessage()) {
+            addMessage(roomInfo.getRoomID(), roomInfo.getLastMessage());
         }
+    }
+
+    public void updateMessageRead(int roomID, int messageID) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(ROOMLIST_LM_READ, messageID);
+
+        db.update(TABLE_ROOMS, values, ROOMLIST_ROOMID+" = ?", new String[]{Integer.toString(roomID)});
+        db.close();
     }
 
     void deleteRoom(int roomID) {
@@ -153,7 +164,7 @@ public class RoomDbHelper extends SQLiteOpenHelper {
 
     public Message getLastMessage(int roomID) throws Exception {
         String roomIDString = getRoomIdString(roomID);
-        String query = "SELECT * FROM "+roomIDString;
+        String query = "SELECT * FROM "+roomIDString+" ORDER BY "+ROOM_TIMESTAMP+" ASC";
         SQLiteDatabase db = getWritableDatabase();
 
         Cursor c = db.rawQuery(query, null);
@@ -181,6 +192,7 @@ public class RoomDbHelper extends SQLiteOpenHelper {
             do {
                 int roomID      = c.getInt(c.getColumnIndex(ROOMLIST_ROOMID));
                 String roomName = c.getString(c.getColumnIndex(ROOMLIST_ROOMNAME));
+                int messageRead = c.getShort(c.getColumnIndex(ROOMLIST_LM_READ));
 
                 Room room = new Room(roomID, roomName);
 
@@ -190,8 +202,8 @@ public class RoomDbHelper extends SQLiteOpenHelper {
                 } catch (Exception e) {
                     lastMessage = null;
                 }
-                Log.d("loop iteration", Integer.toString(i));
-                RoomInfo rInfo = new RoomInfo(room, lastMessage, 0);
+
+                RoomInfo rInfo = new RoomInfo(room, lastMessage, messageRead);
                 list.add(rInfo);
                 ++i;
             } while (c.moveToNext());
