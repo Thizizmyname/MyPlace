@@ -71,10 +71,11 @@ public class MessageActivity extends AppCompatActivity {
         }
 
         @Override
-        public void handleOlderMessagesInActivity(ArrayList<Message> messages) {
-            messageAdapter.updateData(roomDB.getMessages(roomID));
-            messageAdapter.notifyDataSetChanged();
-            swipeContainer.setRefreshing(false);
+        public void handleUpdatedMessageListInActivity(ArrayList<Message> messages) {
+            if (roomID == messages.get(0).getRoomID()) {
+                messageAdapter.updateData(roomDB.getMessages(roomID));
+                swipeContainer.setRefreshing(false);
+            }
         }
 
 //        @Override
