@@ -66,6 +66,7 @@ public class MessageActivity extends AppCompatActivity {
         public void handleNewMessageInActivity(Message msg) {
             if (roomID == msg.getRoomID()) {
                 messageAdapter.add(msg);
+                scrollMyListView(messageAdapter.getCount() - 1);
                 sendMessageReadRequest(msg.getId());
             }
         }
@@ -73,16 +74,26 @@ public class MessageActivity extends AppCompatActivity {
         @Override
         public void handleUpdatedMessageListInActivity(ArrayList<Message> messages) {
             if (roomID == messages.get(0).getRoomID()) {
+                int firstmessageID = messages.get(0).getId();
+                int lastmessageID = messages.get(messages.size() -1).getId();
                 messageAdapter.updateData(roomDB.getMessages(roomID));
+
+                scrollMyListView(lastmessageID - firstmessageID);
                 swipeContainer.setRefreshing(false);
             }
         }
-
-//        @Override
-//        public void handleMessageReadInActivity() {
-//            MainActivity.roomAdapter.notifyDataSetChanged();
-//        }
     };
+
+    private void scrollMyListView(final int position) {
+        final ListView myListView = (ListView) findViewById(R.id.listMessages);
+        myListView.post(new Runnable() {
+            @Override
+            public void run() {
+                // Select the last row so it will scroll into view...
+                myListView.setSelection(position);
+            }
+        });
+    }
 
     @Override
     protected void onStart() {
@@ -190,9 +201,12 @@ public class MessageActivity extends AppCompatActivity {
             @Override
             public void onRefresh() {
                 try {
-                    if (!messageAdapter.isEmpty()) {
+                    if (!messageAdapter.isEmpty() && messageAdapter.getItem(0).getId() != 0) {
                         Message oldestMessage = messageAdapter.getItem(0);
                         mService.sendMessage(JSONParser.getOlderMsgsRequest(roomID, oldestMessage.getId()));
+                    } else {
+                        Toast.makeText(context, "No more messages in this room.", Toast.LENGTH_SHORT).show();
+                        swipeContainer.setRefreshing(false);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -290,7 +304,7 @@ public class MessageActivity extends AppCompatActivity {
     private void getOlderIfNeeded(final ArrayList<Message> msgList) {
 
         int listLength = msgList.size();
-        if (listLength == 1 && msgList.get(0).getRoomID() != FIRST_MSGID_IN_CONVERSATION) {
+        if (listLength == 1 && msgList.get(0).getId() != FIRST_MSGID_IN_CONVERSATION) {
 
             Thread thread = new Thread(new Runnable() {
                 @Override
