@@ -124,7 +124,7 @@ public class SignupActivity extends AppCompatActivity {
         String valiPassword = _passSign.getText().toString();
         String reType = _passRetype.getText().toString();
 
-        if(!(reType.equals(password))){
+        if(!(reType.equals(valiPassword))){
             _passRetype.setError(getResources().getString(R.string.error_incorrect_password));
             valid = false;
         }

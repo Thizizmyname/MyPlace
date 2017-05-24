@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.StrictMode;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -28,6 +29,8 @@ import org.json.JSONException;
 
 import butterknife.ButterKnife;
 import butterknife.Bind;
+
+import static java.lang.Thread.sleep;
 
 public class LoginActivity extends AppCompatActivity {
     ConnectionService mService;
@@ -58,19 +61,7 @@ public class LoginActivity extends AppCompatActivity {
         SharedPreferences loginInfo = getSharedPreferences(LOGIN_PREFS, 0);
         boolean loggedIn = loginInfo.getBoolean("loggedIn", false);
         if (loggedIn == true) {
-            username = loginInfo.getString("username", "No_username_found");
-            password = loginInfo.getString("password", "No_password_found");
-            LocalBroadcastManager.getInstance(this).registerReceiver(loginBroadcastReceiver,
-                    new IntentFilter(ConnectionService.BROADCAST_TAG));
-
-            loginHandler.postDelayed(LoginRun, 10000);
-
-            try {
-                mService.sendMessage(JSONParser.signinRequest(username, password));
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            autoLogin(loginInfo);
         }
 
         _login.setOnClickListener(new View.OnClickListener() {
@@ -89,6 +80,44 @@ public class LoginActivity extends AppCompatActivity {
                 overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
             }
         });
+    }
+
+    private void autoLogin(final SharedPreferences loginInfo) {
+
+        _login.setEnabled(false);
+
+        progressDialog = new ProgressDialog(LoginActivity.this);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setMessage("Authenticating");
+        progressDialog.show();
+
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(!mBound){
+                    try {
+                        sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                username = loginInfo.getString("username", "No_username_found");
+                password = loginInfo.getString("password", "No_password_found");
+                LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(loginBroadcastReceiver,
+                        new IntentFilter(ConnectionService.BROADCAST_TAG));
+
+                loginHandler.postDelayed(LoginRun, 10000);
+
+                try {
+                    mService.sendMessage(JSONParser.signinRequest(username, password));
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        thread.start();
     }
 
     public void login() {
