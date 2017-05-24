@@ -232,4 +232,17 @@ public class LoginActivity extends AppCompatActivity {
             mBound = false;
         }
     };
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(loginBroadcastReceiver);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(this).registerReceiver(loginBroadcastReceiver,
+                new IntentFilter(ConnectionService.BROADCAST_TAG));
+    }
 }
