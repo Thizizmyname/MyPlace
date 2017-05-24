@@ -36,7 +36,7 @@ var noRooms int = 0
 var waitTimeChan chan time.Duration = make(chan time.Duration, 20)
 var handlerChan chan myplaceutils.HandlerArgs = make(chan myplaceutils.HandlerArgs)
 var dbg *log.Logger
-var out *log.Logger = log.New(os.Stdout, "\nOUTPUT: ", 0)
+var out *log.Logger = log.New(os.Stdout, "", 0)
 
 func main() {
 	if len(os.Args) > 1 {
@@ -180,25 +180,46 @@ func clientReceiver(conn net.Conn, requestChan chan clientWriterArgs) {
 
 func gatherAndPrintStats() {
 	maxWaitTime := 0.0
-	totalWaitTime := 0.0
 	noSamples := 0
 	lastPrintTime := time.Now()
 
+	noSamples_local := 0
+	totalWaitTime_local := 0.0
+	maxWaitTime_local := 0.0
+	minWaitTime_local := 10000000.0
+	out.Printf("Local data is gathered from the past %v milliseconds\n", printDelay)
+	out.Println("noClients noSamples_global maxWaitTime_global noSamples_local maxWaitTime_local minWaitTime_local avgWaitTime_local")
+
 	for waitTime_d := range waitTimeChan {
 		waitTime := waitTime_d.Seconds()
-		totalWaitTime += waitTime
 		noSamples++
 
 		if waitTime > maxWaitTime {
 			maxWaitTime = waitTime
 		}
 
+		noSamples_local += 1
+		totalWaitTime_local += waitTime
+
+		if waitTime > maxWaitTime_local {
+			maxWaitTime_local = waitTime
+		}
+
+		if waitTime < minWaitTime_local {
+			minWaitTime_local = waitTime
+		}
+
 		t := time.Now()
 		if lastPrintTime.Add(time.Duration(printDelay * time.Millisecond)).Before(t) {
-			dbg.Printf("New wait time: %0.2f. Total wait time: %0.2f", waitTime, totalWaitTime)
-			out.Printf("no_clients:%v  no_responses:%v  max_wait:%.2f",
-				noClients, noSamples, maxWaitTime)
+			out.Printf("%v %v %.2f %v %.2f %.2f %.2f",
+				noClients, noSamples, maxWaitTime, noSamples_local, maxWaitTime_local,
+				minWaitTime_local, totalWaitTime_local / float64(noSamples_local))
 			lastPrintTime = t
+
+			noSamples_local = 0
+			totalWaitTime_local = 0.0
+			maxWaitTime_local = 0.0
+			minWaitTime_local = 100000000.0
 		}
 	}
 }
