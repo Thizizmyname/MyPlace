@@ -164,7 +164,7 @@ func (u *User) ShowRooms() []string {
 	
 	if UserExists(u.UName){
 		for e := id.Front(); e != nil; e = e.Next() {
-			room = GetRoom(e.Value.(int))
+			room = GetRoom(e.Value.(RoomIDAndLatestReadMsgID).RoomID)
 			rooms = append(rooms, room.Name)
 		}
 		return rooms
