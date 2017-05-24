@@ -1,6 +1,5 @@
 package com.myplace.myplace;
 
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -28,13 +27,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.myplace.myplace.models.Message;
-import com.myplace.myplace.models.Room;
-import com.myplace.myplace.models.RoomInfo;
 import com.myplace.myplace.services.ConnectionService;
 import com.myplace.myplace.services.MainBroadcastReceiver;
 
 import org.json.JSONException;
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
@@ -61,7 +57,7 @@ public class MessageActivity extends AppCompatActivity {
 
     // Our handler for received Intents. This will be called whenever an Intent
     // with an action named "custom-event-name" is broadcasted.
-    private MainBroadcastReceiver mMessageReceiver = new MainBroadcastReceiver() {
+    private MainBroadcastReceiver messageBroadcastReceiver = new MainBroadcastReceiver() {
 
         @Override
         public void handleNewMessageInActivity(Message msg) {
@@ -148,9 +144,10 @@ public class MessageActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         // Register to receive messages.
-        // We are registering an observer (mMessageReceiver) to receive Intents
+        // We are registering an observer (messageBroadcastReceiver) to receive Intents
         // with actions named "custom-event-name".
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
+        //Log.e("MessageActBroadcast", "Register Broadcast");
+        LocalBroadcastManager.getInstance(this).registerReceiver(messageBroadcastReceiver,
                 new IntentFilter(ConnectionService.BROADCAST_TAG));
 
         Thread thread = new Thread(new Runnable() {
@@ -188,7 +185,8 @@ public class MessageActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
+        //Log.e("MessageActBroadcast", "UNregister Broadcast");
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(messageBroadcastReceiver);
     }
 
     @Override
