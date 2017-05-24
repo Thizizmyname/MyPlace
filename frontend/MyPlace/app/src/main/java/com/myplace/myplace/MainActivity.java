@@ -106,8 +106,16 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
+        public void handleOlderMessagesInActivity(ArrayList<Message> messages) {
+            roomAdapter.updateData(roomDB.getRoomList());
+            roomAdapter.notifyDataSetChanged();
+        }
+
+        @Override
         public void handleMessageReadInActivity() {
-            MainActivity.roomAdapter.notifyDataSetChanged();
+            ArrayList<RoomInfo> updatedRoomList = roomDB.getRoomList();
+            roomAdapter.updateData(updatedRoomList);
+            roomAdapter.notifyDataSetChanged();
         }
     };
 
