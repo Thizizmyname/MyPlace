@@ -22,6 +22,7 @@ var msgLengthIndicator int = 20
 var stopFlag = false
 
 func main() {
+	InitLoggers(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
 	c := make(chan os.Signal, 2)
 	c2 := make(chan bool)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
@@ -158,6 +159,38 @@ func initLoggers(
 
 	myplaceutils.Info = log.New(infoHandle,
 		"INFO: ",
+		log.Ldate|log.Ltime|log.Lshortfile)
+
+	myplaceutils.Warning = log.New(warningHandle,
+		"WARNING: ",
+		log.Ldate|log.Ltime|log.Lshortfile)
+
+	myplaceutils.Error = log.New(errorHandle,
+		"ERROR: ",
+		log.Ldate|log.Ltime|log.Lshortfile)
+}
+
+
+
+
+
+
+
+
+
+func InitLoggers(
+
+	traceHandle io.Writer,
+	infoHandle io.Writer,
+	warningHandle io.Writer,
+	errorHandle io.Writer,
+) {
+	myplaceutils.Trace = log.New(traceHandle,
+		"TRACE: ",
+		log.Ldate|log.Ltime|log.Lshortfile)
+
+	myplaceutils.Info = log.New(infoHandle,
+		"DEBUG: ",
 		log.Ldate|log.Ltime|log.Lshortfile)
 
 	myplaceutils.Warning = log.New(warningHandle,
