@@ -1,6 +1,5 @@
 package com.myplace.myplace;
 
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -26,7 +25,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import com.myplace.myplace.models.Message;
-import com.myplace.myplace.models.Room;
+
 import java.util.ArrayList;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
@@ -63,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Our handler for received Intents. This will be called whenever an Intent
     // with an action named "custom-event-name" is broadcasted.
-    private MainBroadcastReceiver mMessageReceiver = new MainBroadcastReceiver() {
+    private MainBroadcastReceiver mainReceiver = new MainBroadcastReceiver() {
         @Override
         public void handleRoomListInActivity(ArrayList<RoomInfo> roomlist) {
             ArrayList<RoomInfo> updatedRoomList = roomDB.getRoomList();
@@ -120,7 +119,8 @@ public class MainActivity extends AppCompatActivity {
         Log.d("Main_Activity", "I'm in onStart!");
         Intent intent = new Intent(this, ConnectionService.class);
         bindService(intent, mTConnection, Context.BIND_AUTO_CREATE);
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
+        //Log.e("MainActBroadcast", "Register Broadcast");
+        LocalBroadcastManager.getInstance(this).registerReceiver(mainReceiver,
                 new IntentFilter(ConnectionService.BROADCAST_TAG));
         updateRoomMessages();
     }
@@ -182,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         // Register to receive messages.
-        // We are registering an observer (mMessageReceiver) to receive Intents
+        // We are registering an observer (mainReceiver) to receive Intents
         // with actions named "custom-event-name".
 
         ArrayList<RoomInfo> updatedRoomList = roomDB.getRoomList();
@@ -194,7 +194,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
+        //Log.e("MainActBroadcast", "UNregister Broadcast");
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mainReceiver);
         // Unbind from the service
         if (mBound) {
             unbindService(mTConnection);

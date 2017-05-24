@@ -59,14 +59,13 @@ public class ConnectionService extends Service {
     public class ConnectionBinder extends Binder {
         public ConnectionService getService() {
             // Return this instance of LocalService so clients can call public methods
-            Log.e("TCP Service", "Started Service");
             return ConnectionService.this;
         }
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-        Log.e("TCP Service", "In onBind");
+        Log.d("ConnectionService", "In onBind");
         return mBinder;
     }
 
@@ -76,7 +75,7 @@ public class ConnectionService extends Service {
     public void sendToActivity (final String str) {
         Intent intent  = new Intent(BROADCAST_TAG);
         intent.putExtra(REPLY_PACKAGE, str);
-        Log.e("ConnectionService", "Sending: " + str);
+        Log.d("ConnectionService", "Sending to BroadcastReceivers: " + str);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
