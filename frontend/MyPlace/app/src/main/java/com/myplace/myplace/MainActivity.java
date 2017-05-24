@@ -143,17 +143,23 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 for (RoomInfo room : roomList) {
-                    try {
-                        mService.sendMessage(JSONParser.getNewerMsgsRequest(room.getRoomID(), room.getLastMessage().getId()));
-                    } catch (JSONException e) {
-                        Log.d("MainActivity", "Cant get newer message");
-                        e.printStackTrace();
-                    }
+
+                        try {
+                            int startID = -1;
+                            if (room.getLastMessage() != null) {
+                                startID = room.getLastMessage().getId();
+                            }
+                            mService.sendMessage(JSONParser.getNewerMsgsRequest(room.getRoomID(), startID));
+                        } catch (JSONException e) {
+                            Log.d("MainActivity", "Cant get newer message");
+                            e.printStackTrace();
+                        }
                 }
             }
         });
         thread.start();
     }
+
     private void updateRoomList() {
         Thread thread = new Thread(new Runnable() {
             @Override
