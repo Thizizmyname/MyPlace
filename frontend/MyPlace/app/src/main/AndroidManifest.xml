@@ -23,6 +23,7 @@
 
         <activity
             android:name=".LoginActivity"
+            android:launchMode="singleInstance"
             android:exported="true"
             android:parentActivityName=".MainActivity">
             <intent-filter>
@@ -47,7 +48,6 @@
             android:exported="true"
             android:parentActivityName=".MainActivity"/>
 
-        <receiver android:name=".services.MainBroadcastReceiver" />
     </application>
 
 </manifest>
