@@ -19,7 +19,8 @@
             android:divider="@null"
             android:dividerHeight="0dp"
             android:smoothScrollbar="true"
-            android:stackFromBottom="true"></ListView>
+            android:stackFromBottom="true"
+            android:transcriptMode="alwaysScroll"></ListView>
     </android.support.v4.widget.SwipeRefreshLayout>
 
 
