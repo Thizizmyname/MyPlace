@@ -98,6 +98,7 @@ public class RoomDbHelper extends SQLiteOpenHelper {
             } while (c.moveToNext());
             c.close();
         }
+        db.close();
         return false;
     }
 
@@ -145,21 +146,42 @@ public class RoomDbHelper extends SQLiteOpenHelper {
     }
 
     public void addMessage(int roomID, Message message) {
-        ContentValues insertValues = new ContentValues();
-        insertValues.put(ROOM_MESSAGEID, message.getId());
-        insertValues.put(ROOM_SENDER, message.getName());
-        insertValues.put(ROOM_TEXT, message.getText());
-        long timestamp = message.getTimestamp();
-        insertValues.put(ROOM_TIMESTAMP, timestamp);
+        if(!messageExists(roomID, message)) {
+            ContentValues insertValues = new ContentValues();
+            insertValues.put(ROOM_MESSAGEID, message.getId());
+            insertValues.put(ROOM_SENDER, message.getName());
+            insertValues.put(ROOM_TEXT, message.getText());
+            long timestamp = message.getTimestamp();
+            insertValues.put(ROOM_TIMESTAMP, timestamp);
 
+            String roomIDString = getRoomIdString(roomID);
+            SQLiteDatabase db = this.getWritableDatabase();
+            db.insert(roomIDString, null, insertValues);
+
+            ContentValues updatedLastMessage = new ContentValues();
+            updatedLastMessage.put(ROOMLIST_LM_TIMESTAMP, timestamp);
+            db.update(TABLE_ROOMS, updatedLastMessage, ROOMLIST_ROOMID + "= ?", new String[]{Integer.toString(roomID)});
+            db.close();
+        }
+    }
+
+    private boolean messageExists(int roomID, Message message) {
         String roomIDString = getRoomIdString(roomID);
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.insert(roomIDString, null, insertValues);
+        String query = "SELECT "+ROOM_MESSAGEID+" FROM "+roomIDString;
+        SQLiteDatabase db = getReadableDatabase();
 
-        ContentValues updatedLastMessage = new ContentValues();
-        updatedLastMessage.put(ROOMLIST_LM_TIMESTAMP, timestamp);
-        db.update(TABLE_ROOMS, updatedLastMessage, ROOMLIST_ROOMID+ "= ?", new String[]{Integer.toString(roomID)});
+        Cursor c = db.rawQuery(query, null);
+        if (c.moveToFirst()) {
+            do {
+                int selectedID = c.getInt(c.getColumnIndex(ROOM_MESSAGEID));
+                if (selectedID == message.getId()) {
+                    return true;
+                }
+            } while (c.moveToNext());
+            c.close();
+        }
         db.close();
+        return false;
     }
 
     public Message getLastMessage(int roomID) throws Exception {
