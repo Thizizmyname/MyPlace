@@ -74,7 +74,7 @@ public class MessageActivity extends AppCompatActivity {
 
         @Override
         public void handleUpdatedMessageListInActivity(ArrayList<Message> messages) {
-            if (roomID == messages.get(0).getRoomID()) {
+            if (messages.size() != 0 && roomID == messages.get(0).getRoomID()) {
                 int firstmessageID = messages.get(0).getId();
                 int lastmessageID = messages.get(messages.size() -1).getId();
                 messageAdapter.updateData(roomDB.getMessages(roomID));
