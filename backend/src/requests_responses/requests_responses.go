@@ -34,8 +34,8 @@ ErrorCause string
 }
 
 type GetRoomsRequest struct {
-RequestID int
-UName string
+	RequestID int
+	UName string
 }
 
 type GetRoomsResponse struct {
@@ -44,8 +44,8 @@ type GetRoomsResponse struct {
 }
 
 type GetRoomUsersRequest struct {
-RequestID int
-RoomID int
+	RequestID int
+	RoomID int
 }
 
 type GetRoomUsersResponse struct {
@@ -55,9 +55,9 @@ type GetRoomUsersResponse struct {
 }
 
 type GetOlderMsgsRequest struct {
-  RequestID int
-  RoomID int
-  MsgID int
+	RequestID int
+	RoomID int
+	MsgID int
 }
 
 type GetOlderMsgsResponse struct {
@@ -77,9 +77,9 @@ type GetNewerMsgsResponse struct {
 }
 
 type JoinRoomRequest struct {
-  RequestID int
-  RoomID int
-  UName string
+	RequestID int
+	RoomID int
+	UName string
 }
 
 type JoinRoomResponse struct {
@@ -89,13 +89,13 @@ type JoinRoomResponse struct {
 }
 
 type LeaveRoomRequest struct {
-  RequestID int
-  RoomID int
-  UName string
+	RequestID int
+	RoomID int
+	UName string
 }
 
 type LeaveRoomResponse struct {
-  RequestID int
+	RequestID int
 }
 
 type CreateRoomRequest struct {
@@ -185,13 +185,14 @@ type Request interface {}
 type Response interface {}
 
 func FromRequestString(requestString string) (Request, error) {
-	reqType, err := strconv.Atoi(requestString[:2])
-
-	if (err != nil) {
-		return nil, err
+	if len(requestString) < 2 {
+		return nil, errors.New("request too short")
 	}
 
-	jsonRequest := requestString[2 : len(requestString) - 1]
+	reqType, err := strconv.Atoi(requestString[:2])
+	if err != nil { return nil, err }
+
+	jsonRequest := requestString[2:]
 
 	switch reqType {
 	case 0:
@@ -256,34 +257,32 @@ func ToResponseString(response Response) (string, error) {
 
   switch response.(type) {
   case SignUpResponse:
-    return fmt.Sprintf("00%s\n", jsonResponse), nil
+    return fmt.Sprintf("00%s", jsonResponse), nil
   case SignInResponse:
-    return fmt.Sprintf("01%s\n", jsonResponse), nil
+    return fmt.Sprintf("01%s", jsonResponse), nil
   case GetRoomsResponse:
-    return fmt.Sprintf("02%s\n", jsonResponse), nil
+    return fmt.Sprintf("02%s", jsonResponse), nil
   case GetRoomUsersResponse:
-    return fmt.Sprintf("03%s\n", jsonResponse), nil
+    return fmt.Sprintf("03%s", jsonResponse), nil
   case GetOlderMsgsResponse:
-    return fmt.Sprintf("04%s\n", jsonResponse), nil
+    return fmt.Sprintf("04%s", jsonResponse), nil
   case GetNewerMsgsResponse:
-    return fmt.Sprintf("05%s\n", jsonResponse), nil
+    return fmt.Sprintf("05%s", jsonResponse), nil
   case JoinRoomResponse:
-    return fmt.Sprintf("06%s\n", jsonResponse), nil
+    return fmt.Sprintf("06%s", jsonResponse), nil
   case LeaveRoomResponse:
-    return fmt.Sprintf("07%s\n", jsonResponse), nil
+    return fmt.Sprintf("07%s", jsonResponse), nil
   case CreateRoomResponse:
-    return fmt.Sprintf("08%s\n", jsonResponse), nil
+    return fmt.Sprintf("08%s", jsonResponse), nil
   case PostMsgResponse:
-    return fmt.Sprintf("09%s\n", jsonResponse), nil
+    return fmt.Sprintf("09%s", jsonResponse), nil
   case MsgReadResponse:
-    return fmt.Sprintf("10%s\n", jsonResponse), nil
+    return fmt.Sprintf("10%s", jsonResponse), nil
   case SignOutResponse:
-    return fmt.Sprintf("11%s\n", jsonResponse), nil
+    return fmt.Sprintf("11%s", jsonResponse), nil
   case ErrorResponse:
-    return fmt.Sprintf("-1%s\n", jsonResponse), nil
+    return fmt.Sprintf("-1%s", jsonResponse), nil
   default:
     return "", errors.New("illegal response type")
   }
 }
-
-
