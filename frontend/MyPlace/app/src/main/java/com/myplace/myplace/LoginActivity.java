@@ -37,6 +37,7 @@ public class LoginActivity extends AppCompatActivity {
     public static final String LOGIN_PREFS = "login_prefs";
     private ProgressDialog progressDialog;
     private String username;
+    private String password;
     private Handler loginHandler = new Handler();
 
     @Bind(R.id.input_username) EditText _username;
@@ -57,9 +58,19 @@ public class LoginActivity extends AppCompatActivity {
         SharedPreferences loginInfo = getSharedPreferences(LOGIN_PREFS, 0);
         boolean loggedIn = loginInfo.getBoolean("loggedIn", false);
         if (loggedIn == true) {
-            Intent startMain = new Intent(getApplicationContext(), MainActivity.class);
-            startActivity(startMain);
-            finish();
+            username = loginInfo.getString("username", "No_username_found");
+            password = loginInfo.getString("password", "No_password_found");
+            LocalBroadcastManager.getInstance(this).registerReceiver(loginBroadcastReceiver,
+                    new IntentFilter(ConnectionService.BROADCAST_TAG));
+
+            loginHandler.postDelayed(LoginRun, 10000);
+
+            try {
+                mService.sendMessage(JSONParser.signinRequest(username, password));
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
 
         _login.setOnClickListener(new View.OnClickListener() {
@@ -96,7 +107,7 @@ public class LoginActivity extends AppCompatActivity {
         progressDialog.show();
 
         username = _username.getText().toString();
-        final String password = _password.getText().toString();
+        password = _password.getText().toString();
 
         LocalBroadcastManager.getInstance(this).registerReceiver(loginBroadcastReceiver,
                 new IntentFilter(ConnectionService.BROADCAST_TAG));
@@ -116,8 +127,8 @@ public class LoginActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_SIGNUP) {
             if (resultCode == RESULT_OK) {
-                String username = data.getStringExtra("username");
-                onLoginSuccess(username);
+                username = data.getStringExtra("username");
+                onLoginSuccess();
             }
         }
     }
@@ -127,12 +138,13 @@ public class LoginActivity extends AppCompatActivity {
         moveTaskToBack(true);
     }
 
-    public void onLoginSuccess(String username) {
+    public void onLoginSuccess() {
         _login.setEnabled(true);
         SharedPreferences loginInfo = getSharedPreferences(LOGIN_PREFS, 0);
         SharedPreferences.Editor loginEdit = loginInfo.edit();
         loginEdit.putBoolean("loggedIn", true);
         loginEdit.putString("username", username);
+        loginEdit.putString("password", password);
         loginEdit.commit();
         Intent startMain = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(startMain);
@@ -154,17 +166,17 @@ public class LoginActivity extends AppCompatActivity {
     public boolean validate() {
         boolean valid = true;
 
-        String username = _username.getText().toString();
-        String password = _password.getText().toString();
+        String valiUsername = _username.getText().toString();
+        String valiPassword = _password.getText().toString();
 
-        if (username.isEmpty() || username.length() <= 3) {
+        if (valiUsername.isEmpty() || valiUsername.length() <= 3) {
             _username.setError(getResources().getString(R.string.error_incorrect_username));
             valid = false;
         } else {
             _username.setError(null);
         }
 
-        if (password.isEmpty() || password.length() <= 5) {
+        if (valiPassword.isEmpty() || valiPassword.length() <= 5) {
             _password.setError(getResources().getString(R.string.error_incorrect_password));
             valid = false;
         } else {
@@ -207,7 +219,7 @@ public class LoginActivity extends AppCompatActivity {
             progressDialog.dismiss();
             loginHandler.removeCallbacks(LoginRun);
             if (serverResponse) {
-                onLoginSuccess(username);
+                onLoginSuccess();
             } else {
                 onLoginFailed();
             }
