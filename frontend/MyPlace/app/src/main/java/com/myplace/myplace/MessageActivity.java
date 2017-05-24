@@ -57,7 +57,7 @@ public class MessageActivity extends AppCompatActivity {
 
     // Our handler for received Intents. This will be called whenever an Intent
     // with an action named "custom-event-name" is broadcasted.
-    private MainBroadcastReceiver messageBroadcastReceiver = new MainBroadcastReceiver() {
+    private MainBroadcastReceiver messageBroadcastReceiver = new MainBroadcastReceiver("messageBroadcastReceiver") {
 
         @Override
         public void handleNewMessageInActivity(Message msg) {

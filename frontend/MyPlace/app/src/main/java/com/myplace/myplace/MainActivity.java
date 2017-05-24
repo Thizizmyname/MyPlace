@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Our handler for received Intents. This will be called whenever an Intent
     // with an action named "custom-event-name" is broadcasted.
-    private MainBroadcastReceiver mainReceiver = new MainBroadcastReceiver() {
+    private MainBroadcastReceiver mainReceiver = new MainBroadcastReceiver("mainReceiver") {
         @Override
         public void handleRoomListInActivity(ArrayList<RoomInfo> roomlist) {
             ArrayList<RoomInfo> updatedRoomList = roomDB.getRoomList();
@@ -120,8 +120,8 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, ConnectionService.class);
         bindService(intent, mTConnection, Context.BIND_AUTO_CREATE);
         //Log.e("MainActBroadcast", "Register Broadcast");
-        LocalBroadcastManager.getInstance(this).registerReceiver(mainReceiver,
-                new IntentFilter(ConnectionService.BROADCAST_TAG));
+//        LocalBroadcastManager.getInstance(this).registerReceiver(mainReceiver,
+//                new IntentFilter(ConnectionService.BROADCAST_TAG));
         updateRoomMessages();
     }
 
@@ -184,7 +184,9 @@ public class MainActivity extends AppCompatActivity {
         // Register to receive messages.
         // We are registering an observer (mainReceiver) to receive Intents
         // with actions named "custom-event-name".
-
+        //Log.e("MainActBroadcast", "Register Broadcast");
+        LocalBroadcastManager.getInstance(this).registerReceiver(mainReceiver,
+                new IntentFilter(ConnectionService.BROADCAST_TAG));
         ArrayList<RoomInfo> updatedRoomList = roomDB.getRoomList();
         roomAdapter.updateData(updatedRoomList);
         roomAdapter.notifyDataSetChanged();
@@ -294,6 +296,7 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra(ROOM_NAME, roomInfo.getName());
         intent.putExtra("roomID", roomInfo.getRoomID());
         intent.putExtra("lastMsgReadId", roomInfo.getLastMsgRead());
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mainReceiver);
         startActivity(intent);
         overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
     }
