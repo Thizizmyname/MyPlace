@@ -102,12 +102,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void handleLogoutInActivity() {
-            roomDB.dropAllTables();
-            logout();
 
-            Intent startLogin = new Intent(getApplicationContext(), LoginActivity.class);
-            startActivity(startLogin);
-            finish();
         }
 
         @Override
@@ -388,6 +383,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void logout() {
+        roomDB.dropAllTables();
         SharedPreferences loginInfo = getSharedPreferences(LOGIN_PREFS, 0);
         SharedPreferences.Editor loginEdit = loginInfo.edit();
         loginEdit.putString("username", "");
@@ -408,6 +404,11 @@ public class MainActivity extends AppCompatActivity {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+                logout();
+
+                Intent startLogin = new Intent(getApplicationContext(), LoginActivity.class);
+                startActivity(startLogin);
+                finish();
             }
         });
         builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
