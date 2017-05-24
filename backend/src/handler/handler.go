@@ -132,7 +132,7 @@ func ResponseHandler(incomingChannel chan myplaceutils.HandlerArgs) {
 			myplaceutils.Info.Println("Matched request to PostMsg")
 			response = postMsg(request.(requests_responses.PostMsgRequest), responseChan)
 		case requests_responses.MsgReadRequest:
-			myplaceutils.Info.Println("Matched request to SignOut")
+			myplaceutils.Info.Println("Matched request to MsgRequest")
 			response = msgRead(request.(requests_responses.MsgReadRequest))
 		case requests_responses.SignOutRequest:
 			myplaceutils.Info.Println("Matched request to SignOut")
