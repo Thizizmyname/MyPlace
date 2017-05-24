@@ -125,8 +125,35 @@ public class MainActivity extends AppCompatActivity {
         Log.d("Main_Activity", "I'm in onStart!");
         Intent intent = new Intent(this, ConnectionService.class);
         bindService(intent, mTConnection, Context.BIND_AUTO_CREATE);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
+                new IntentFilter(ConnectionService.BROADCAST_TAG));
+        updateRoomMessages();
     }
 
+    private void updateRoomMessages() {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (!mBound) {
+                    Log.d("MainActivity", "Waiting for mBound");
+                    try {
+                        sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                for (RoomInfo room : roomList) {
+                    try {
+                        mService.sendMessage(JSONParser.getNewerMsgsRequest(room.getRoomID(), room.getLastMessage().getId()));
+                    } catch (JSONException e) {
+                        Log.d("MainActivity", "Cant get newer message");
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        thread.start();
+    }
     private void updateRoomList() {
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -145,18 +172,8 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("MainActivity", "Get room request error");
                     e.printStackTrace();
                 }
-                for (RoomInfo room : roomList) {
-                    try {
-                        mService.sendMessage(JSONParser.getNewerMsgsRequest(room.getRoomID(), room.getLastMessage().getId()));
-                    }
-                    catch (JSONException e){
-                        Log.d("MainActivity", "Cant get newer message");
-                        e.printStackTrace();
-                    }
-                }
             }
         });
-
         thread.start();
     }
 
@@ -166,23 +183,17 @@ public class MainActivity extends AppCompatActivity {
         // Register to receive messages.
         // We are registering an observer (mMessageReceiver) to receive Intents
         // with actions named "custom-event-name".
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
-                new IntentFilter(ConnectionService.BROADCAST_TAG));
 
         ArrayList<RoomInfo> updatedRoomList = roomDB.getRoomList();
         roomAdapter.updateData(updatedRoomList);
         roomAdapter.notifyDataSetChanged();
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
-    }
 
     @Override
     protected void onStop() {
         super.onStop();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
         // Unbind from the service
         if (mBound) {
             unbindService(mTConnection);
