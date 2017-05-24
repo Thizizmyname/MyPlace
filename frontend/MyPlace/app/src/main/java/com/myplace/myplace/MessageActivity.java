@@ -75,12 +75,24 @@ public class MessageActivity extends AppCompatActivity {
         @Override
         public void handleUpdatedMessageListInActivity(ArrayList<Message> messages) {
             if (messages.size() != 0 && roomID == messages.get(0).getRoomID()) {
+                int firstmessageID = messages.get(0).getId();
+                int lastmessageID = messages.get(messages.size() -1).getId();
                 messageAdapter.updateData(roomDB.getMessages(roomID));
 
-                scrollMyListView(messages.size());
+                scrollMyListView(lastmessageID - firstmessageID);
                 swipeContainer.setRefreshing(false);
             }
         }
+
+//        @Override
+//        public void handleUpdatedMessageListInActivity(ArrayList<Message> messages) {
+//            if (messages.size() != 0 && roomID == messages.get(0).getRoomID()) {
+//                messageAdapter.updateData(roomDB.getMessages(roomID));
+//
+//                scrollMyListView(messages.size());
+//                swipeContainer.setRefreshing(false);
+//            }
+//        }
     };
 
     private void scrollMyListView(final int position) {
