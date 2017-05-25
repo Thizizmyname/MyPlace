@@ -213,27 +213,34 @@ func getRoomUsers(request requests_responses.GetRoomUsersRequest) requests_respo
 	users := myplaceutils.ShowUsers(room)
 
 	response := requests_responses.GetRoomUsersResponse{id, roomId, users }
-	
+
 	return response
 }
 
 func getOlderMsgs(request requests_responses.GetOlderMsgsRequest) requests_responses.Response {
 	// Denna returenerar även det senaste lästa meddelandet
-	id := request.RequestID 
+	id := request.RequestID
 	roomID := request.RoomID
 	msgID := request.MsgID // Senaste meddelandet som lästs
 	NoMsgs := 20  // Anger hur många meddelande som ska hämtas
 	room := myplaceutils.GetRoom(roomID)
 	messages := []requests_responses.MsgInfo{}
 
-	if msgID > len(room.Messages) {
-		return requests_responses.ErrorResponse{id,4,"MessageID does not exist"}	
+	if room == nil {
+		return requests_responses.ErrorResponse{
+			id,
+			requests_responses.GetOlderMsgsIndex,
+			"bad roomID"}
 	}
-	
+
+	if msgID > len(room.Messages) {
+		return requests_responses.ErrorResponse{id,4,"MessageID does not exist"}
+	}
+
 	if NoMsgs > msgID {
 		NoMsgs = msgID
 	}
-	
+
 	for x := (msgID - NoMsgs); x < msgID; x++ {
 		msg := room.Messages[x] // Meddelande x i rummet
 		msginfo := myplaceutils.CreateMsgInfo(msg, roomID) // Skapar ett MsgInfo
@@ -250,26 +257,34 @@ func getNewerMsgs(request requests_responses.GetNewerMsgsRequest) requests_respo
 	msgID := request.MsgID
 	getNoMsg := 10
 	msgInfos := []requests_responses.MsgInfo{}
-	
+
 	room := myplaceutils.GetRoom(roomID)
 	// Checks if the user has a msgID which is greater than the latestMsgID in the room
+
+	if room == nil {
+		return requests_responses.ErrorResponse{
+			requestID,
+			requests_responses.GetNewerMsgsIndex,
+			"bad roomID"}
+	}
+
 	if msgID > len(room.Messages) {
 		return requests_responses.ErrorResponse{requestID,requests_responses.GetNewerMsgsIndex,"MessageID does not exist"}
 	}
-	
+
 	if (getNoMsg + msgID) > len(room.Messages) {
 		getNoMsg = len(room.Messages)
 	}else{
 		getNoMsg = msgID+getNoMsg +1 // inkluderar det sista meddelandet i rangen av taket från msgId
 	}
-	
+
 	for x := (msgID+1) ; x < getNoMsg; x++ {
 		msg := room.Messages[x]
 		msgInfo := myplaceutils.CreateMsgInfo(msg,room.ID)
 		msgInfos = append(msgInfos,msgInfo)
 	}
-	
-	
+
+
 	return requests_responses.GetNewerMsgsResponse{requestID,msgInfos}
 
 }
@@ -306,7 +321,7 @@ func joinRoom(request requests_responses.JoinRoomRequest, responseChan chan requ
 			requests_responses.JoinRoomIndex,
 			"User is already a member of the room"}
 	}
-	
+
 	user.JoinRoom(room)
 	room.AddOutgoingChannel(responseChan)
 
