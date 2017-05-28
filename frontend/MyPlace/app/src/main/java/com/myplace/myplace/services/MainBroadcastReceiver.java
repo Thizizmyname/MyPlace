@@ -129,8 +129,10 @@ public abstract class MainBroadcastReceiver extends BroadcastReceiver {
     }
 
     private void handleJoinedRoom(final RoomInfo room) {
-        roomDB.createRoomTable(room);
-        handleJoinedRoomInActivity(room);
+        if (!(room == null)) {
+            roomDB.createRoomTable(room);
+            handleJoinedRoomInActivity(room);
+        }
     }
 
     private void handleMessages(final ArrayList<Message> messages) {

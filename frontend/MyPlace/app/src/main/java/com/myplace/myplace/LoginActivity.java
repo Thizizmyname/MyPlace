@@ -157,6 +157,7 @@ public class LoginActivity extends AppCompatActivity {
         if (requestCode == REQUEST_SIGNUP) {
             if (resultCode == RESULT_OK) {
                 username = data.getStringExtra("username");
+                password = data.getStringExtra("password");
                 onLoginSuccess();
             }
         }
