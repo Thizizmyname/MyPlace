@@ -72,12 +72,15 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void handleJoinedRoomInActivity(RoomInfo roominfo) {
-            roomAdapter.add(roominfo);
+            ArrayList<RoomInfo> updatedRoomList = roomDB.getRoomList();
+            roomAdapter.updateData(updatedRoomList);
             roomAdapter.notifyDataSetChanged();
         }
 
         @Override
         public void handleUpdatedMessageListInActivity(ArrayList<Message> messages) {
+            ArrayList<RoomInfo> updatedRoomList = roomDB.getRoomList();
+            roomAdapter.updateData(updatedRoomList);
             roomAdapter.notifyDataSetChanged();
         }
 
